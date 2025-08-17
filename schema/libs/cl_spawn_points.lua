@@ -42,6 +42,8 @@ net.Receive("expSpawnSelectOpen", function()
 	Schema.spawnPoints.spawns = spawns
 
 	panel:SetSpawns(spawns)
+
+	hook.Run("OnSpawnSelectOpen", panel)
 end)
 
 net.Receive("expSpawnSelectResponse", function()

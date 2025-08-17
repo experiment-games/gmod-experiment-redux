@@ -97,6 +97,7 @@ Schema.buff.IncludeDirectory(Schema.folder .. "/schema/buffs")
 Schema.perk.IncludeDirectory(Schema.folder .. "/schema/perks")
 Schema.npc.IncludeDirectory(Schema.folder .. "/schema/npcs")
 Schema.map.IncludeDirectory(Schema.folder .. "/schema/maps")
+Schema.tutorial.IncludeDirectory(Schema.folder .. "/schema/tutorials")
 
 ix.chat.Register("achievement", {
 	OnChatAdd = function(self, speaker, text)

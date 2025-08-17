@@ -191,7 +191,15 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor, data)
 
 			_G[libraryGlobalName] = LIBRARY_OBJECT
 
-			ix.util.Include(directory .. fileName, "shared")
+			local realm = "shared"
+
+			if (fileName:StartsWith("sv_")) then
+				realm = "server"
+			elseif (fileName:StartsWith("cl_")) then
+				realm = "client"
+			end
+
+			ix.util.Include(directory .. fileName, realm)
 
 			if (SERVER) then
 				if (LIBRARY_OBJECT.backgroundImage) then
