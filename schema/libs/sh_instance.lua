@@ -26,6 +26,128 @@ Schema.instance = ix.util.GetOrCreateLibrary("instance", {
 })
 
 if (SERVER) then
+	--- Gets all children of an entity recursively
+	--- @param entity Entity
+	--- @return table<Entity>
+	local function GetEntityChildren(entity)
+		local children = {}
+
+		if (not IsValid(entity)) then
+			return children
+		end
+
+		-- Get direct children
+		local directChildren = entity:GetChildren()
+
+		for _, child in ipairs(directChildren) do
+			if (IsValid(child)) then
+				table.insert(children, child)
+				-- Recursively get children of children
+				local grandchildren = GetEntityChildren(child)
+				for _, grandchild in ipairs(grandchildren) do
+					table.insert(children, grandchild)
+				end
+			end
+		end
+
+		return children
+	end
+
+	--- Common logic for adding entities to instances with networking and transmission updates
+	--- @param entity Entity
+	--- @param instanceID string
+	--- @param isPlayer boolean
+	local function AddEntityToInstance(entity, instanceID, isPlayer)
+		if (not IsValid(entity)) then
+			ix.util.SchemaErrorNoHalt("Attempted to add invalid entity to instance '" .. tostring(instanceID) .. "'\n")
+			return false
+		end
+
+		-- Remove from previous instance if it exists
+		local oldInstanceID = Schema.instance.entityInstances[entity] or Schema.instance.playerInstances[entity]
+		if (oldInstanceID) then
+			if (isPlayer) then
+				Schema.instance.RemovePlayer(entity)
+			else
+				Schema.instance.RemoveEntity(entity)
+			end
+		end
+
+		-- Create instance if it doesn't exist
+		local instance = Schema.instance.CreateInstance(instanceID)
+
+		-- Add entity to appropriate collection
+		if (isPlayer) then
+			instance.players[entity] = true
+			Schema.instance.playerInstances[entity] = instanceID
+		else
+			instance.entities[entity] = true
+			Schema.instance.entityInstances[entity] = instanceID
+		end
+
+		-- Network the entity's instance ID
+		entity:SetNWString("InstanceID", instanceID)
+
+		-- Needed for ShouldCollide to work
+		entity.expInstanceOldCustomCollisionCheck = entity:GetCustomCollisionCheck()
+		entity:SetCustomCollisionCheck(true)
+
+		-- Update transmission
+		if (isPlayer) then
+			Schema.instance.UpdatePlayerTransmission(entity)
+		else
+			Schema.instance.UpdateEntityTransmission(entity)
+		end
+
+		return true
+	end
+
+	--- Common logic for removing entities from instances
+	--- @param entity Entity
+	--- @param isPlayer boolean
+	local function RemoveEntityFromInstance(entity, isPlayer)
+		if (not IsValid(entity)) then
+			return false
+		end
+
+		local instanceID
+		if (isPlayer) then
+			instanceID = Schema.instance.playerInstances[entity]
+		else
+			instanceID = Schema.instance.entityInstances[entity]
+		end
+
+		if (not instanceID) then
+			return false
+		end
+
+		local instance = Schema.instance.instances[instanceID]
+		if (instance) then
+			if (isPlayer) then
+				instance.players[entity] = nil
+				Schema.instance.playerInstances[entity] = nil
+			else
+				instance.entities[entity] = nil
+				Schema.instance.entityInstances[entity] = nil
+			end
+		end
+
+		-- Clear networked instance ID
+		entity:SetNWString("InstanceID", "")
+
+		-- Restore collision check
+		entity:SetCustomCollisionCheck(entity.expInstanceOldCustomCollisionCheck or false)
+
+		-- Update transmission
+		if (isPlayer) then
+			Schema.instance.UpdatePlayerTransmission(entity)
+		else
+			Schema.instance.UpdateEntityTransmission(entity)
+		end
+
+		return instanceID
+	end
+
 	--- Creates a new instance or returns existing one
 	--- @param instanceID string
 	--- @param owner Player|nil Optional owner of the instance
@@ -102,104 +224,69 @@ if (SERVER) then
 		return ownedInstances
 	end
 
-	--- Adds an entity to an instance
+	--- Adds an entity and its children to an instance
 	--- @param entity Entity
 	--- @param instanceID string
-	function Schema.instance.AddEntity(entity, instanceID)
-		if (not IsValid(entity)) then
-			ix.util.SchemaErrorNoHalt("Attempted to add invalid entity to instance '" .. tostring(instanceID) .. "'\n")
+	--- @param includeChildren boolean Optional, defaults to true
+	function Schema.instance.AddEntity(entity, instanceID, includeChildren)
+		if (includeChildren == nil) then includeChildren = true end
+
+		if (not AddEntityToInstance(entity, instanceID, false)) then
 			return
 		end
 
-		-- Remove from previous instance if it exists
-		local oldInstanceID = Schema.instance.entityInstances[entity]
-		if (oldInstanceID) then
-			Schema.instance.RemoveEntity(entity)
+		-- Add children to the same instance
+		if (includeChildren) then
+			local children = GetEntityChildren(entity)
+			for _, child in ipairs(children) do
+				if (IsValid(child)) then
+					AddEntityToInstance(child, instanceID, false)
+					hook.Run("EntityAddedToInstance", child, instanceID)
+				end
+			end
 		end
-
-		-- Create instance if it doesn't exist
-		local instance = Schema.instance.CreateInstance(instanceID)
-
-		-- Add entity to instance
-		instance.entities[entity] = true
-		Schema.instance.entityInstances[entity] = instanceID
-
-		-- Network the entity's instance ID
-		entity:SetNWString("InstanceID", instanceID)
-
-		-- Needed for ShouldCollide to work
-		entity.expInstanceOldCustomCollisionCheck = entity:GetCustomCollisionCheck()
-		entity:SetCustomCollisionCheck(true)
-
-		-- Update transmission for all players
-		Schema.instance.UpdateEntityTransmission(entity)
 
 		hook.Run("EntityAddedToInstance", entity, instanceID)
 	end
 
-	--- Removes an entity from its instance
+	--- Removes an entity and its children from its instance
 	--- @param entity Entity
-	function Schema.instance.RemoveEntity(entity)
-		if (not IsValid(entity)) then
-			return
+	--- @param includeChildren boolean Optional, defaults to true
+	function Schema.instance.RemoveEntity(entity, includeChildren)
+		if (includeChildren == nil) then includeChildren = true end
+
+		-- Remove children first
+		if (includeChildren) then
+			local children = GetEntityChildren(entity)
+			for _, child in ipairs(children) do
+				if (IsValid(child)) then
+					local childInstanceID = RemoveEntityFromInstance(child, false)
+					if (childInstanceID) then
+						hook.Run("EntityRemovedFromInstance", child, childInstanceID)
+					end
+				end
+			end
 		end
 
-		local instanceID = Schema.instance.entityInstances[entity]
-		if (not instanceID) then
-			return
+		-- Remove the main entity
+		local instanceID = RemoveEntityFromInstance(entity, false)
+		if (instanceID) then
+			hook.Run("EntityRemovedFromInstance", entity, instanceID)
 		end
-
-		local instance = Schema.instance.instances[instanceID]
-		if (instance) then
-			instance.entities[entity] = nil
-		end
-
-		Schema.instance.entityInstances[entity] = nil
-
-		-- Clear networked instance ID
-		entity:SetNWString("InstanceID", "")
-
-		entity:SetCustomCollisionCheck(entity.expInstanceOldCustomCollisionCheck or false)
-
-		-- Update transmission for all players (entity becomes visible to everyone)
-		Schema.instance.UpdateEntityTransmission(entity)
-
-		hook.Run("EntityRemovedFromInstance", entity, instanceID)
 	end
 
 	--- Adds a player to an instance
+	--- ! Do not call this function in PlayerSpawn, Loadout or anything similar. Use timer.Simple(0, ...) to
+	--- ! delay the call a frame. Otherwise the player's hands will not have been parented to the predicted
+	--- ! viewmodel yet, causing the hands to be invisible.
 	--- @param client Player
 	--- @param instanceID? string Optional ID to identify the instance by, defaults to SteamID64
 	function Schema.instance.AddPlayer(client, instanceID)
-		if (not IsValid(client)) then
-			ix.util.SchemaErrorNoHalt("Attempted to add invalid player to instance '" .. tostring(instanceID) .. "'\n")
-			return
-		end
-
-		-- Remove from previous instance
-		local oldInstanceID = Schema.instance.playerInstances[client]
-		if (oldInstanceID) then
-			Schema.instance.RemovePlayer(client)
-		end
-
 		instanceID = instanceID or client:SteamID64()
 
-		-- Create instance if it doesn't exist
-		local instance = Schema.instance.CreateInstance(instanceID)
-
-		-- Add player to instance
-		instance.players[client] = true
-		Schema.instance.playerInstances[client] = instanceID
-
-		-- Network the player's instance to all clients
-		client:SetNWString("InstanceID", instanceID)
-
-		-- Needed for ShouldCollide to work
-		client.expInstanceOldCustomCollisionCheck = client:GetCustomCollisionCheck()
-		client:SetCustomCollisionCheck(true)
-
-		-- Update transmission for all entities
-		Schema.instance.UpdatePlayerTransmission(client)
+		if (not AddEntityToInstance(client, instanceID, true)) then
+			return
+		end
 
 		hook.Run("PlayerAddedToInstance", client, instanceID)
 	end
@@ -207,31 +294,10 @@ if (SERVER) then
 	--- Removes a player from their instance (returns them to global)
 	--- @param client Player
 	function Schema.instance.RemovePlayer(client)
-		if (not IsValid(client)) then
-			return
+		local instanceID = RemoveEntityFromInstance(client, true)
+		if (instanceID) then
+			hook.Run("PlayerRemovedFromInstance", client, instanceID)
 		end
-
-		local instanceID = Schema.instance.playerInstances[client]
-		if (not instanceID) then
-			return
-		end
-
-		local instance = Schema.instance.instances[instanceID]
-		if (instance) then
-			instance.players[client] = nil
-		end
-
-		Schema.instance.playerInstances[client] = nil
-
-		-- Clear networked instance ID
-		client:SetNWString("InstanceID", "")
-
-		client:SetCustomCollisionCheck(client.expInstanceOldCustomCollisionCheck or false)
-
-		-- Update transmission for all entities
-		Schema.instance.UpdatePlayerTransmission(client)
-
-		hook.Run("PlayerRemovedFromInstance", client, instanceID)
 	end
 
 	--- Gets the instance ID a player is in
@@ -405,8 +471,74 @@ if (SERVER) then
 		return true
 	end
 
+	-- Hook to handle when entities get parented
+	hook.Add("EntitySetParent", "expInstanceParentChild", function(child, parent)
+		-- Validate entities
+		if (not IsValid(child) or not IsValid(parent)) then
+			return
+		end
+
+		-- Get the parent's instance
+		local parentInstance = Schema.instance.GetEntityInstance(parent)
+
+		-- If parent is a player, check their instance instead
+		if (parent:IsPlayer()) then
+			parentInstance = Schema.instance.GetPlayerInstance(parent)
+		end
+
+		-- Get the child's current instance
+		local childInstance = Schema.instance.GetEntityInstance(child)
+
+		-- If parent has an instance and child doesn't match, move child to parent's instance
+		if (parentInstance and parentInstance ~= childInstance) then
+			-- Remove child from current instance first (if any)
+			if (childInstance) then
+				Schema.instance.RemoveEntity(child, false) -- Don't include children to avoid recursion
+			end
+
+			-- Add child to parent's instance (don't include children to avoid double-processing)
+			Schema.instance.AddEntity(child, parentInstance, false)
+
+			-- Call hook for external systems
+			hook.Run("EntityMovedToParentInstance", child, parent, parentInstance, childInstance)
+		elseif (not parentInstance and childInstance) then
+			-- If parent is not instanced but child is, remove child from instance
+			Schema.instance.RemoveEntity(child, false)
+			hook.Run("EntityRemovedFromParentInstance", child, parent, childInstance)
+		end
+	end)
+
+	-- Hook to handle when entities lose their parent (via SetParent(nil) or parent removal)
+	local function HandleOrphanedEntity(entity)
+		if (not IsValid(entity)) then
+			return
+		end
+
+		-- Check if this entity was in an instance and now has no parent
+		local entityInstance = Schema.instance.GetEntityInstance(entity)
+		if (entityInstance and not IsValid(entity:GetParent())) then
+			-- Entity is orphaned and in an instance - keep it in the instance
+			-- This maintains consistency unless explicitly moved by other code
+			return
+		end
+	end
+
 	-- Clean up when entities are removed
 	hook.Add("EntityRemoved", "expInstanceCleanup", function(entity)
+		if (not IsValid(entity)) then
+			return
+		end
+
+		-- Get all children of the removed entity
+		local children = entity:GetChildren()
+		for _, child in ipairs(children) do
+			if (IsValid(child)) then
+				-- Child will be automatically orphaned, but keep it in the same instance
+				-- The existing EntityRemoved hook in your system will clean up if needed
+				HandleOrphanedEntity(child)
+			end
+		end
+
 		Schema.instance.RemoveEntity(entity)
 	end)
 
@@ -506,12 +638,13 @@ if (SERVER) then
 		end
 	end)
 
-	-- Prevent right-click context menu interactions across instances
-	hook.Add("PlayerCanPickupWeapon", "expInstancePickupWeapon", function(client, weapon)
-		if (not Schema.instance.CanPlayerSeeEntity(client, weapon)) then
-			return false
-		end
-	end)
+	-- Commented, otherwise player:Give wont work
+	-- -- Prevent right-click context menu interactions across instances
+	-- hook.Add("PlayerCanPickupWeapon", "expInstancePickupWeapon", function(client, weapon)
+	-- 	if (not Schema.instance.CanPlayerSeeEntity(client, weapon)) then
+	-- 		return false
+	-- 	end
+	-- end)
 
 	-- Prevent item pickup across instances (for dropped items)
 	hook.Add("PlayerCanPickupItem", "expInstancePickupItem", function(client, item)
