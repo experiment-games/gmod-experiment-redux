@@ -1,8 +1,19 @@
 local TUTORIAL = TUTORIAL
 
 TUTORIAL.uniqueID = "final_tutorial"
-TUTORIAL.activateOn = "OnPlayerItemRead"
+-- disabled until we get to that mission
+-- TUTORIAL.activateOn = "OnPlayerItemRead"
 TUTORIAL.Skippable = true
+
+-- Don't activate unless the prologue is finished
+function TUTORIAL:ShouldActivate()
+	local client = LocalPlayer()
+	local character = client:GetCharacter()
+
+	if (character and not character:GetData("prologue_finished")) then
+		return false
+	end
+end
 
 function TUTORIAL:OnActivate(item, frame)
 	Schema.tutorial.item = item

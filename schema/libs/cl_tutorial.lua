@@ -45,7 +45,11 @@ function Schema.tutorial.OnPostRegister(tutorial)
 		hook.Add(hookName, "expTutorial" .. "#" .. tutorial.uniqueID .. ":" .. hookName, function(...)
 			local args = { ... }
 
-			print("expTutorial: " .. tutorial.uniqueID .. " activated on hook: " .. hookName)
+			if (tutorial.ShouldActivate) then
+				if (tutorial.ShouldActivate(unpack(args)) == false) then
+					return
+				end
+			end
 
 			local delay = tutorial.activateOnDelay or 0
 
@@ -61,9 +65,13 @@ function Schema.tutorial.OnPostRegister(tutorial)
 		local hookName = tutorial.deactivateOn
 
 		hook.Add(hookName, "expTutorialDeactivate" .. "#" .. tutorial.uniqueID .. ":" .. hookName, function(...)
-			print("expTutorial: " .. tutorial.uniqueID .. " deactivated on hook: " .. hookName)
-
 			if (tutorial.active) then
+				if (tutorial.ShouldDeactivate) then
+					if (tutorial.ShouldDeactivate(...) == false) then
+						return
+					end
+				end
+
 				Schema.tutorial.HideTutorial(tutorial.uniqueID)
 			end
 		end)
@@ -262,7 +270,7 @@ hook.Add("DrawOverlay", "expTutorialsDrawOverlay", function()
 	end
 
 	-- Show disable tutorial hint
-	local disableTutorialText = "Hold BACKSPACE for 3 seconds to disable tutorial."
+	local disableTutorialText = "Hold BACKSPACE for 3 seconds to disable the tutorial."
 	draw.SimpleTextOutlined(disableTutorialText, "expSmallerFont", scrW - 8, scrH - 8, color_white, TEXT_ALIGN_RIGHT,
 		TEXT_ALIGN_BOTTOM, 1, color_black)
 

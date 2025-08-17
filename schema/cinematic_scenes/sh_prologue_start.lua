@@ -5,7 +5,7 @@ SCENE.cinematicSpawnID = "prologue_gateway"
 function SCENE:OnEnterServer(client)
 	Schema.instance.AddPlayer(client)
 
-	timer.Simple(10, function()
+	timer.Simple(8, function()
 		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, self.uniqueID)) then
 			Schema.cinematics.TransitionPlayerToScene(client, "prologue_gateway")
 		end
@@ -25,7 +25,7 @@ if (CLIENT) then
 
 	function SCENE:OnEnterLocalPlayer()
 		Schema.cinematics.ShowCinematicText({
-			{ text = "Prologue",          delay = 0, duration = 5, horizontalAlignment = TEXT_ALIGN_LEFT,  verticalAlignment = TEXT_ALIGN_TOP },
+			{ text = "Prologue",          delay = 0, duration = 6, horizontalAlignment = TEXT_ALIGN_LEFT,  verticalAlignment = TEXT_ALIGN_TOP },
 			{ text = "Some years ago...", delay = 2, duration = 6, horizontalAlignment = TEXT_ALIGN_RIGHT, verticalAlignment = TEXT_ALIGN_BOTTOM },
 		})
 	end

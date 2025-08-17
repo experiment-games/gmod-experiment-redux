@@ -1,8 +1,19 @@
 local TUTORIAL = TUTORIAL
 
 TUTORIAL.uniqueID = "you_tab"
-TUTORIAL.activateOn = "OnMainMenuCreated"
-TUTORIAL.deactivateOn = "CreateCharacterBuffInfo"
+-- disabled until we get to that mission
+-- TUTORIAL.activateOn = "OnMainMenuCreated"
+-- TUTORIAL.deactivateOn = "CreateCharacterBuffInfo"
+
+-- Don't activate unless the prologue is finished
+function TUTORIAL:ShouldActivate()
+	local client = LocalPlayer()
+	local character = client:GetCharacter()
+
+	if (character and not character:GetData("prologue_finished")) then
+		return false
+	end
+end
 
 function TUTORIAL:OnActivate(menuPanel)
 	-- Store reference if needed
