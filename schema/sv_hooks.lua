@@ -779,6 +779,10 @@ function Schema:PlayerDeath(client, inflictor, attacker)
 	end
 
 	Schema.achievement.Progress("favored_target", client)
+
+	-- Store this vector so we can use it to determine if the player can spawn at a spawn point.
+	character:SetData("lastDeathPosition", client:GetPos())
+	character:SetData("lastDeathTime", os.time())
 end
 
 --[[
@@ -1053,6 +1057,17 @@ end
 
 function Schema:OnPlayerLockerClosed(client, lockers)
 	ix.log.Add(client, "closeLockers")
+end
+
+function Schema:PlayerCanSelectSpawnPoint(client, spawn, spawnIndex)
+	local availableSpawns = Schema.spawnPoints.GetAvailableSpawns(client)
+	local spawn = availableSpawns[spawnIndex]
+
+	if (spawn.status ~= Schema.spawnPoints.spawnStatus.SAFE and spawn.status ~= Schema.spawnPoints.spawnStatus.CHAOS) then
+		return false, "You cannot spawn at this location!"
+	end
+
+	return true
 end
 
 Schema.chunkedNetwork.HandleSend("NpcEdit", function(client, data, extraData)

@@ -28,8 +28,7 @@ local variables = {
 	"visible"
 }
 
-function PLUGIN:OnCharacterCreated(client, character)
-	local inventory = character:GetInventory()
+function PLUGIN:PlayerFillDefaultInventory(client, character, inventory)
 	inventory:Add("door_protector", 1)
 end
 

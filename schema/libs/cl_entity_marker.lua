@@ -179,6 +179,10 @@ function Schema.entityMarker.IsMarked(entity)
 	return Schema.entityMarker.markers[entity:EntIndex()] ~= nil
 end
 
+--[[
+	Hooks
+--]]
+
 -- Unmark entities being removed
 hook.Add("EntityRemoved", "expEtityMarkerEntityRemoved", function(entity)
 	if (not IsValid(entity)) then
@@ -229,4 +233,14 @@ hook.Add("HUDPaint", "expEntityMarkerHUDPaint", function()
 			end
 		end
 	end
+end)
+
+--[[
+	Network Messages
+--]]
+
+net.Receive("expEntityMarkerForce", function(len, client)
+	local entityIndex = net.ReadUInt(MAX_EDICT_BITS)
+
+	Schema.entityMarker.Mark(entityIndex)
 end)

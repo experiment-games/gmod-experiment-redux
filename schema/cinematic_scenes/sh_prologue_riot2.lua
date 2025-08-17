@@ -3,235 +3,18 @@ local SCENE = SCENE
 SCENE.cinematicSpawnID = "prologue_riot2"
 
 if (SERVER) then
-	util.AddNetworkString("expPrologueRiot2ItemToPickup")
-
-	local function findItemSpawnPoint(sequenceID, itemSpawnID)
-		for _, ent in ipairs(ents.FindByClass("exp_cinematic_item_spawn")) do
-			if (ent:GetSequenceID() == sequenceID and ent:GetItemSpawnID() == itemSpawnID) then
-				return ent
-			end
-		end
-
-		return nil
-	end
-
-	local function findEnemySpawnPoint(sequenceID, enemySpawnID)
-		for _, ent in ipairs(ents.FindByClass("exp_cinematic_enemy_spawn")) do
-			if (ent:GetSequenceID() == sequenceID and ent:GetEnemySpawnID() == enemySpawnID) then
-				return ent
-			end
-		end
-
-		return nil
-	end
-
-	local function networkItemToPickup(client, itemEntity)
-		net.Start("expPrologueRiot2ItemToPickup")
-		net.WriteUInt(itemEntity:EntIndex(), MAX_EDICT_BITS)
-		net.Send(client)
-	end
-
 	function SCENE:OnEnterServer(client)
 		Schema.instance.AddPlayer(client)
 
-		-- Spawn weapon and ammo in this client's instance
-		local weaponSpawn = findItemSpawnPoint(SCENE.cinematicSpawnID, "weapon")
-		local ammoSpawn = findItemSpawnPoint(SCENE.cinematicSpawnID, "ammo")
-
-		if (not weaponSpawn or not ammoSpawn) then
-			ix.util.SchemaErrorNoHalt("Prologue scene 'prologue_riot2' is missing item spawn points for weapon or ammo!")
-			Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
-			return
-		end
-
-		local weaponItemTable = ix.item.Get("ex_glock")
-		local ammo = Schema.ammo.ConvertToAmmo(weaponItemTable.forcedWeaponCalibre)
-		local ammoItemTable = Schema.ammo.FindMainAmmoItem(ammo)
-
-		if (not ammoItemTable) then
-			ix.util.SchemaErrorNoHalt("Prologue scene 'prologue_riot2' is missing ammo item for weapon!")
-			Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
-			return
-		end
-
-		local instanceID = Schema.instance.GetPlayerInstance(client)
-
-		-- Track the items this player has to pick up
-		client.expPrologueRiot2Items = {}
-
-		ix.item.Spawn(weaponItemTable.uniqueID, weaponSpawn:GetPos(), function(item, itemEntity)
-			if (not IsValid(client)) then
-				itemEntity:Remove()
-				return
-			end
-
-			-- Prevent the map saving this item
-			itemEntity.bTemporary = true
-
-			Schema.instance.AddEntity(itemEntity, instanceID)
-
-			client.expPrologueRiot2Items[item.uniqueID] = item
-
-			networkItemToPickup(client, itemEntity)
-		end)
-
-		ix.item.Spawn(ammoItemTable.uniqueID, ammoSpawn:GetPos(), function(item, itemEntity)
-			if (not IsValid(client)) then
-				itemEntity:Remove()
-				return
-			end
-
-			-- Prevent the map saving this item
-			itemEntity.bTemporary = true
-
-			Schema.instance.AddEntity(itemEntity, instanceID)
-
-			client.expPrologueRiot2Items[item.uniqueID] = item
-
-			networkItemToPickup(client, itemEntity)
-		end)
-
-		-- TODO: instruct player how to equip weapon and ammo
-		-- TODO: End scene after they kill the manhack, or when the time expires
-		-- TODO: Handle softlocks, like where they drop the weapon outside bounds or something (currently handled with removal of items, we should detect that and respawn them or something)
-
-		--[[
-		Some sounds to have an NPC possibly say:
-			vo/canals/arrest_helpme.wav <- cry for help
-
-			vo/npc/female01/coverwhilereload01.wav
-			vo/npc/female01/coverwhilereload02.wav
-			vo/npc/male01/coverwhilereload01.wav
-			vo/npc/male01/coverwhilereload02.wav
-
-			vo/npc/male01/ammo03.wav
-			vo/npc/male01/ammo04.wav
-			vo/npc/male01/ammo05.wav
-
-			vo/npc/male01/behindyou01.wav
-
-			vo/npc/male01/gethellout.wav
-
-			vo/npc/male01/herecomehacks01.wav
-			vo/npc/male01/herecomehacks02.wav
-			vo/npc/male01/heretheycome01.wav
-
-			vo/npc/male01/youdbetterreload01.wav
-	--]]
-
-		-- Hard-timer to end scene after some time
-		timer.Simple(60 * 10, function()
+		timer.Simple(15, function()
 			if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_riot2")) then
-				Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
+				Schema.cinematics.TransitionPlayerToScene(client, "prologue_riot3")
 			end
 		end)
-
-		-- TODO: Hard-timer to spawn the manhacks regardless of whether the player has picked up the items
 	end
-
-	function SCENE:OnLeaveServer(client)
-		client.expPrologueRiot2Items = nil
-
-		local instanceID = Schema.instance.GetPlayerInstance(client)
-		Schema.instance.DestroyInstance(instanceID, "end_of_scene")
-
-		client:KillSilent()
-		client:Spawn()
-		-- TODO: Strip all items after this flashback
-		-- TODO: Show the spawn point selection
-	end
-
-	function SCENE:OnServerThink(client)
-	end
-
-	local function spawnManhack(position, targetClient)
-		local manhack = ents.Create("npc_manhack")
-		manhack:SetPos(position)
-		manhack:Spawn()
-
-		-- Set relationships with anything neutral, except the target
-		manhack:AddRelationship("player D_NU 98")
-		manhack:AddEntityRelationship(targetClient, D_HT, 99)
-
-		manhack:SetTarget(targetClient)
-		manhack:UpdateEnemyMemory(targetClient, targetClient:GetPos())
-
-		local instanceID = Schema.instance.GetPlayerInstance(targetClient)
-		Schema.instance.AddEntity(manhack, instanceID)
-
-		return manhack
-	end
-	_G.TestSpawnManhack = spawnManhack
-
-	local function checkIfPickedUpItems(client)
-		if (table.Count(client.expPrologueRiot2Items) > 0) then
-			return
-		end
-
-		client.expPrologueRiot2Items = nil
-
-		local spawnPoint = findEnemySpawnPoint(SCENE.cinematicSpawnID, "manhack")
-
-		if (not spawnPoint) then
-			return
-		end
-
-		-- TODO: Wait for the weapon to be equipped
-		spawnManhack(spawnPoint:GetPos(), client)
-	end
-
-	-- Track the next phase if the player picks up both items
-	hook.Add("OnItemTransferred", "expPrologueRiot2OnItemTransferred", function(item, oldInventory, newInventory)
-		if (not item.entity or not newInventory) then
-			return
-		end
-
-		local itemInstanceID = Schema.instance.GetEntityInstance(item.entity)
-
-		if (not itemInstanceID) then
-			return
-		end
-
-		local inventoryOwner = newInventory:GetOwner()
-
-		if (not IsValid(inventoryOwner) or not inventoryOwner.expPrologueRiot2Items) then
-			return
-		end
-
-		local itemToPickup = inventoryOwner.expPrologueRiot2Items[item.uniqueID]
-
-		if (not itemToPickup or itemToPickup ~= item) then
-			return
-		end
-
-		inventoryOwner.expPrologueRiot2Items[item.uniqueID] = nil
-
-		checkIfPickedUpItems(inventoryOwner)
-	end)
-
-	-- Also track the next phase if the player picks up the weapon and immediately loads the ammo
-	hook.Add("PlayerAmmoChanged", "expPrologueRiot2PlayerAmmoChanged", function(client, ammoID, oldCount, newCount)
-		if (not IsValid(client) or not client.expPrologueRiot2Items) then
-			return
-		end
-
-		local ammoItemTable = Schema.ammo.FindMainAmmoItem(ammoID)
-
-		if (not ammoItemTable or not client.expPrologueRiot2Items[ammoItemTable.uniqueID]) then
-			return
-		end
-
-		client.expPrologueRiot2Items[ammoItemTable.uniqueID] = nil
-
-		checkIfPickedUpItems(client)
-	end)
 end
 
 if (CLIENT) then
-	function SCENE:OnDraw()
-		-- Schema.draw.DrawUndimmedRect(x, y, w, h)
-	end
-
 	function SCENE:OnEnterLocalPlayer()
 		Schema.cinematics.ShowCinematicText({
 			{ text = "That illusion shattered the day the Nemesis AI", delay = 0, duration = 8, horizontalAlignment = TEXT_ALIGN_LEFT, verticalAlignment = TEXT_ALIGN_CENTER },
@@ -252,22 +35,13 @@ if (CLIENT) then
 
 	function SCENE:OnLeaveLocalPlayer()
 		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
-		local client = LocalPlayer()
 
 		if (nemesisPlugin) then
 			nemesisPlugin:ClearClientSpecificMonitorVgui("prologue_riot2")
 		end
 
-		Schema.entityMarker.ClearAll()
-
-		Schema.cinematics.StopCinematicSound(3.0) -- Fade out over 3 seconds
+		Schema.cinematics.StopCinematicSound(3.0)
 	end
-
-	net.Receive("expPrologueRiot2ItemToPickup", function()
-		local itemEntityIndex = net.ReadUInt(MAX_EDICT_BITS)
-
-		Schema.entityMarker.Mark(itemEntityIndex)
-	end)
 end
 
 hook.Add("ExperimentMonitorsFilter", "expPrologueRiot2DisableNormalBehaviour", function(monitors, filterType)

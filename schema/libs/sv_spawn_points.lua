@@ -245,29 +245,6 @@ hook.Add("PostPlayerLoadout", "expSpawnPointsPostPlayerLoadout", function(client
 	net.Send(client)
 end)
 
-hook.Add("PlayerDeath", "expSpawnPointsPlayerDeath", function(client, inflictor, attacker)
-	local character = client:GetCharacter()
-
-	if (not character) then
-		return
-	end
-
-	-- Store this vector so we can use it to determine if the player can spawn at a spawn point.
-	character:SetData("lastDeathPosition", client:GetPos())
-	character:SetData("lastDeathTime", os.time())
-end)
-
-hook.Add("PlayerCanSelectSpawnPoint", "expSpawnPointsPlayerCanSelectSpawnPoint", function(client, spawn, spawnIndex)
-	local availableSpawns = Schema.spawnPoints.GetAvailableSpawns(client)
-	local spawn = availableSpawns[spawnIndex]
-
-	if (spawn.status ~= Schema.spawnPoints.spawnStatus.SAFE and spawn.status ~= Schema.spawnPoints.spawnStatus.CHAOS) then
-		return false, "You cannot spawn at this location!"
-	end
-
-	return true
-end)
-
 net.Receive("expSpawnRequestSelect", function(len, client)
 	local index = net.ReadUInt(8)
 	local spawn = Schema.spawnPoints.spawns[index]

@@ -19,7 +19,7 @@ if (not SERVER) then
 end
 
 function BUFF.hooks:OnCharacterCreated(client, character)
-    character:SetData("buffs", {
-        Schema.buff.MakeStored(client, self.index)
-    })
+	character:SetData("buffs", {
+		Schema.buff.MakeStored(client, self.index)
+	})
 end

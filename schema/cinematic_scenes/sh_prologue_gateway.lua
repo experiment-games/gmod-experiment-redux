@@ -28,8 +28,10 @@ if (CLIENT) then
 		Schema.cinematics.SetFogData(50, 750, color_black, 1)
 		Schema.cinematics.SetBlackAndWhite(true)
 
-		Schema.cinematics.prologueMusic = "music/HL2_song6.mp3"
-		Schema.cinematics.PlayCinematicSound(Schema.cinematics.prologueMusic, 0.2, 2.0)
+		-- Delay so menu music can fade out
+		timer.Simple(2.5, function()
+			Schema.cinematics.PlayCinematicSound("music/HL2_song6.mp3", 0.2, 2.0)
+		end)
 
 		-- Show only to this client some welcome information on the nemesis monitors
 		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
@@ -58,5 +60,24 @@ hook.Add("ExperimentMonitorsFilter", "expPrologueGatewayDisableNormalBehaviour",
 		if (specialID and specialID == "prologue_gateway") then
 			table.remove(monitors, i)
 		end
+	end
+end)
+
+-- Note: If we every remove this, be sure to call `hook.Run("PlayerFillDefaultInventory", client, character, inventory)` for newly created
+-- characters, or change all occurrences of PlayerFillDefaultInventory to work with OnCharacterCreated.
+-- Show the prologue instead of the normal spawn point selection.
+hook.Add("ShouldShowSpawnSelection", "expPrologueGatewayShouldShowSpawnSelection", function(client)
+	local character = client:GetCharacter()
+
+	if (not character:GetData("prologue_finished")) then
+		-- We must delay a frame, otherwise the player's hands wont have been parented to their predicted viewmodel yet, causing issues with those
+		-- being in a different instance
+		timer.Simple(0, function()
+			if (IsValid(client)) then
+				Schema.cinematics.PutPlayerInScene(client, "prologue_gateway", 10)
+			end
+		end)
+
+		return false
 	end
 end)

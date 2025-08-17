@@ -24,7 +24,11 @@ function Schema.cinematics.GetCinematicSpawns(cinematicSpawnID)
 	return spawns
 end
 
-function Schema.cinematics.PutPlayerInScene(client, sceneID)
+--- @param client Player
+--- @param sceneID string
+--- @param fadeIn boolean|number
+--- @return boolean
+function Schema.cinematics.PutPlayerInScene(client, sceneID, fadeIn)
 	local scene = Schema.cinematics.Find(sceneID)
 	if (not scene) then
 		ix.util.SchemaErrorNoHalt("Scene not found: " .. sceneID)
@@ -44,7 +48,11 @@ function Schema.cinematics.PutPlayerInScene(client, sceneID)
 
 	-- Spawn player at cinematic spawn if specified
 	if (scene.cinematicSpawnID) then
-		Schema.cinematics.SpawnPlayerAtCinematic(client, scene.cinematicSpawnID, true)
+		if (fadeIn == nil) then
+			fadeIn = true -- Default to true if not specified
+		end
+
+		Schema.cinematics.SpawnPlayerAtCinematic(client, scene.cinematicSpawnID, fadeIn)
 	end
 
 	-- Call server-side scene enter
@@ -151,6 +159,11 @@ function Schema.cinematics.TransitionPlayerToScene(client, newSceneID, fadeTime,
 	return true
 end
 
+--- Spawns a player at a cinematic spawn point, optionally with a fade in or specified fade in time.
+--- @param client Player
+--- @param cinematicSpawnID string
+--- @param fadeIn boolean|number
+--- @return boolean
 function Schema.cinematics.SpawnPlayerAtCinematic(client, cinematicSpawnID, fadeIn)
 	local spawns = Schema.cinematics.GetCinematicSpawns(cinematicSpawnID)
 
@@ -167,8 +180,8 @@ function Schema.cinematics.SpawnPlayerAtCinematic(client, cinematicSpawnID, fade
 	client:SetEyeAngles(angles)
 	client:SetLocalVelocity(Vector(0, 0, 0))
 
-	if (fadeIn ~= false) then
-		local fadeTime = Schema.cinematics.CINEMATIC_FADE_TIME
+	if (isnumber(fadeIn) or fadeIn ~= false) then
+		local fadeTime = isnumber(fadeIn) and fadeIn or Schema.cinematics.CINEMATIC_FADE_TIME
 
 		net.Start("ixCinematicFadeIn")
 		net.WriteFloat(fadeTime)

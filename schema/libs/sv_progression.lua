@@ -13,106 +13,106 @@ util.AddNetworkString("expProgressionRemove")
 --- @param player Player
 --- @return table, table # The progressions and dirty progressions
 function Schema.progression.GetProgressions(player)
-  local character = player:GetCharacter()
-  local progressions = character:GetData("progressions")
-  local dirtyProgressions = character:GetData("dirtyProgressions")
+	local character = player:GetCharacter()
+	local progressions = character:GetData("progressions")
+	local dirtyProgressions = character:GetData("dirtyProgressions")
 
-  if (not progressions) then
-    progressions = {}
-    character:SetData("progressions", progressions)
-  end
+	if (not progressions) then
+		progressions = {}
+		character:SetData("progressions", progressions)
+	end
 
-  if (not dirtyProgressions) then
-    dirtyProgressions = {}
-    character:SetData("dirtyProgressions", dirtyProgressions)
-  end
+	if (not dirtyProgressions) then
+		dirtyProgressions = {}
+		character:SetData("dirtyProgressions", dirtyProgressions)
+	end
 
-  return progressions, dirtyProgressions
+	return progressions, dirtyProgressions
 end
 
 --- Gets the dynamic progressions for a player.
 --- @param player Player
 --- @return table<string, table<string, ProgressionValue>> # The dynamic progressions
 function Schema.progression.GetDynamicProgressions(player)
-  local character = player:GetCharacter()
-  local progressions = character:GetData("progressions", {})
-  local dynamicProgressions = {}
+	local character = player:GetCharacter()
+	local progressions = character:GetData("progressions", {})
+	local dynamicProgressions = {}
 
-  for scope, keys in pairs(progressions) do
-    local dynamicProgression = Schema.progression.GetDynamicByScope(scope)
+	for scope, keys in pairs(progressions) do
+		local dynamicProgression = Schema.progression.GetDynamicByScope(scope)
 
-    if (dynamicProgression) then
-      dynamicProgressions[scope] = keys
-    end
-  end
+		if (dynamicProgression) then
+			dynamicProgressions[scope] = keys
+		end
+	end
 
-  return dynamicProgressions
+	return dynamicProgressions
 end
 
 --- Gets the directory where dynamically created progressions are saved.
 --- @return string
 function Schema.progression.GetSaveFileDirectory()
-  return "progressions/dynamic"
+	return "progressions/dynamic"
 end
 
 --- Gets the file path where dynamically created progressions are saved.
 --- @param uniqueID string The unique identifier for the progression
 --- @return string
 function Schema.progression.GetSaveFile(uniqueID)
-  return ("%s/%s.json"):format(Schema.progression.GetSaveFileDirectory(), uniqueID)
+	return ("%s/%s.json"):format(Schema.progression.GetSaveFileDirectory(), uniqueID)
 end
 
 --- Saves dynamically created progression data so it can be loaded again
 --- after a map change or server restart.
 --- @param data table
 function Schema.progression.Save(data)
-  local file = Schema.progression.GetSaveFile(data.uniqueID)
+	local file = Schema.progression.GetSaveFile(data.uniqueID)
 
-  Schema.util.SaveSchemaData(file, data)
+	Schema.util.SaveSchemaData(file, data)
 end
 
 --- Destroys the dynamically created progression data with the given uniqueID.
 --- @param uniqueID string
 function Schema.progression.Destroy(uniqueID)
-  local file = Schema.progression.GetSaveFile(uniqueID)
+	local file = Schema.progression.GetSaveFile(uniqueID)
 
-  Schema.util.DeleteSchemaData(file)
+	Schema.util.DeleteSchemaData(file)
 end
 
 --- Initialize dynamically created progression data.
 --- @param trackerInfo ProgressionTrackerInfo
 function Schema.progression.RegisterDynamic(trackerInfo)
-  --- @cast trackerInfo ProgressionTracker
-  local goals = trackerInfo.goals
+	--- @cast trackerInfo ProgressionTracker
+	local goals = trackerInfo.goals
 
-  -- Don't confuse RegisterTracker with this data
-  trackerInfo.goals = nil
-  trackerInfo.isDynamic = true
+	-- Don't confuse RegisterTracker with this data
+	trackerInfo.goals = nil
+	trackerInfo.isDynamic = true
 
-  trackerInfo.isInProgress = function(player, progression)
-    -- TODO: Use isInProgressInfo.type and isInProgressInfo.value to return a value
-    return false
-  end
+	trackerInfo.isInProgress = function(player, progression)
+		-- TODO: Use isInProgressInfo.type and isInProgressInfo.value to return a value
+		return false
+	end
 
-  trackerInfo = Schema.progression.RegisterTracker(trackerInfo)
+	trackerInfo = Schema.progression.RegisterTracker(trackerInfo)
 
-  Schema.progression.dynamicTrackers[trackerInfo.uniqueID] = trackerInfo
+	Schema.progression.dynamicTrackers[trackerInfo.uniqueID] = trackerInfo
 
-  if (goals) then
-    for _, goalInfo in ipairs(goals) do
-      local goal = trackerInfo:RegisterGoal({
-        key = goalInfo.key,
-        name = goalInfo.name,
-        getProgressScript = goalInfo.getProgressScript,
-        getProgress = Schema.progression.CreateGetProgressScript(trackerInfo, goalInfo.getProgressScript),
+	if (goals) then
+		for _, goalInfo in ipairs(goals) do
+			local goal = trackerInfo:RegisterGoal({
+				key = goalInfo.key,
+				name = goalInfo.name,
+				getProgressScript = goalInfo.getProgressScript,
+				getProgress = Schema.progression.CreateGetProgressScript(trackerInfo, goalInfo.getProgressScript),
 
-        -- Needed to cast later
-        type = goalInfo.type,
-      })
-    end
-  end
+				-- Needed to cast later
+				type = goalInfo.type,
+			})
+		end
+	end
 
-  return trackerInfo
+	return trackerInfo
 end
 
 --- Get a dynamically created progression tracker.
@@ -120,14 +120,14 @@ end
 --- @return ProgressionTrackerInfo?
 --- @nodiscard
 function Schema.progression.GetDynamic(uniqueID)
-  return Schema.progression.dynamicTrackers[uniqueID]
+	return Schema.progression.dynamicTrackers[uniqueID]
 end
 
 --- Get all dynamically created progression trackers.
 --- @return table<string, ProgressionTrackerInfo>
 --- @nodiscard
 function Schema.progression.GetAllDynamic()
-  return Schema.progression.dynamicTrackers
+	return Schema.progression.dynamicTrackers
 end
 
 --- Get a dynamically created progression tracker.
@@ -135,46 +135,46 @@ end
 --- @return ProgressionTrackerInfo?
 --- @nodiscard
 function Schema.progression.GetDynamicByScope(scope)
-  for _, tracker in pairs(Schema.progression.dynamicTrackers) do
-    if (tracker.scope == scope) then
-      return tracker
-    end
-  end
+	for _, tracker in pairs(Schema.progression.dynamicTrackers) do
+		if (tracker.scope == scope) then
+			return tracker
+		end
+	end
 end
 
 --- Loads dynamically created progression data.
 --- @param uniqueID string
 --- @return table?
 function Schema.progression.Load(uniqueID)
-  local file = Schema.progression.GetSaveFile(uniqueID)
-  local data = Schema.util.RestoreSchemaData(file, false)
+	local file = Schema.progression.GetSaveFile(uniqueID)
+	local data = Schema.util.RestoreSchemaData(file, false)
 
-  if (not data) then
-    return
-  end
+	if (not data) then
+		return
+	end
 
-  return data
+	return data
 end
 
 --- Loads all dynamically created progression data.
 --- @return table<string, ProgressionTracker>
 --- @nodiscard
 function Schema.progression.LoadAll()
-  local saveDirectory = Schema.progression.GetSaveFileDirectory()
-  local allData = {}
+	local saveDirectory = Schema.progression.GetSaveFileDirectory()
+	local allData = {}
 
-  -- Load all files in the directory
-  for _, file in ipairs(Schema.util.FindSchemaData(saveDirectory .. "/*.json")) do
-    local uniqueID = file:match("^(.*)%.json$")
-    local progressionData = Schema.progression.Load(uniqueID)
+	-- Load all files in the directory
+	for _, file in ipairs(Schema.util.FindSchemaData(saveDirectory .. "/*.json")) do
+		local uniqueID = file:match("^(.*)%.json$")
+		local progressionData = Schema.progression.Load(uniqueID)
 
-    if (progressionData) then
-      progressionData = Schema.progression.RegisterDynamic(progressionData)
-      allData[uniqueID] = progressionData
-    end
-  end
+		if (progressionData) then
+			progressionData = Schema.progression.RegisterDynamic(progressionData)
+			allData[uniqueID] = progressionData
+		end
+	end
 
-  return allData
+	return allData
 end
 
 --- Changes a progression for a player, within a scope (e.g: belonging to a quest/npc)
@@ -186,42 +186,44 @@ end
 --- @param noNetwork? boolean Whether to not send the change to the client
 --- @return any # The new value
 function Schema.progression.Change(player, scope, key, value, noNetwork)
-  local progressions, dirtyProgressions = Schema.progression.GetProgressions(player)
+	local progressions, dirtyProgressions = Schema.progression.GetProgressions(player)
 
-  progressions[scope] = progressions[scope] or {}
+	progressions[scope] = progressions[scope] or {}
 
-  if (isfunction(value)) then
-    value = value(progressions[scope][key])
-  end
+	if (isfunction(value)) then
+		value = value(progressions[scope][key])
+	end
 
-  progressions[scope][key] = value
+	progressions[scope][key] = value
 
-  -- Force this to be dirty so it gets saved to the database
-  dirtyProgressions[scope] = progressions[scope]
+	-- Force this to be dirty so it gets saved to the database
+	dirtyProgressions[scope] = progressions[scope]
 
-  if (noNetwork) then
-    return value
-  end
+	if (noNetwork) then
+		return value
+	end
 
-  local dynamicProgression = Schema.progression.GetDynamicByScope(scope)
+	local dynamicProgression = Schema.progression.GetDynamicByScope(scope)
 
-  if (dynamicProgression) then
-    Schema.progression.NetworkDynamicChanges(player, {
-      [scope] = progressions[scope]
-    })
+	if (dynamicProgression) then
+		Schema.progression.NetworkDynamicChanges(player, {
+			[scope] = progressions[scope]
+		})
 
-    return
-  end
+		return
+	end
 
-  Schema.progression.NetworkChanges(player, {
-    {
-      scope = scope,
-      key = key,
-      value = value
-    }
-  })
+	Schema.progression.NetworkChanges(player, {
+		{
+			scope = scope,
+			key = key,
+			value = value
+		}
+	})
 
-  return value
+	hook.Run("PlayerProgressionChange", player, scope, key, value)
+
+	return value
 end
 
 --- Checks if a player's progression matches the specified value
@@ -231,19 +233,19 @@ end
 --- @param value ProgressionValue|fun(ProgressionValue):(boolean) The value, or a function that takes the current value and returns whether it matches
 --- @return boolean
 function Schema.progression.Check(player, scope, key, value)
-  local progressions = Schema.progression.GetProgressions(player)
+	local progressions = Schema.progression.GetProgressions(player)
 
-  local currentValue = progressions[scope] and progressions[scope][key]
+	local currentValue = progressions[scope] and progressions[scope][key]
 
-  if (isfunction(value)) then
-    return value(currentValue)
-  end
+	if (isfunction(value)) then
+		return value(currentValue)
+	end
 
-  if (currentValue == nil) then
-    return not value
-  end
+	if (currentValue == nil) then
+		return not value
+	end
 
-  return currentValue == value
+	return currentValue == value
 end
 
 --- Checks if a player's progression for many keys of a scope match the specified value
@@ -253,13 +255,13 @@ end
 --- @param value ProgressionValue|fun(ProgressionValue):(boolean) The value, or a function that takes the current value and returns whether it matches
 --- @return boolean
 function Schema.progression.CheckMany(player, scope, keys, value)
-  for _, key in ipairs(keys) do
-    if (not Schema.progression.Check(player, scope, key, value)) then
-      return false
-    end
-  end
+	for _, key in ipairs(keys) do
+		if (not Schema.progression.Check(player, scope, key, value)) then
+			return false
+		end
+	end
 
-  return true
+	return true
 end
 
 --- Gets the type converter for a progression key
@@ -267,26 +269,26 @@ end
 --- @param key string
 --- @return fun(ProgressionValue): any
 function Schema.progression.GetTypeConverter(scope, key)
-  local tracker = Schema.progression.GetDynamicByScope(scope)
+	local tracker = Schema.progression.GetDynamicByScope(scope)
 
-  -- TODO: We should stop juggling uniqueID and scope if they can be the same for a tracker
-  assert(tracker, "The progression should exist - TODO: Non dynamic progressions: " .. key .. " in " .. scope)
+	-- TODO: We should stop juggling uniqueID and scope if they can be the same for a tracker
+	assert(tracker, "The progression should exist - TODO: Non dynamic progressions: " .. key .. " in " .. scope)
 
-  local goalOrKey = tracker:FindGoal(key)
-      or tracker:FindProgressionKey(key)
-  assert(goalOrKey, "The goal or Key should exist: " .. key .. " in " .. scope)
+	local goalOrKey = tracker:FindGoal(key)
+		or tracker:FindProgressionKey(key)
+	assert(goalOrKey, "The goal or Key should exist: " .. key .. " in " .. scope)
 
-  local type = goalOrKey.type
+	local type = goalOrKey.type
 
-  if (type == "number") then
-    return tonumber
-  elseif (type == "boolean") then
-    return tobool
-  elseif (type == "string") then
-    return tostring
-  end
+	if (type == "number") then
+		return tonumber
+	elseif (type == "boolean") then
+		return tobool
+	elseif (type == "string") then
+		return tostring
+	end
 
-  assert(false, "Unknown progression type: " .. type)
+	assert(false, "Unknown progression type: " .. type)
 end
 
 --- Gets the progression value for a player
@@ -295,13 +297,13 @@ end
 --- @param key string
 --- @return ProgressionValue?
 function Schema.progression.Get(player, scope, key)
-  local progressions = Schema.progression.GetProgressions(player)
+	local progressions = Schema.progression.GetProgressions(player)
 
-  if (not progressions[scope]) then
-    return nil
-  end
+	if (not progressions[scope]) then
+		return nil
+	end
 
-  return progressions[scope][key]
+	return progressions[scope][key]
 end
 
 --- Networks the given progression changes to the player.
@@ -310,79 +312,79 @@ end
 --- @param isFullReset? boolean Whether to reset all progressions
 --- @return number # The delay in seconds before all progressions are sent
 function Schema.progression.NetworkChanges(player, changedItems, isFullReset)
-  -- Ensure that the changedItems are sequential, so we don't get stuck networking
-  changedItems = Schema.CompactTable(changedItems)
-  local messageAmount = #changedItems
+	-- Ensure that the changedItems are sequential, so we don't get stuck networking
+	changedItems = Schema.CompactTable(changedItems)
+	local messageAmount = #changedItems
 
-  if (messageAmount > Schema.MaxMessageIndex) then
-    ErrorNoHaltWithStack(
-      "Too many items in a single progression operation for player "
-      .. player:Name() .. "! (" .. messageAmount .. ")\n"
-    )
+	if (messageAmount > Schema.MaxMessageIndex) then
+		ErrorNoHaltWithStack(
+			"Too many items in a single progression operation for player "
+			.. player:Name() .. "! (" .. messageAmount .. ")\n"
+		)
 
-    return 0
-  end
+		return 0
+	end
 
-  local delayInSeconds = 0
+	local delayInSeconds = 0
 
-  if (messageAmount > 0) then
-    -- If we send everything at once, we will get kicked with 'overflowed reliable channel', so let's chunk it up with a 0.05s delay
-    -- The header will let the client know how many messages to expect
-    delayInSeconds = Schema.ScopedChunkData(
-      player,
-      "Progression",
-      changedItems,
-      Schema.ChunkMaxSizeProgressionItem,
-      Schema.ChunkDelayProgressionItem,
-      function(chunk, chunkIndex, chunkAmount)
-        if (chunkIndex == 1) then
-          net.Start("expProgressionItemHeader")
-          net.WriteBool(isFullReset or false)
-          net.WriteUInt(messageAmount, Schema.MessageIDBitCount)
-          net.Send(player)
-        end
+	if (messageAmount > 0) then
+		-- If we send everything at once, we will get kicked with 'overflowed reliable channel', so let's chunk it up with a 0.05s delay
+		-- The header will let the client know how many messages to expect
+		delayInSeconds = Schema.ScopedChunkData(
+			player,
+			"Progression",
+			changedItems,
+			Schema.ChunkMaxSizeProgressionItem,
+			Schema.ChunkDelayProgressionItem,
+			function(chunk, chunkIndex, chunkAmount)
+				if (chunkIndex == 1) then
+					net.Start("expProgressionItemHeader")
+					net.WriteBool(isFullReset or false)
+					net.WriteUInt(messageAmount, Schema.MessageIDBitCount)
+					net.Send(player)
+				end
 
-        for _, progressionInfo in ipairs(chunk) do
-          net.Start("expProgressionItem")
-          net.WriteString(progressionInfo.scope)
-          net.WriteString(progressionInfo.key)
-          net.WriteType(progressionInfo.value)
-          net.Send(player)
-        end
-      end
-    )
-  else
-    -- Even if there are no progressions, reset it to make sure the client knows to reset
-    net.Start("expProgressionItemHeader")
-    net.WriteBool(isFullReset or false)
-    net.WriteUInt(0, Schema.MessageIDBitCount)
-    net.Send(player)
-  end
+				for _, progressionInfo in ipairs(chunk) do
+					net.Start("expProgressionItem")
+					net.WriteString(progressionInfo.scope)
+					net.WriteString(progressionInfo.key)
+					net.WriteType(progressionInfo.value)
+					net.Send(player)
+				end
+			end
+		)
+	else
+		-- Even if there are no progressions, reset it to make sure the client knows to reset
+		net.Start("expProgressionItemHeader")
+		net.WriteBool(isFullReset or false)
+		net.WriteUInt(0, Schema.MessageIDBitCount)
+		net.Send(player)
+	end
 
-  return delayInSeconds
+	return delayInSeconds
 end
 
 --- Sends the player's completed interactions to the client
 --- @param player Player
 --- @return number # The delay in seconds before all completions are sent
 function Schema.progression.NetworkAll(player)
-  local progressions = Schema.progression.GetProgressions(player)
-  local changedItems = {}
+	local progressions = Schema.progression.GetProgressions(player)
+	local changedItems = {}
 
-  for scope, keys in pairs(progressions) do
-    for key, value in pairs(keys) do
-      table.insert(changedItems, {
-        scope = scope,
-        key = key,
-        value = value
-      })
-    end
-  end
+	for scope, keys in pairs(progressions) do
+		for key, value in pairs(keys) do
+			table.insert(changedItems, {
+				scope = scope,
+				key = key,
+				value = value
+			})
+		end
+	end
 
-  -- Also send dynamic progressions
-  Schema.progression.NetworkDynamicChanges(player)
+	-- Also send dynamic progressions
+	Schema.progression.NetworkDynamicChanges(player)
 
-  return Schema.progression.NetworkChanges(player, changedItems, true)
+	return Schema.progression.NetworkChanges(player, changedItems, true)
 end
 
 --- Networks the given dynamic progression changes to the player. Since clients
@@ -392,50 +394,50 @@ end
 --- @param client Player
 --- @param progressions? table<string, table<string, ProgressionValue>>
 function Schema.progression.NetworkDynamicChanges(client, progressions)
-  if (not progressions) then
-    progressions = Schema.progression.GetDynamicProgressions(client)
-  end
+	if (not progressions) then
+		progressions = Schema.progression.GetDynamicProgressions(client)
+	end
 
-  local networkTables = {}
+	local networkTables = {}
 
-  for scope, keys in pairs(progressions) do
-    local progression = Schema.progression.GetDynamicByScope(scope)
-    assert(progression, "The progression should exist")
+	for scope, keys in pairs(progressions) do
+		local progression = Schema.progression.GetDynamicByScope(scope)
+		assert(progression, "The progression should exist")
 
-    table.insert(networkTables, {
-      progressionTracker = Schema.util.CopyOmitCyclicReference(progression),
-      keys = keys
-    })
-  end
+		table.insert(networkTables, {
+			progressionTracker = Schema.util.CopyOmitCyclicReference(progression),
+			keys = keys
+		})
+	end
 
-  Schema.chunkedNetwork.Send("ProgressionDynamicAll", client, networkTables)
+	Schema.chunkedNetwork.Send("ProgressionDynamicAll", client, networkTables)
 end
 
 --- Opens the progression editor for a player.
 --- @param client Player
 function Schema.progression.OpenEditor(client)
-  local progressions = Schema.util.CopyOmitCyclicReference(Schema.progression.GetAllDynamic())
+	local progressions = Schema.util.CopyOmitCyclicReference(Schema.progression.GetAllDynamic())
 
-  Schema.chunkedNetwork.Send("ProgressionsEdit", client, progressions)
+	Schema.chunkedNetwork.Send("ProgressionsEdit", client, progressions)
 end
 
 hook.Add("InitializedSchema", "Schema.progression.LoadAllDynamic", function()
-  Schema.progression.dynamicTrackers = Schema.progression.LoadAll()
+	Schema.progression.dynamicTrackers = Schema.progression.LoadAll()
 end)
 
 net.Receive("expProgressionRemove", function(length, client)
-  local uniqueID = net.ReadString()
+	local uniqueID = net.ReadString()
 
-  if (not Schema.progression.HasManagePermission(client)) then
-    client:Notify("You do not have permission to manage progression trackers!")
-    return
-  end
+	if (not Schema.progression.HasManagePermission(client)) then
+		client:Notify("You do not have permission to manage progression trackers!")
+		return
+	end
 
-  Schema.progression.Destroy(uniqueID)
+	Schema.progression.Destroy(uniqueID)
 
-  local progression = Schema.progression.GetDynamic(uniqueID)
-  assert(progression, "The progression should exist")
-  Schema.progression.UnRegisterTracker(progression)
+	local progression = Schema.progression.GetDynamic(uniqueID)
+	assert(progression, "The progression should exist")
+	Schema.progression.UnRegisterTracker(progression)
 
-  Schema.progression.dynamicTrackers[uniqueID] = nil
+	Schema.progression.dynamicTrackers[uniqueID] = nil
 end)

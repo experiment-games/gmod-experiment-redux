@@ -399,3 +399,36 @@ function META:GetItemDropPos(entity)
 
 	return trace.HitPos
 end
+
+-- ! This overrides Helix's SetWepRaised so it also calls 'PlayerChangedWeaponRaised'
+--- Sets whether or not this player's current weapon is raised.
+-- @realm server
+-- @bool bState Whether or not the raise the weapon
+-- @entity[opt=GetActiveWeapon()] weapon Weapon to raise or lower. You should pass this argument if you already have a
+-- reference to this player's current weapon to avoid an expensive lookup for this player's current weapon.
+function META:SetWepRaised(bState, weapon)
+	weapon = weapon or self:GetActiveWeapon()
+
+	if (IsValid(weapon)) then
+		local bCanShoot = ! bState and weapon.FireWhenLowered or bState
+		self:SetNetVar("raised", bState)
+
+		if (bCanShoot) then
+			-- delay shooting while the raise animation is playing
+			timer.Create("ixWeaponRaise" .. self:SteamID64(), 1, 1, function()
+				if (IsValid(self)) then
+					self:SetNetVar("canShoot", true)
+				end
+			end)
+		else
+			timer.Remove("ixWeaponRaise" .. self:SteamID64())
+			self:SetNetVar("canShoot", false)
+		end
+	else
+		timer.Remove("ixWeaponRaise" .. self:SteamID64())
+		self:SetNetVar("raised", false)
+		self:SetNetVar("canShoot", false)
+	end
+
+	hook.Run("PlayerChangedWeaponRaised", self, weapon, bState)
+end

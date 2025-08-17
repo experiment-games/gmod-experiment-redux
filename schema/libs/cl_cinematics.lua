@@ -332,16 +332,7 @@ function Schema.cinematics.CalculateBloomIntensity(fadeType, progress)
 		local easedProgress = 1 - math.pow(1 - progress, 3)
 		return maxBloom * (1 - easedProgress) + minBloom * easedProgress
 	elseif fadeType == "fadeOut" then
-		local bloomProgress
-		if progress <= 0.5 then
-			bloomProgress = progress * 2
-			local easedProgress = math.pow(bloomProgress, 2)
-			return minBloom * (1 - easedProgress) + maxBloom * easedProgress
-		else
-			bloomProgress = (progress - 0.5) * 2
-			local easedProgress = 1 - math.pow(1 - bloomProgress, 2)
-			return maxBloom * (1 - easedProgress) + minBloom * easedProgress
-		end
+		return maxBloom * progress + minBloom * (1 - progress)
 	end
 
 	return minBloom

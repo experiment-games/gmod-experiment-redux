@@ -39,7 +39,7 @@ local conVarsToSet = {
 	["tacrp_mult_recoil_vis"] = { isServer = true, value = 0.85 },
 	["tacrp_sway"] = { isServer = true, value = false },          -- false disables: Weapon point of aim will move around gently. While aiming, hold sprint key to hold breath and steady aim
 	["tacrp_freeaim"] = { isServer = true, value = false },       -- false disables: While not aiming, moving around will cause the crosshair to move off center
-	["tacrp_autoreload"] = { isServer = false, value = false },
+	["tacrp_autoreload"] = { isServer = false, value = true },
 	["tacrp_flashlight_blind"] = { isServer = true, value = false }, -- false disables the blinding glare growing, the hook.Remove for TacRP_TranslucentDraw actually fully disables its functionality. We manually re-enable lasers in PostDrawTranslucentRenderables
 
 	["tacrp_autosave"] = { isServer = false, value = false },     -- Prevents TacRP's SWEP:LoadPreset from being called and wiping attachments we add

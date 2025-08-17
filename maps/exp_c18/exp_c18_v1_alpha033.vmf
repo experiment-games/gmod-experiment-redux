@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8870"
-	"mapversion" "2359"
+	"mapversion" "2360"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -101,7 +101,7 @@ bgimages_plus
 world
 {
 	"id" "1"
-	"mapversion" "2359"
+	"mapversion" "2360"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -875023,20 +875023,6 @@ entity
 }
 entity
 {
-	"id" "2627155"
-	"classname" "info_player_start"
-	"angles" "0 90 0"
-	"origin" "2711 -261.042 513"
-	editor
-	{
-		"color" "0 255 0"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[2000 3500]"
-	}
-}
-entity
-{
 	"id" "2627157"
 	"classname" "exp_spawn_point"
 	"angles" "0 86 0"
@@ -942783,8 +942769,8 @@ cameras
 	"activecamera" "0"
 	camera
 	{
-		"position" "[-2257.28 -8320.68 -202.661]"
-		"look" "[4039.81 -6843.68 -22759.2]"
+		"position" "[3386.4 -2422.44 797.305]"
+		"look" "[-19898.3 -4214.11 3087.14]"
 	}
 	camera
 	{

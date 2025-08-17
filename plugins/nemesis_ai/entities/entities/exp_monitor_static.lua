@@ -32,7 +32,6 @@ function ENT:Initialize()
 		local monitorEntity = PLUGIN:SpawnMonitor(self, monitor)
 
 		if (self.specialID) then
-			print("Setting special ID for monitor entity: " .. self.specialID)
 			monitorEntity:SetSpecialID(self.specialID)
 		end
 	end
