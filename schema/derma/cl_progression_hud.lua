@@ -51,6 +51,20 @@ do
 		self.categories = {}
 	end
 
+	-- Checks all rows' GetProgressionTracker to see if the matching key is a completionkey
+	-- This is used to determine if the panel needs to update to reflect a tracker being completed
+	function PANEL:IsAnyTrackersCompletedKey(completedKey)
+		for _, row in ipairs(self.rows) do
+			local tracker = row:GetProgressionTracker()
+
+			if (tracker and tracker.completedKey == completedKey) then
+				return true
+			end
+		end
+
+		return false
+	end
+
 	function PANEL:Update()
 		self:Clear()
 
@@ -131,6 +145,10 @@ do
 		self.goalsContainer = self:Add("DSizeToContents")
 		self.goalsContainer:Dock(TOP)
 		self.goalsContainer:DockPadding(12, 0, 0, 0) -- Indent goals
+	end
+
+	function PANEL:GetProgressionTracker()
+		return self.tracker
 	end
 
 	function PANEL:SetProgressionTracker(tracker)
@@ -311,8 +329,8 @@ do
 	end
 
 	function PANEL:Think()
-		-- Update goal display each frame (similar to the original tracker)
-		if self.goal and not self.forceCompleted then
+		-- Update goal display each frame
+		if (self.goal and not self.forceCompleted) then
 			self:UpdateGoalDisplay()
 		end
 	end
@@ -368,4 +386,13 @@ hook.Add("ProgressionTrackerOnHUDChanged", "expProgressionHUDUpdate", function(t
 	if not IsValid(Schema.progression.hudPanel) then return end
 
 	Schema.progression.hudPanel:Update()
+end)
+
+hook.Add("PlayerProgressionChange", "expProgressionHUDUpdate", function(client, scope, key, value)
+	if not IsValid(Schema.progression.hudPanel) then return end
+
+	-- Updates the panel so newly completed trackers are removed from the hud panel
+	if (Schema.progression.hudPanel:IsAnyTrackersCompletedKey(key)) then
+		Schema.progression.hudPanel:Update()
+	end
 end)

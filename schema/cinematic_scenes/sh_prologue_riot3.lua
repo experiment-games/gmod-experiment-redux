@@ -281,12 +281,12 @@ if (SERVER) then
 			return
 		end
 
-		-- Check if all items have been picked up and equipped
-		local weaponPickedUp = Schema.progression.Check(client, "prologue", SCENE.PROGRESSION_GLOCK_PICKED_UP, true)
+		-- Check if all items have been picked up, equipped and raised
+		local weaponEquipped = Schema.progression.Check(client, "prologue", SCENE.PROGRESSION_GLOCK_EQUIPPED, true)
 		local ammoLoaded = Schema.progression.Check(client, "prologue", SCENE.PROGRESSION_AMMO_LOADED, true)
-		local glockEquipped = Schema.progression.Check(client, "prologue", SCENE.PROGRESSION_GLOCK_EQUIPPED, true)
+		local glockRaised = Schema.progression.Check(client, "prologue", SCENE.PROGRESSION_GLOCK_RAISED, true)
 
-		if (not weaponPickedUp or not ammoLoaded or not glockEquipped) then
+		if (not weaponEquipped or not ammoLoaded or not glockRaised) then
 			return
 		end
 

@@ -149,31 +149,3 @@ SCENE.GOAL_DEFEAT_MANHACKS = SCENE.INTRO_TUTORIAL_TRACKER:RegisterGoal({
 		return progress, SCENE.REQUIRED_MANHACKS, killed
 	end,
 })
-
---[[
-	Example Progression
---]]
-
---[[
-
--- Call this when player kills a manhack
-function OnManhackKilled(player)
-	if Schema.progression.Check(player, "prologue", SCENE.PROGRESSION_INTRO_STARTED, true) then
-		-- Increment manhack kill count
-		Schema.progression.Change(player, "prologue", SCENE.PROGRESSION_MANHACKS_KILLED_COUNT, function(value)
-			return (value or 0) + 1
-		end)
-
-		-- Check if all manhacks are defeated
-		local killedCount = Schema.progression.Get(player, "prologue", SCENE.PROGRESSION_MANHACKS_KILLED_COUNT) or 0
-
-		if killedCount >= SCENE.REQUIRED_MANHACKS then
-			Schema.progression.Change(player, "prologue", SCENE.PROGRESSION_MANHACKS_DEFEATED, true)
-			Schema.progression.Change(player, "prologue", SCENE.PROGRESSION_INTRO_COMPLETED, true)
-			player:Notify("Tutorial Complete! Well done, survivor!")
-		else
-			player:Notify("Tutorial: Manhack defeated! (" .. killedCount .. "/" .. SCENE.REQUIRED_MANHACKS .. ")")
-		end
-	end
-end
-]]
