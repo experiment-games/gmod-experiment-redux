@@ -117,7 +117,7 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
 
 			return {
-				importantText("Press " .. menuKey .. " once to open the main menu."),
+				Schema.tutorial.ImportantText("Press " .. menuKey .. " once to open the main menu."),
 			}
 		end
 
@@ -138,8 +138,8 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 		return {
 			"Through nano technology you can be (de)buffed.",
 			"Hovering over a buff will show how it affects you.",
-			importantText("Hover over a nano buff to view what it does."),
-			importantText("Next, click on the inventory tab to continue."),
+			Schema.tutorial.ImportantText("Hover over a nano buff to view what it does."),
+			Schema.tutorial.ImportantText("Next, click on the inventory tab to continue."),
 		}, x + (combinedW * .5), y + combinedH, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP
 	end,
 })
@@ -178,56 +178,16 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
 
 			return {
-				importantText("Press " .. menuKey .. " once to open the main menu."),
+				Schema.tutorial.ImportantText("Press " .. menuKey .. " once to open the main menu."),
 			}
 		end
 
 		local x, y = tutorial.inventoryButton:LocalToScreen(0, 0)
 		local w, h = tutorial.inventoryButton:GetSize()
 
-		return importantText("Click on the inventory tab to continue."), x + w + 8, y + (h * .5), TEXT_ALIGN_LEFT,
+		return Schema.tutorial.ImportantText("Click on the inventory tab to continue."), x + w + 8, y + (h * .5), TEXT_ALIGN_LEFT,
 			TEXT_ALIGN_CENTER
 	end,
 })
 
-lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
-	DrawFocusAreas = function(tutorial, scrW, scrH, alpha)
-		if (not IsValid(ix.gui.inv1)) then
-			return
-		end
-
-		local x, y = ix.gui.inv1:LocalToScreen(0, 0)
-		local w, h = ix.gui.inv1:GetSize()
-
-		Schema.draw.DrawUndimmedRect(x, y, w, h, alpha)
-	end,
-
-	GetText = function(tutorial)
-		local menuPanel = ix.gui.menu
-
-		if (not IsValid(menuPanel) or menuPanel.bClosing) then
-			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
-
-			return {
-				importantText("Press " .. menuKey .. " once to open the main menu."),
-			}
-		end
-
-		if (not IsValid(ix.gui.inv1) or not ix.gui.inv1:IsVisible()) then
-			return {
-				importantText("Click on the inventory tab to continue."),
-			}
-		end
-
-		local x, y = ix.gui.inv1:LocalToScreen(0, 0)
-		local w, h = ix.gui.inv1:GetSize()
-
-		return {
-			"Here you see your inventory. Hover over an item to show more information.",
-			"You can drag items around to organize them.",
-			importantText("Now, first right-click the piece of paper named 'An Introduction',"),
-			importantText("then select 'Read' to continue."),
-		}, x, y + h, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP
-	end,
-})
 --]]

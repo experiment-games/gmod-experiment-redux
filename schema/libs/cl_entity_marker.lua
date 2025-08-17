@@ -68,7 +68,7 @@ local function GetEntityScreenInfo(entity)
 	return screenPos, isBehind, dir
 end
 
-local function DrawPointer(screenPos, color, isBehind, direction)
+local function DrawPointer(color, direction)
 	if (not direction) then
 		return
 	end
@@ -105,27 +105,39 @@ local function DrawPointer(screenPos, color, isBehind, direction)
 	-- Ensure pointer stays within screen bounds
 	x, y = ClampToScreen(x, y, edgeDist)
 
-	-- Calculate triangle vertices - FIXED: Now pointing toward the center
-	local tip = Vector(x, y)
+	local triangleSize = math.max(triangleSize, 20)
 
-	-- Calculate the back corners of the triangle (pointing toward center)
-	local backAngleOffset = math.rad(135) -- 135 degrees back from tip
-	local left = Vector(
-		x + triangleSize * math.cos(angle - backAngleOffset),
-		y + triangleSize * math.sin(angle - backAngleOffset)
-	)
-	local right = Vector(
-		x + triangleSize * math.cos(angle + backAngleOffset),
-		y + triangleSize * math.sin(angle + backAngleOffset)
-	)
+	-- Calculate triangle points
+	local tipX, tipY = x, y
+	local baseX = x - cosA * triangleSize
+	local baseY = y - sinA * triangleSize
 
-	-- Draw the triangle with vertices in CLOCKWISE order
+	-- Perpendicular for triangle width
+	local perpX = -sinA * (triangleSize * 0.5)
+	local perpY = cosA * (triangleSize * 0.5)
+
+	local leftX = baseX + perpX
+	local leftY = baseY + perpY
+	local rightX = baseX - perpX
+	local rightY = baseY - perpY
+
+	local thickness = 2
+
+	-- Draw triangle using lines
 	surface.SetDrawColor(color)
-	surface.DrawPoly({
-		{ x = tip.x,   y = tip.y }, -- Tip (pointing toward center)
-		{ x = right.x, y = right.y }, -- Right corner
-		{ x = left.x,  y = left.y } -- Left corner
-	})
+
+	for i = 1, thickness do
+		local offset = i - 1
+		-- Tip to left
+		surface.DrawLine(tipX + offset, tipY, leftX + offset, leftY)
+		surface.DrawLine(tipX, tipY + offset, leftX, leftY + offset)
+		-- Left to right
+		surface.DrawLine(leftX + offset, leftY, rightX + offset, rightY)
+		surface.DrawLine(leftX, leftY + offset, rightX, rightY + offset)
+		-- Right to tip
+		surface.DrawLine(rightX + offset, rightY, tipX + offset, tipY)
+		surface.DrawLine(rightX, rightY + offset, tipX, tipY + offset)
+	end
 end
 
 --- Mark an entity with highlighting and pointing
@@ -228,8 +240,8 @@ hook.Add("HUDPaint", "expEntityMarkerHUDPaint", function()
 			local isOffScreen = screenPos.x < margin or screenPos.x > (w - margin) or
 				screenPos.y < margin or screenPos.y > (h - margin)
 
-			if isOffScreen or isBehind then
-				DrawPointer(screenPos, markerData.color, isBehind, direction)
+			if (isOffScreen or isBehind) then
+				DrawPointer(markerData.color, direction)
 			end
 		end
 	end

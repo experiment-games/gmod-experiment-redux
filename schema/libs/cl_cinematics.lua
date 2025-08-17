@@ -3,6 +3,14 @@ Schema.cinematics = ix.util.GetOrCreateCommonLibrary("cinematics", nil, {
 	currentScene = nil
 })
 
+function Schema.cinematics.IsInScene(sceneID)
+	if (not Schema.cinematics.currentScene) then
+		return false
+	end
+
+	return Schema.cinematics.currentScene.uniqueID == sceneID
+end
+
 --- Draws a cinematic fade-in effect.
 --- @param fadeTime? number
 function Schema.cinematics.FadeIn(fadeTime)
@@ -382,6 +390,12 @@ hook.Add("RenderScreenspaceEffects", "expCinematicsRenderScreenspaceEffects", fu
 end)
 
 hook.Add("Think", "expCinematicsThink", function()
+	if (Schema.cinematics.currentScene) then
+		if (Schema.cinematics.currentScene.OnThink) then
+			Schema.cinematics.currentScene:OnThink()
+		end
+	end
+
 	if (Schema.cinematics.cinematicData.fadeOut and Schema.cinematics.cinematicData.fadeOut.active) then
 		local fadeData = Schema.cinematics.cinematicData.fadeOut
 		local elapsed = CurTime() - fadeData.startTime

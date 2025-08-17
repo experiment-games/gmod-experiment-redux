@@ -97,16 +97,29 @@ function Schema.tutorial.ShowTutorial(tutorialID, ...)
 	end
 
 	local tutorial = Schema.tutorial.Find(tutorialID)
+
 	if (not tutorial) then
 		return
 	end
 
+	if (tutorial.ShouldActivate) then
+		if (tutorial.ShouldActivate(...) == false) then
+			return
+		end
+	end
+
 	-- If a tutorial is currently active, queue this one
 	if (Schema.tutorial.currentTutorial) then
+		-- Don't queue if its already queued
+		if (Schema.tutorial.IsTutorialQueued(tutorialID)) then
+			return
+		end
+
 		table.insert(Schema.tutorial.tutorialQueue, {
 			tutorial = tutorial,
 			args = { ... }
 		})
+
 		return
 	end
 
@@ -170,6 +183,20 @@ end
 
 function Schema.tutorial.GetCurrentTutorial()
 	return Schema.tutorial.currentTutorial
+end
+
+function Schema.tutorial.IsCurrentTutorial(tutorialID)
+	return Schema.tutorial.currentTutorial and Schema.tutorial.currentTutorial.uniqueID == tutorialID
+end
+
+function Schema.tutorial.IsTutorialQueued(tutorialID)
+	for _, queuedItem in ipairs(Schema.tutorial.tutorialQueue) do
+		if (queuedItem.tutorial.uniqueID == tutorialID) then
+			return true
+		end
+	end
+
+	return false
 end
 
 function Schema.tutorial.FindMenuButton(buttonName)

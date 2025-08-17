@@ -3,6 +3,7 @@ local SCENE = SCENE
 SCENE.cinematicSpawnID = "prologue_riot2"
 
 ix.util.Include("prologue_riot3/sh_mission_tracker.lua", "shared")
+Schema.tutorial.IncludeDirectory(Schema.folder .. "/schema/cinematic_scenes/prologue_riot3/tutorials")
 
 if (SERVER) then
 	local function findItemSpawnPoint(sequenceID, itemSpawnID)
@@ -157,8 +158,9 @@ if (SERVER) then
 
 		Schema.instance.AddEntity(manhack, instanceID)
 
-
 		Schema.entityMarker.MarkForPlayer(targetClient, manhack)
+
+		manhack.expIsPrologueRiot3ManhackForClient = targetClient
 
 		return manhack
 	end
@@ -310,15 +312,16 @@ if (SERVER) then
 	end)
 
 	hook.Add("OnNPCKilled", "expPrologueRiot3OnNPCKilled", function(npc, attacker, inflictor)
+		local client = npc.expIsPrologueRiot3ManhackForClient
+
 		if (
-				not IsValid(attacker)
-				or not attacker:IsPlayer()
-				or not Schema.cinematics.IsPlayerInScene(attacker, SCENE.uniqueID)
+				not IsValid(client)
+				or not Schema.cinematics.IsPlayerInScene(client, SCENE.uniqueID)
 			) then
 			return
 		end
 
-		Schema.progression.Change(attacker, "prologue", SCENE.PROGRESSION_MANHACKS_KILLED_COUNT, function(value)
+		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_MANHACKS_KILLED_COUNT, function(value)
 			return (value or 0) + 1
 		end)
 	end)
@@ -334,8 +337,33 @@ if (SERVER) then
 end
 
 if (CLIENT) then
-	function SCENE:OnDraw()
-		-- Schema.draw.DrawUndimmedRect(x, y, w, h)
+	local function tryStartTutorials()
+		-- If both items are picked up, we can show the inventory hint
+		local glockPickedUp = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_PICKED_UP, true)
+		local ammoPickedUp = Schema.progression.Check("prologue", SCENE.PROGRESSION_AMMO_PICKED_UP, true)
+		local glockEquipped = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_EQUIPPED, true)
+		local ammoLoaded = Schema.progression.Check("prologue", SCENE.PROGRESSION_AMMO_LOADED, true)
+
+		if (glockPickedUp and ammoPickedUp and (not glockEquipped or not ammoLoaded)) then
+			Schema.tutorial.ShowTutorial("prologue_riot3_open_inventory")
+		else
+			return
+		end
+
+		-- Immediately queue the tutorial on how the inventory works, and how to raise weapons
+		if (not glockEquipped or not ammoLoaded) then
+			Schema.tutorial.ShowTutorial("prologue_riot3_equip_weapon_and_ammo")
+		end
+
+		local weaponRaised = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_RAISED, true)
+
+		if (not weaponRaised) then
+			Schema.tutorial.ShowTutorial("prologue_riot3_raise_weapon")
+		end
+	end
+
+	function SCENE:OnThink()
+		tryStartTutorials()
 	end
 
 	function SCENE:OnEnterLocalPlayer()
@@ -372,14 +400,6 @@ if (CLIENT) then
 
 		Schema.entityMarker.ClearAll()
 	end
-
-	hook.Add("ProgressionNetworkChange", "expPrologueRiot3ProgressionNetworkChange", function(client, scope, key, value)
-		if (scope ~= "prologue") then
-			return
-		end
-
-		-- TODO: Update hints based on what hasn't been done yet (e.g: weapon pickup, ammo pickup, open inventory and equip + load ammo)
-	end)
 end
 
 hook.Add("ExperimentMonitorsFilter", "expPrologueRiot3DisableNormalBehaviour", function(monitors, filterType)
