@@ -98,8 +98,15 @@ function PANEL:Think()
 		return
 	end
 
+	if (hook.Run("ShouldShowBuffsHUD") == false) then
+		self:SetVisible(false)
+		return
+	else
+		self:SetVisible(true)
+	end
+
 	-- Don't update buffs when not visible and we're not in the character menu
-	local menu = (IsValid(ix.gui.characterMenu) and !ix.gui.characterMenu:IsClosing()) and ix.gui.characterMenu
+	local menu = (IsValid(ix.gui.characterMenu) and ! ix.gui.characterMenu:IsClosing()) and ix.gui.characterMenu
 		or IsValid(ix.gui.menu) and ix.gui.menu
 
 	if (menu) then

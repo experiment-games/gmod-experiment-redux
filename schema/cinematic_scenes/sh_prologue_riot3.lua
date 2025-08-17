@@ -25,20 +25,36 @@ if (SERVER) then
 		return nil
 	end
 
+	local function spawnItemEntity(itemType, itemUniqueID, client)
+		local instanceID = Schema.instance.GetPlayerInstance(client)
+		local spawnPoint = findItemSpawnPoint(SCENE.cinematicSpawnID, itemType)
+
+		ix.item.Spawn(itemUniqueID, spawnPoint:GetPos(), function(item, itemEntity)
+			if (not IsValid(client)) then
+				itemEntity:Remove()
+				return
+			end
+
+			-- Prevent the map saving this item
+			itemEntity.bTemporary = true
+
+			Schema.instance.AddEntity(itemEntity, instanceID)
+
+			client.expPrologueRiot3Items[itemType] = item
+			itemEntity.expIsPrologueRiot3Item = {
+				client = client,
+				itemType = itemType,
+				itemUniqueID = itemUniqueID
+			}
+
+			Schema.entityMarker.MarkForPlayer(client, itemEntity)
+		end)
+	end
+
 	function SCENE:OnEnterServer(client)
 		Schema.instance.AddPlayer(client)
 
 		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_INTRO_STARTED, true)
-
-		-- Spawn weapon and ammo in this client's instance
-		local weaponSpawn = findItemSpawnPoint(SCENE.cinematicSpawnID, "weapon")
-		local ammoSpawn = findItemSpawnPoint(SCENE.cinematicSpawnID, "ammo")
-
-		if (not weaponSpawn or not ammoSpawn) then
-			ix.util.SchemaErrorNoHalt("Prologue scene 'prologue_riot2' is missing item spawn points for weapon or ammo!")
-			Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
-			return
-		end
 
 		local weaponItemTable = ix.item.Get("ex_glock")
 		local ammo = Schema.ammo.ConvertToAmmo(weaponItemTable.forcedWeaponCalibre)
@@ -50,42 +66,12 @@ if (SERVER) then
 			return
 		end
 
-		local instanceID = Schema.instance.GetPlayerInstance(client)
-
 		-- Track the items this player has to pick up
 		client.expPrologueRiot3Items = {}
 
-		ix.item.Spawn(weaponItemTable.uniqueID, weaponSpawn:GetPos(), function(item, itemEntity)
-			if (not IsValid(client)) then
-				itemEntity:Remove()
-				return
-			end
-
-			-- Prevent the map saving this item
-			itemEntity.bTemporary = true
-
-			Schema.instance.AddEntity(itemEntity, instanceID)
-
-			client.expPrologueRiot3Items["weapon"] = item
-
-			Schema.entityMarker.MarkForPlayer(client, itemEntity)
-		end)
-
-		ix.item.Spawn(ammoItemTable.uniqueID, ammoSpawn:GetPos(), function(item, itemEntity)
-			if (not IsValid(client)) then
-				itemEntity:Remove()
-				return
-			end
-
-			-- Prevent the map saving this item
-			itemEntity.bTemporary = true
-
-			Schema.instance.AddEntity(itemEntity, instanceID)
-
-			client.expPrologueRiot3Items["ammo"] = item
-
-			Schema.entityMarker.MarkForPlayer(client, itemEntity)
-		end)
+		-- Spawn weapon and ammo in this client's instance
+		spawnItemEntity("weapon", weaponItemTable.uniqueID, client)
+		spawnItemEntity("ammo", ammoItemTable.uniqueID, client)
 
 		-- TODO: instruct player how to equip weapon and ammo
 		-- TODO: End scene after they kill the manhack, or when the time expires
@@ -117,8 +103,8 @@ if (SERVER) then
 
 		-- Hard-timer to end scene after some time
 		timer.Simple(60 * 10, function()
-			if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_riot2")) then
-				Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
+			if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, self.uniqueID)) then
+				Schema.cinematics.TransitionPlayerToScene(client, "prologue_end")
 			end
 		end)
 
@@ -176,6 +162,20 @@ if (SERVER) then
 
 		return manhack
 	end
+
+	-- Respawn the item if it gets deleted by going into an unreachable spot
+	hook.Add("OnNonEntityAreaRemoval", "expPrologueRiot3OnNonEntityAreaRemoval", function(entity)
+		if (not entity.expIsPrologueRiot3Item) then
+			return
+		end
+
+		local client = entity.expIsPrologueRiot3Item.client
+		local itemType = entity.expIsPrologueRiot3Item.itemType
+		local itemUniqueID = entity.expIsPrologueRiot3Item.itemUniqueID
+
+		-- Respawn the item for the client
+		spawnItemEntity(itemType, itemUniqueID, client)
+	end)
 
 	-- Track the next phase if the player picks up both items
 	hook.Add("OnItemTransferred", "expPrologueRiot3OnItemTransferred", function(item, oldInventory, newInventory)
@@ -268,14 +268,14 @@ if (SERVER) then
 
 	-- Based on the player's progression, we spawn the manhacks
 	hook.Add("PlayerProgressionChange", "expPrologueRiot3PlayerProgressionChange", function(client, scope, key, value)
-		if (scope ~= "prologue" or not Schema.cinematics.IsPlayerInScene(client, "prologue_riot3")) then
+		if (scope ~= "prologue" or not Schema.cinematics.IsPlayerInScene(client, SCENE.uniqueID)) then
 			return
 		end
 
 		if (client.expPrologueRiot3ManhacksSpawned) then
 			if (key == SCENE.PROGRESSION_MANHACKS_KILLED_COUNT and value >= SCENE.REQUIRED_MANHACKS) then
-				-- They've defeated all manhacks, remove them from the scene
-				Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
+				-- They've defeated all manhacks, go to the final fade out scene
+				Schema.cinematics.TransitionPlayerToScene(client, "prologue_end")
 			end
 
 			return
@@ -313,7 +313,7 @@ if (SERVER) then
 		if (
 				not IsValid(attacker)
 				or not attacker:IsPlayer()
-				or not Schema.cinematics.IsPlayerInScene(attacker, "prologue_riot3")
+				or not Schema.cinematics.IsPlayerInScene(attacker, SCENE.uniqueID)
 			) then
 			return
 		end
@@ -325,7 +325,7 @@ if (SERVER) then
 
 	-- Edge case, if the player is in the scene and they die, get them out
 	hook.Add("PostPlayerDeath", "expPrologueRiot3PostPlayerDeath", function(client)
-		if (not Schema.cinematics.IsPlayerInScene(client, "prologue_riot3")) then
+		if (not Schema.cinematics.IsPlayerInScene(client, SCENE.uniqueID)) then
 			return
 		end
 

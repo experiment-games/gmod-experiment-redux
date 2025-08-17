@@ -6,7 +6,7 @@ function SCENE:OnEnterServer(client)
 	Schema.instance.AddPlayer(client)
 
 	timer.Simple(15, function()
-		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_riot1")) then
+		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, self.uniqueID)) then
 			Schema.cinematics.TransitionPlayerToScene(client, "prologue_riot2")
 		end
 	end)

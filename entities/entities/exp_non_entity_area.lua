@@ -157,26 +157,28 @@ function ENT:TeleportEntity(ent, destination)
 end
 
 -- Function to remove an entity safely
-function ENT:RemoveEntity(ent)
-	self:CreateRemovalEffect(ent:GetPos())
+function ENT:RemoveEntity(entity)
+	self:CreateRemovalEffect(entity:GetPos())
 
 	-- Special handling for different entity types
-	if (ent:IsPlayer()) then
+	if (entity:IsPlayer()) then
 		-- Don't remove players, just teleport them out if possible
 		local teleportDest = self:GetTeleportDestination()
 
 		if (IsValid(teleportDest)) then
-			self:TeleportEntity(ent, teleportDest)
+			self:TeleportEntity(entity, teleportDest)
 		end
 
 		return
 	end
 
 	if (GetConVar("developer"):GetInt() > 0) then
-		print("[NonEntityArea] Removed " .. ent:GetClass() .. " from area " .. self.TargetName)
+		print("[NonEntityArea] Removed " .. entity:GetClass() .. " from area " .. self.TargetName)
 	end
 
-	ent:Remove()
+	hook.Run("OnNonEntityAreaRemoval", entity)
+
+	entity:Remove()
 end
 
 -- Create visual effect for teleportation

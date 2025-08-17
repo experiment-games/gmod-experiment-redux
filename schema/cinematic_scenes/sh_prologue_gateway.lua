@@ -2,12 +2,11 @@ local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_gateway"
 
--- TODO: Show the prologue once to each new player and prevent showing the spawn point selection until the prologue is finished
 function SCENE:OnEnterServer(client)
 	Schema.instance.AddPlayer(client)
 
 	timer.Simple(10, function()
-		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_gateway")) then
+		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, self.uniqueID)) then
 			Schema.cinematics.TransitionPlayerToScene(client, "prologue_riot1")
 		end
 	end)
@@ -60,24 +59,5 @@ hook.Add("ExperimentMonitorsFilter", "expPrologueGatewayDisableNormalBehaviour",
 		if (specialID and specialID == "prologue_gateway") then
 			table.remove(monitors, i)
 		end
-	end
-end)
-
--- Note: If we every remove this, be sure to call `hook.Run("PlayerFillDefaultInventory", client, character, inventory)` for newly created
--- characters, or change all occurrences of PlayerFillDefaultInventory to work with OnCharacterCreated.
--- Show the prologue instead of the normal spawn point selection.
-hook.Add("ShouldShowSpawnSelection", "expPrologueGatewayShouldShowSpawnSelection", function(client)
-	local character = client:GetCharacter()
-
-	if (not character:GetData("prologue_finished")) then
-		-- We must delay a frame, otherwise the player's hands wont have been parented to their predicted viewmodel yet, causing issues with those
-		-- being in a different instance
-		timer.Simple(0, function()
-			if (IsValid(client)) then
-				Schema.cinematics.PutPlayerInScene(client, "prologue_gateway", 10)
-			end
-		end)
-
-		return false
 	end
 end)

@@ -91,21 +91,11 @@ function Schema.cinematics.ShowCinematicText(textData, duration, horizontalAlign
 		local currentTime = 0
 
 		for i, entry in ipairs(textData) do
-			local delay, text, displayDuration, horizontalAlignment, verticalAlignment
-
-			if (type(entry[1]) == "string") then
-				text = entry.text
-				displayDuration = entry.duration or Schema.cinematics.CINEMATIC_TEXT_DURATION
-				horizontalAlignment = entry.horizontalAlignment or TEXT_ALIGN_LEFT
-				verticalAlignment = entry.verticalAlignment or TEXT_ALIGN_BOTTOM
-				delay = entry.delay or 0
-			else
-				delay = entry.delay or 0
-				text = entry.text
-				displayDuration = entry.duration or Schema.cinematics.CINEMATIC_TEXT_DURATION
-				horizontalAlignment = entry.horizontalAlignment or TEXT_ALIGN_LEFT
-				verticalAlignment = entry.verticalAlignment or TEXT_ALIGN_BOTTOM
-			end
+			local delay = entry.delay or 0
+			local text = entry.text
+			local displayDuration = entry.duration or Schema.cinematics.CINEMATIC_TEXT_DURATION
+			local horizontalAlignment = entry.horizontalAlignment or TEXT_ALIGN_LEFT
+			local verticalAlignment = entry.verticalAlignment or TEXT_ALIGN_BOTTOM
 
 			currentTime = currentTime + delay
 
@@ -437,6 +427,10 @@ end)
 hook.Add("HUDPaint", "expCinematicsHUDPaint", function()
 	local scrW, scrH = ScrW(), ScrH()
 
+	if (Schema.cinematics.currentScene and Schema.cinematics.currentScene.OnDraw) then
+		Schema.cinematics.currentScene:OnDraw(scrW, scrH)
+	end
+
 	if (Schema.cinematics.cinematicData.textDisplay) then
 		local textData = Schema.cinematics.cinematicData.textDisplay
 		local text = textData.text
@@ -468,31 +462,52 @@ hook.Add("HUDPaint", "expCinematicsHUDPaint", function()
 			local startTime = entry.startTime
 			local duration = entry.duration
 
-			if currentTime >= startTime and currentTime <= startTime + duration then
+			if (currentTime >= startTime and currentTime <= startTime + duration) then
 				table.insert(activeEntries, entry)
 			end
 		end
 
-		if #activeEntries > 0 then
-			local verticalAlignment = activeEntries[1].verticalAlignment or TEXT_ALIGN_BOTTOM
-			local baseY = Schema.cinematics.CalculateVerticalStartPosition(allEntries, scrH, verticalAlignment)
+		if (#activeEntries > 0) then
+			-- Group active entries by vertical alignment
+			local topEntries = {}
+			local centerEntries = {}
+			local bottomEntries = {}
 
 			for i, entry in ipairs(activeEntries) do
-				local startTime = entry.startTime
-				local duration = entry.duration
-				local alpha = Schema.cinematics.CalculateTextAlpha(startTime, duration, entry.alpha)
-				local horizontalAlignment = entry.horizontalAlignment or TEXT_ALIGN_LEFT
-
-				Schema.cinematics.DrawCinematicText(entry.text, horizontalAlignment, verticalAlignment, alpha, scrW, scrH,
-					entry.index, baseY)
+				local verticalAlignment = entry.verticalAlignment or TEXT_ALIGN_BOTTOM
+				if verticalAlignment == TEXT_ALIGN_TOP then
+					table.insert(topEntries, entry)
+				elseif verticalAlignment == TEXT_ALIGN_CENTER then
+					table.insert(centerEntries, entry)
+				else
+					table.insert(bottomEntries, entry)
+				end
 			end
+
+			-- Draw each group with its own base position
+			local function drawTextGroup(entries, alignment)
+				if #entries == 0 then return end
+
+				local baseY = Schema.cinematics.CalculateVerticalStartPosition(entries, scrH, alignment)
+
+				for i, entry in ipairs(entries) do
+					local startTime = entry.startTime
+					local duration = entry.duration
+					local alpha = Schema.cinematics.CalculateTextAlpha(startTime, duration, entry.alpha)
+					local horizontalAlignment = entry.horizontalAlignment or TEXT_ALIGN_LEFT
+
+					-- Use the entry's position within its alignment group for Y offset calculation
+					Schema.cinematics.DrawCinematicText(entry.text, horizontalAlignment, alignment, alpha, scrW, scrH, i,
+						baseY)
+				end
+			end
+
+			drawTextGroup(topEntries, TEXT_ALIGN_TOP)
+			drawTextGroup(centerEntries, TEXT_ALIGN_CENTER)
+			drawTextGroup(bottomEntries, TEXT_ALIGN_BOTTOM)
 		else
 			Schema.cinematics.cinematicData.textDisplayArray = nil
 		end
-	end
-
-	if (Schema.cinematics.currentScene and Schema.cinematics.currentScene.OnDraw) then
-		Schema.cinematics.currentScene:OnDraw()
 	end
 
 	local shouldDrawBlack = false
