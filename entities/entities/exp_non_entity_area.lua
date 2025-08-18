@@ -13,14 +13,11 @@ end
 -- Initialize the entity
 function ENT:Initialize()
 	self:SetSolid(SOLID_BSP)
-	self:SetMoveType(MOVETYPE_PUSH)
-	self:SetUseType(SIMPLE_USE)
 
 	-- Set up the trigger
 	self:SetTrigger(true)
 
 	-- Get keyvalues from the map
-	self.TargetName = self:GetName() or ""
 	self.expTeleportTarget = self.expTeleportTarget or ""
 
 	-- Create a list of entity types to remove/teleport
@@ -173,7 +170,7 @@ function ENT:RemoveEntity(entity)
 	end
 
 	if (GetConVar("developer"):GetInt() > 0) then
-		print("[NonEntityArea] Removed " .. entity:GetClass() .. " from area " .. self.TargetName)
+		print("[NonEntityArea] Removed " .. entity:GetClass() .. " from area ", self)
 	end
 
 	hook.Run("OnNonEntityAreaRemoval", entity)
@@ -202,9 +199,7 @@ end
 function ENT:KeyValue(key, value)
 	key = key:lower()
 
-	if (key == "name") then
-		self:SetName(value)
-	elseif (key == "teleporttarget") then
+	if (key == "teleporttarget") then
 		self.expTeleportTarget = value
 	end
 end

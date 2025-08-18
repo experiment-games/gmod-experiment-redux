@@ -132,3 +132,11 @@
     sequenceID(string) : "Sequence ID" : "" : "ID of the scripted sequence to identify this spawn by"
     enemySpawnID(string) : "Enemy Spawn ID" : "" : "ID of the enemy spawn point"
 ]
+
+// General purpose area trigger that fires hooks when players enter/exit
+@SolidClass base(Trigger, Targetname) = exp_area :
+    "General purpose area trigger that fires hooks when players enter and exit"
+[
+    areaID(string) : "Area ID" : "" : "Unique identifier for this area"
+    areaName(string) : "Area Name" : "" : "Human-readable name for this area"
+]
