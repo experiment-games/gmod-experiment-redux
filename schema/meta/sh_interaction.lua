@@ -48,13 +48,15 @@ end
 --- @return string
 --- @realm shared
 function META:GetText(player, npcEntity)
-	if (isfunction(self.text)) then
-		return self.text(self, player, npcEntity)
+	local text = self.text
+
+	if (isfunction(text)) then
+		text = self.text(self, player, npcEntity)
 	end
 
-	if (istable(self.text)) then
-		local randomIndex = math.random(1, #self.text)
-		local textOrFunction = self.text[randomIndex]
+	if (istable(text)) then
+		local randomIndex = math.random(1, #text)
+		local textOrFunction = text[randomIndex]
 
 		if (isfunction(textOrFunction)) then
 			return textOrFunction(self, player, npcEntity)
@@ -64,7 +66,7 @@ function META:GetText(player, npcEntity)
 	end
 
 	--- @type string
-	return self.text
+	return text
 end
 
 --- Gets the responses for this interaction.

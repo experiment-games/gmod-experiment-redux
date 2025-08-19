@@ -57,6 +57,13 @@ h6 {
 	word-wrap: break-word;
 }
 
+.highlight {
+	background-color: #A33426;
+	color: white;
+	padding: 4px 8px;
+	border-radius: 4px;
+}
+
 button {
 	box-sizing: border-box;
 	display: block;
