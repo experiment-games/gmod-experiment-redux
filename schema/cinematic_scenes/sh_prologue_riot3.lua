@@ -63,7 +63,7 @@ if (SERVER) then
 
 		if (not ammoItemTable) then
 			ix.util.SchemaErrorNoHalt("Prologue scene 'prologue_riot2' is missing ammo item for weapon!")
-			Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
+			Schema.cinematics.TransitionPlayerToScene(client, "prologue_end")
 			return
 		end
 
@@ -113,28 +113,8 @@ if (SERVER) then
 	end
 
 	function SCENE:OnLeaveServer(client)
-		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_INTRO_COMPLETED, true)
-
 		local instanceID = Schema.instance.GetPlayerInstance(client)
 		Schema.instance.DestroyInstance(instanceID, "end_of_scene")
-
-		client:GetCharacter():SetData("prologue_finished", true)
-
-		client.expPrologueRiot3Items = nil
-		client.expPrologueRiot3ManhacksSpawned = nil
-
-		client:KillSilent()
-		client:Spawn()
-
-		-- Strip all items from the player in this flashback
-		local character = client:GetCharacter()
-		local inventory = character:GetInventory()
-
-		for item, _ in inventory:Iter() do
-			item:Remove()
-		end
-
-		hook.Run("PlayerFillDefaultInventory", client, character, inventory)
 	end
 
 	local function spawnManhack(position, targetClient)
@@ -332,7 +312,7 @@ if (SERVER) then
 			return
 		end
 
-		Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
+		Schema.cinematics.TransitionPlayerToScene(client, "prologue_end")
 	end)
 end
 

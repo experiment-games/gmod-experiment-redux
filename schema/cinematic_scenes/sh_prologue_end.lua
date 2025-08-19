@@ -2,6 +2,9 @@ local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_riot2"
 
+-- Must match SCENE.PROGRESSION_INTRO_COMPLETED in mission_tracker
+SCENE.PROGRESSION_INTRO_COMPLETED = "intro_tutorial_completed"
+
 function SCENE:OnEnterServer(client)
 	Schema.instance.AddPlayer(client)
 
@@ -16,6 +19,26 @@ end
 function SCENE:OnLeaveServer(client)
 	local instanceID = Schema.instance.GetPlayerInstance(client)
 	Schema.instance.DestroyInstance(instanceID, "end_of_scene")
+
+	Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_INTRO_COMPLETED, true)
+
+	client:GetCharacter():SetData("prologue_finished", true)
+
+	client.expPrologueRiot3Items = nil
+	client.expPrologueRiot3ManhacksSpawned = nil
+
+	client:KillSilent()
+	client:Spawn()
+
+	-- Strip all items from the player in this flashback
+	local character = client:GetCharacter()
+	local inventory = character:GetInventory()
+
+	for item, _ in inventory:Iter() do
+		item:Remove()
+	end
+
+	hook.Run("PlayerFillDefaultInventory", client, character, inventory)
 end
 
 if (CLIENT) then
@@ -27,7 +50,7 @@ if (CLIENT) then
 	function SCENE:OnEnterLocalPlayer()
 		Schema.cinematics.ShowCinematicText({
 			{ text = "Present Day",           delay = 0, duration = 5, horizontalAlignment = TEXT_ALIGN_LEFT,   verticalAlignment = TEXT_ALIGN_TOP },
-			{ text = "Now it's up to you...", delay = 2, duration = 5, horizontalAlignment = TEXT_ALIGN_CENTER, verticalAlignment = TEXT_ALIGN_BOTTOM },
+			{ text = "Now it's up to you...", delay = 2, duration = 5, horizontalAlignment = TEXT_ALIGN_CENTER, verticalAlignment = TEXT_ALIGN_CENTER },
 			{ text = "Will you fight back?",  delay = 4, duration = 5, horizontalAlignment = TEXT_ALIGN_RIGHT,  verticalAlignment = TEXT_ALIGN_BOTTOM },
 		})
 	end
