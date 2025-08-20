@@ -51,7 +51,7 @@ end
 function ENT:Think()
 	if ((self.nextAnimCheck or 0) < CurTime()) then
 		self:SetAnim()
-		self.nextAnimCheck = CurTime() + 60
+		self.nextAnimCheck = CurTime() + 2
 	end
 
 	self:SetNextClientThink(CurTime() + 0.25)

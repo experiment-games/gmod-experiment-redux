@@ -336,6 +336,10 @@ do
 		local yPos = 0
 
 		for _, goal in ipairs(goals) do
+			if (not goal:IsVisible()) then
+				continue
+			end
+
 			local goalPanel = vgui.Create("expProgressionGoal", goalsList)
 			goalPanel:SetProgressionGoal(goal, isCompleted)
 			goalPanel:SetPos(0, yPos)

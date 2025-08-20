@@ -357,18 +357,6 @@ if (CLIENT) then
 				return vgui.Create("expPrologueMonitorRiot2", parent)
 			end)
 		end
-
-		local tracker = Schema.progression.GetTracker(SCENE.SCENE_TRACKER_ID)
-		Schema.progression.SetTrackerOnHUD(tracker, true)
-
-		-- Call again after a delay, to ensure the HUD is updated. This is because the progression may not
-		-- have networked by now, so we need to force an update.
-		timer.Simple(0.5, function()
-			Schema.progression.SetTrackerOnHUD(tracker, true)
-		end)
-		timer.Simple(1.5, function() -- failsafe
-			Schema.progression.SetTrackerOnHUD(tracker, true)
-		end)
 	end
 
 	function SCENE:OnLeaveLocalPlayer()

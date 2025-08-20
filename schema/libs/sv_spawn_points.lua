@@ -181,6 +181,8 @@ function Schema.spawnPoints.DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 		effectData:SetScale(scale * 50)
 		effectData:SetNormal(hitNormal)
 		util.Effect("ThumperDust", effectData)
+
+		hook.Run("PlayerSpawnedAtSpawnPoint", client)
 	end)
 end
 

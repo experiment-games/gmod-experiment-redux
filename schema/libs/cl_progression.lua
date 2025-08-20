@@ -162,6 +162,15 @@ net.Receive("expProgressionItem", function(length)
 
 	hook.Run("PlayerProgressionChange", LocalPlayer(), scope, key, value)
 
+	-- Try find a tracker belonging to this progression key (isInProgress), if it is to be on hud by default, set it on hud
+	local trackers = Schema.progression.GetTrackersByScope(scope, key)
+
+	for _, tracker in pairs(trackers) do
+		if (tracker.showOnHUD) then
+			Schema.progression.SetTrackerOnHUD(tracker, true)
+		end
+	end
+
 	remainingMessages = remainingMessages - 1
 
 	if (remainingMessages == 0) then

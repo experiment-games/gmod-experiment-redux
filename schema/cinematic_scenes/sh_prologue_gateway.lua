@@ -27,10 +27,7 @@ if (CLIENT) then
 		Schema.cinematics.SetFogData(50, 750, color_black, 1)
 		Schema.cinematics.SetBlackAndWhite(true)
 
-		-- Delay so menu music can fade out
-		timer.Simple(2.5, function()
-			Schema.cinematics.PlayCinematicSound("music/HL2_song6.mp3", 0.2, 2.0)
-		end)
+		Schema.cinematics.PlayCinematicSound("music/HL2_song6.mp3", 0.2, 2.0)
 
 		-- Show only to this client some welcome information on the nemesis monitors
 		local nemesisPlugin = ix.plugin.Get("nemesis_ai")

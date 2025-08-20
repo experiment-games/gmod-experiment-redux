@@ -165,6 +165,10 @@ do
 		-- Add goals
 		local goals = tracker:GetGoals()
 		for _, goal in ipairs(goals) do
+			if (not goal:IsVisible()) then
+				continue
+			end
+
 			local goalRow = self.goalsContainer:Add("expProgressionHUDGoal")
 			goalRow:SetProgressionGoal(goal, tracker:IsCompleted(LocalPlayer()))
 			goalRow:Dock(TOP)
@@ -392,7 +396,8 @@ hook.Add("PlayerProgressionChange", "expProgressionHUDUpdate", function(client, 
 	if not IsValid(Schema.progression.hudPanel) then return end
 
 	-- Updates the panel so newly completed trackers are removed from the hud panel
-	if (Schema.progression.hudPanel:IsAnyTrackersCompletedKey(key)) then
-		Schema.progression.hudPanel:Update()
-	end
+	-- Commented the if-statement so any change will update the hud panel. This is so goals that were invisible before, now become visible
+	-- if (Schema.progression.hudPanel:IsAnyTrackersCompletedKey(key)) then
+	Schema.progression.hudPanel:Update()
+	-- end
 end)

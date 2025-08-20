@@ -29,13 +29,16 @@ SCENE.INTRO_TUTORIAL_TRACKER = Schema.progression.RegisterTracker({
 	uniqueID = SCENE.SCENE_TRACKER_ID,
 
 	--- Name shown in the UI for this tracker
-	name = "Introduction Tutorial",
+	name = "Prologue Weapon Tutorial",
 
 	--- The key that marks this tutorial as completed
 	completedKey = SCENE.PROGRESSION_INTRO_COMPLETED,
 
 	--- The key that marks this tutorial as in-progress
 	isInProgress = SCENE.PROGRESSION_INTRO_STARTED,
+
+	--- Show the tracker on HUD by default
+	showOnHUD = true,
 })
 
 --[[

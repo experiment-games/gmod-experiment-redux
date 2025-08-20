@@ -176,8 +176,23 @@ function Schema.entityMarker.ClearAll()
 end
 
 --- Get all marked entities
-function Schema.entityMarker.GetMarked()
+--- @return table<number, { entity: number, color: Color }>
+function Schema.entityMarker.GetMarkers()
 	return Schema.entityMarker.markers
+end
+
+--- Get all marked entities that are currently valid (in PVS)
+--- @return Entity[]
+function Schema.entityMarker.GetMarkedEntities()
+	local markedEntities = {}
+
+	for _, markerData in pairs(Schema.entityMarker.markers) do
+		if (IsValid(Entity(markerData.entity))) then
+			table.insert(markedEntities, Entity(markerData.entity))
+		end
+	end
+
+	return markedEntities
 end
 
 --- Check if entity is marked
