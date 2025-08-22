@@ -170,6 +170,8 @@ function PANEL:SetBuff(buff, key)
 	for _, panel in ipairs(panels) do
 		panel:SetHelixTooltip(function(tooltip)
 			Schema.buff.PopulateTooltip(tooltip, self.buffTable, buff)
+
+			hook.Run("PopulatedBuffTooltip", tooltip, self.buffTable, buff)
 		end)
 	end
 

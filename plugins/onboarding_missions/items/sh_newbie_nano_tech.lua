@@ -1,16 +1,17 @@
 local PLUGIN = PLUGIN
 local ITEM = ITEM
 
-ITEM.name = "Newbie Nano Tech"
+ITEM.name = "Newbie Nano-Tech Injector"
 ITEM.noBusiness = true
 ITEM.noDrop = true
 ITEM.model = "models/computergibs.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Consumables"
-ITEM.description = "A takeout carton, it's filled with cold noodles. Eating this might make you feel more enduring."
+ITEM.description =
+"A small injector filled with a shimmering blue liquid. Using it will grant you a temporary boost to your attributes."
 
-ITEM.functions.Implant = {
+ITEM.functions.Inject = {
 	OnRun = function(item)
 		local client = item.player
 

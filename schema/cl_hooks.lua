@@ -487,6 +487,8 @@ function Schema:CreateCharacterInfo(panel)
 	buffManager.characterPanel = panel
 	panel.buffs.manager = buffManager
 
+	ix.gui.characterBuffs = buffManager
+
 	panel.buffs:SizeToContents()
 
 	hook.Run("CreateCharacterBuffInfo", panel, panel.buffs)

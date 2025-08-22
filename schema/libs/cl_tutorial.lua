@@ -110,15 +110,16 @@ function Schema.tutorial.ShowTutorial(tutorialID, ...)
 
 	-- If a tutorial is currently active, queue this one
 	if (Schema.tutorial.currentTutorial) then
-		-- Don't queue if its already queued
-		if (Schema.tutorial.IsTutorialQueued(tutorialID)) then
-			return
-		end
+		-- TODO: Queuing is glitchy since it might open a tutorial in an unexpected place
+		-- -- Don't queue if its already queued
+		-- if (Schema.tutorial.IsTutorialQueued(tutorialID)) then
+		-- 	return
+		-- end
 
-		table.insert(Schema.tutorial.tutorialQueue, {
-			tutorial = tutorial,
-			args = { ... }
-		})
+		-- table.insert(Schema.tutorial.tutorialQueue, {
+		-- 	tutorial = tutorial,
+		-- 	args = { ... }
+		-- })
 
 		return
 	end
@@ -168,11 +169,11 @@ function Schema.tutorial.HideCurrentTutorial()
 	tutorial.active = false
 	Schema.tutorial.currentFade = 0
 
+	Schema.tutorial.currentTutorial = nil
+
 	if (tutorial.OnDeactivate) then
 		tutorial:OnDeactivate()
 	end
-
-	Schema.tutorial.currentTutorial = nil
 
 	-- Show next tutorial in queue if any
 	if (#Schema.tutorial.tutorialQueue > 0) then

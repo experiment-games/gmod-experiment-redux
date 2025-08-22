@@ -17,7 +17,7 @@ PLUGIN.MISSION_2_TRACKER = Schema.progression.RegisterTracker({
 PLUGIN.MISSION_2_TRACKER_GOAL_1 = PLUGIN.MISSION_2_TRACKER:RegisterGoal({
 	key = PLUGIN.PROGRESSION_MISSION_2_USE_NANO_TECH_ITEM,
 
-	name = "Use the 'Newbie Nano Tech' item",
+	name = "Use the 'Newbie Nano-Tech Injector' item",
 
 	type = "boolean",
 
@@ -117,3 +117,16 @@ PLUGIN.MISSION_2_TRACKER_GOAL_6 = PLUGIN.MISSION_2_TRACKER:RegisterGoal({
 		return PLUGIN.MISSION_2_TRACKER_GOAL_5:CheckProgress()
 	end
 })
+
+if (SERVER) then
+	util.AddNetworkString("expOnboardingMissionProgress")
+
+	net.Receive("expOnboardingMissionProgress", function(len, client)
+		local missionID = net.ReadString()
+
+		-- If we get a message that the 'You' tab was viewed, complete that goal
+		if (missionID == "mission2.2") then
+			PLUGIN.MISSION_2_TRACKER_GOAL_2:Change(client, true)
+		end
+	end)
+end

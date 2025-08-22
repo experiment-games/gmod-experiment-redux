@@ -28,7 +28,9 @@ NPC.voicePitch = 102
 --]]
 
 --[[
+
     Onboarding Mission Interaction Set
+
 --]]
 
 local INTERACTION_SET = NPC:RegisterInteractionSet({
@@ -39,7 +41,9 @@ local INTERACTION_SET = NPC:RegisterInteractionSet({
 	end,
 })
 
--- Completes mission 1 and starts mission 2
+--[[
+	Completes mission 1 and starts mission 2
+--]]
 local INTERACTION_START_MISSION2 = INTERACTION_SET:RegisterInteraction({
 	uniqueID = "startMission2",
 
@@ -52,12 +56,48 @@ local INTERACTION_START_MISSION2 = INTERACTION_SET:RegisterInteraction({
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		return PLUGIN.MISSION_1_TRACKER:IsInProgress(player)
+			and not PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
 	end,
 
 	serverOnStart = function(interaction, player, npcEntity)
 		PLUGIN.MISSION_1_TRACKER:Complete(player)
 		PLUGIN.MISSION_2_TRACKER:Start(player)
+	end,
+})
 
+INTERACTION_START_MISSION2:RegisterResponse({
+	answer = "What do I do now?",
+	next = "mission_2_instructions",
+})
+
+INTERACTION_START_MISSION2:RegisterResponse({
+	answer = "I need to go now.",
+})
+
+--[[
+	Explains Mission 2
+--]]
+local INTERACTION_MISSION2_INSTRUCTIONS = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "mission_2_instructions",
+
+	text =
+		"Alright, listen up. I've got something important for you. *pulls out a small device* "
+		.. "This here is a Nano-Tech Injector. It's going to help you survive in this place.<br>"
+		.. "Just use it on yourself, and you'll get a Nano Buff that will protect you from harm. "
+		.. "*hands over the injector* "
+		.. "Why don't you give it a try?<br>"
+		.. "<span class=\"highlight\">Use the 'Newbie Nano-Tech Injector' item in your inventory to activate it.</span>",
+
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		local character = player:GetCharacter()
+
+		-- TODO: This means (like Runescape) we have a drop-trick. Do we want this?
+		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
+			and not PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
+			and not character:GetInventory():HasItem("newbie_nano_tech")
+	end,
+
+	serverOnStart = function(interaction, player, npcEntity)
 		local character = player:GetCharacter()
 		local itemUniqueID = "newbie_nano_tech"
 
@@ -72,9 +112,61 @@ local INTERACTION_START_MISSION2 = INTERACTION_SET:RegisterInteraction({
 	end,
 })
 
-INTERACTION_START_MISSION2:RegisterResponse({
-	answer = "What do I do now?",
-	next = "mission_2_instructions",
+INTERACTION_MISSION2_INSTRUCTIONS:RegisterResponse({
+	answer = "What are Nano Buffs?",
+	next = "mission_2_nano_buffs",
+})
+
+INTERACTION_MISSION2_INSTRUCTIONS:RegisterResponse({
+	answer = "Thanks, I'll try it out.",
+})
+
+--[[
+	Continues with expectation that item is yet to be used
+--]]
+local INTERACTION_MISSION2_NOT_USED_YET = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "mission_2_not_used_yet",
+
+	text = "You haven't used the Nano-Tech Injector yet. It's important for your survival here.<br>"
+		.. "<span class=\"highlight\">Use the 'Newbie Nano-Tech Injector' item in your inventory to activate it.</span>",
+
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
+			and not PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
+	end,
+})
+
+INTERACTION_MISSION2_NOT_USED_YET:RegisterResponse({
+	answer = "What are Nano Buffs?",
+	next = "mission_2_nano_buffs",
+})
+
+INTERACTION_MISSION2_NOT_USED_YET:RegisterResponse({
+	answer = "I'll use it now.",
+})
+
+--[[
+	Explains Nano Buffs
+--]]
+local INTERACTION_MISSION2_NANO_BUFFS = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "mission_2_nano_buffs",
+
+	text =
+		"Nano Buffs are special enhancements that give you various abilities and protections. "
+		.. "The one you'll get from the injector is a basic survival buff.<br>"
+		..
+		"You can <span class=\"highlight\">check your active Nano Buffs in the 'You' menu under the Nano Buffs tab.</span><br>"
+		.. "There is positive and negative buffs, so beware of the negative ones!"
+		.. "Remember, these buffs are temporary, so use them wisely and don't fret for too long about the negative ones.",
+
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
+			and not PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
+	end,
+})
+
+INTERACTION_MISSION2_NANO_BUFFS:RegisterResponse({
+	answer = "Got it, thanks.",
 })
 
 -- TODO: Tutorial overlay explains how to use the item (explains Inventory mechanics again)
