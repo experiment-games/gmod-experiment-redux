@@ -16,12 +16,12 @@ end
 function ENT:Upgrade(client, nextUpgrade)
 	local generator = self.expGenerator
 
-    if (not generator or not generator.upgrades) then
-        error("Generator is missing upgrades table!")
-    end
+	if (not generator or not generator.upgrades) then
+		error("Generator is missing upgrades table!")
+	end
 
 	local character = client:GetCharacter()
-    local price = nextUpgrade.price
+	local price = nextUpgrade.price
 
 	if (not character:HasMoney(price)) then
 		client:Notify("You can not afford this upgrade!")
@@ -30,7 +30,7 @@ function ENT:Upgrade(client, nextUpgrade)
 
 	local canUpgrade, message
 
-	if(nextUpgrade.condition)then
+	if (nextUpgrade.condition) then
 		canUpgrade, message = nextUpgrade.condition(client, self)
 	else
 		canUpgrade = true
@@ -145,7 +145,7 @@ function ENT:OnEarned(money)
 	self:SetPower(math.max(self:GetPower() - 1, 0))
 
 	local itemID = self.expItemID
-    local itemTable = ix.item.instances[itemID]
+	local itemTable = ix.item.instances[itemID]
 
 	if (itemTable.OnEarned) then
 		itemTable:OnEarned(self, money)
@@ -161,7 +161,7 @@ function ENT:OnEarned(money)
 
 	if (teleportEarnings) then
 		client:GetCharacter():GiveMoney(money)
-		client:Notify("You have earned ".. ix.currency.Get(money).." from your generator.")
+		client:Notify("You have earned " .. ix.currency.Get(money) .. " from your generator.")
 	else
 		local heldBolts = self:GetHeldBolts() or 0
 
@@ -196,7 +196,7 @@ end
 
 function ENT:OnOptionSelected(client, option, data)
 	local itemID = self.expItemID
-    local itemTable = ix.item.instances[itemID]
+	local itemTable = ix.item.instances[itemID]
 
 	if (not itemTable) then
 		client:Notify("This generator is broken!")
@@ -216,7 +216,7 @@ function ENT:OnOptionSelected(client, option, data)
 
 			if (heldBolts > 0) then
 				client:GetCharacter():GiveMoney(heldBolts)
-				client:Notify("You have withdrawn ".. ix.currency.Get(heldBolts) .." from the generator.")
+				client:Notify("You have withdrawn " .. ix.currency.Get(heldBolts) .. " from the generator.")
 			end
 
 			self.ixIsSafe = true
@@ -247,7 +247,7 @@ function ENT:OnOptionSelected(client, option, data)
 		end)
 	end
 
-    local nextUpgrade, upgradeLabel = self:GetNextUpgrade(client)
+	local nextUpgrade, upgradeLabel = self:GetNextUpgrade(client)
 
 	if (option == upgradeLabel) then
 		if (not nextUpgrade) then
@@ -255,7 +255,7 @@ function ENT:OnOptionSelected(client, option, data)
 			return
 		end
 
-        self:Upgrade(client, nextUpgrade)
+		self:Upgrade(client, nextUpgrade)
 	end
 
 	if (option == L("withdraw", client, heldBolts)) then
@@ -267,7 +267,11 @@ function ENT:OnOptionSelected(client, option, data)
 		self:SetHeldBolts(0)
 		client:GetCharacter():GiveMoney(heldBolts)
 
-		client:Notify("You have withdrawn ".. ix.currency.Get(heldBolts) .." from the generator.")
+		client:Notify("You have withdrawn " .. ix.currency.Get(heldBolts) .. " from the generator.")
+
+		hook.Run("PlayerWithdrewFromGenerator", client, self, heldBolts)
+
+		return
 	end
 
 	if (option == L("generatorRecharge", client)) then
@@ -295,6 +299,10 @@ function ENT:OnOptionSelected(client, option, data)
 		self:SetPower(math.min(power + scrapAmount, itemTable.generator.power))
 
 		client:NotifyLocalized("generatorRecharged", scrapAmount)
+
+		hook.Run("PlayerRechargedGenerator", client, self, scrapAmount)
+
+		return
 	end
 end
 
@@ -370,7 +378,7 @@ function ENT:OnRemove()
 		self:ReleaseCharacterCount(owner:GetCharacter())
 	end
 
-	if (!ix.shuttingDown and !self.ixIsSafe and self.expItemID) then
+	if (! ix.shuttingDown and ! self.ixIsSafe and self.expItemID) then
 		local itemTable = ix.item.instances[self.expItemID]
 
 		if (itemTable) then
@@ -391,7 +399,7 @@ function ENT:OnRemove()
 
 			if (itemTable.removeCompletely) then
 				local query = mysql:Delete("ix_items")
-					query:Where("item_id", self.expItemID)
+				query:Where("item_id", self.expItemID)
 				query:Execute()
 			end
 		end

@@ -9,11 +9,12 @@ ITEM.description = "Generates a steady rate of bolts over time and can be upgrad
 ITEM.maximum = 1
 ITEM.noBusiness = true
 ITEM.data = {
-	upgrades = 0
+	upgrades = 0,
+	power = 0,
 }
 
 if (CLIENT) then
-    function ITEM:PopulateTooltip(tooltip)
+	function ITEM:PopulateTooltip(tooltip)
 		if (self:GetData("placed")) then
 			local panel = tooltip:AddRowAfter("name", "maximum")
 			panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
@@ -30,7 +31,7 @@ end
 
 ITEM.generator = {
 	uniqueID = "exp_bolt_control_unit",
-    health = 200,
+	health = 200,
 	produce = 100, -- Base production
 	power = 4,
 	name = "Bolt Generator",
@@ -55,11 +56,12 @@ ITEM.generator = {
 			price = 5000,
 			produce = 100,
 			condition = function(client, entity)
-				if(client ~= entity:GetItemOwner())then
+				if (client ~= entity:GetItemOwner()) then
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
 				end
 
-				return Schema.perk.GetOwned("master_of_logistics", client), "You do not have the master of logistics perk!"
+				return Schema.perk.GetOwned("master_of_logistics", client),
+					"You do not have the master of logistics perk!"
 			end
 		},
 		{
@@ -67,11 +69,12 @@ ITEM.generator = {
 			price = 5000,
 			produce = 200,
 			condition = function(client, entity)
-				if(client ~= entity:GetItemOwner())then
+				if (client ~= entity:GetItemOwner()) then
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
 				end
 
-				return Schema.perk.GetOwned("master_of_logistics", client), "You do not have the master of logistics perk!"
+				return Schema.perk.GetOwned("master_of_logistics", client),
+					"You do not have the master of logistics perk!"
 			end
 		},
 		{
@@ -79,11 +82,12 @@ ITEM.generator = {
 			price = 5000,
 			produce = 400,
 			condition = function(client, entity)
-				if(client ~= entity:GetItemOwner())then
+				if (client ~= entity:GetItemOwner()) then
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
 				end
 
-				return Schema.perk.GetOwned("master_of_logistics", client), "You do not have the master of logistics perk!"
+				return Schema.perk.GetOwned("master_of_logistics", client),
+					"You do not have the master of logistics perk!"
 			end
 		}
 	}

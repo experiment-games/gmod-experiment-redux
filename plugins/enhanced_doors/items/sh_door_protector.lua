@@ -34,7 +34,6 @@ ITEM.functions.Place = {
 		end
 
 		if (IsValid(entity:GetDTEntity(0)) or IsValid(entity.expProtector)) then
-			-- return "@dOwnedBy", entity:GetDTEntity(0):Name()
 			client:Notify("This door is already owned by someone else.")
 			return false
 		end
@@ -43,6 +42,8 @@ ITEM.functions.Place = {
 		protector:SetupDoorProtector(client, entity, item)
 		protector:Spawn()
 		client:RegisterEntityToRemoveOnLeave(protector)
+
+		hook.Run("PlayerUsedDoorProtector", client, entity, protector)
 	end,
 
 	OnCanRun = function(item)

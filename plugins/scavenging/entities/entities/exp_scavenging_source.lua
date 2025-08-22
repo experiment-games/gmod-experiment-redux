@@ -14,6 +14,8 @@ ENT.AdminOnly = true
 
 ENT.Model = Model("models/props_junk/trashcluster01a.mdl")
 
+ENT.IsScavengingSource = true
+
 function ENT:SetupDataTables()
 	self:NetworkVar("Int", "ID")
 	self:NetworkVar("String", "InventoryType")

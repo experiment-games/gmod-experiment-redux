@@ -129,4 +129,22 @@ if (SERVER) then
 			PLUGIN.MISSION_2_TRACKER_GOAL_2:Change(client, true)
 		end
 	end)
+
+	hook.Add("PlayerUsedDoorProtector", "expOnboardingMission2UseDoorProtector", function(client, entity, protector)
+		if (
+				PLUGIN.MISSION_2_TRACKER_GOAL_3:CheckProgress(client)
+				and not PLUGIN.MISSION_2_TRACKER_GOAL_4:CheckProgress(client)
+			) then
+			PLUGIN.MISSION_2_TRACKER_GOAL_4:Change(client, true)
+		end
+	end)
+
+	hook.Add("PlayerLockedDoor", "expOnboardingMission2LockDoor", function(client, door, partner)
+		if (
+				PLUGIN.MISSION_2_TRACKER_GOAL_4:CheckProgress(client)
+				and not PLUGIN.MISSION_2_TRACKER_GOAL_5:CheckProgress(client)
+			) then
+			PLUGIN.MISSION_2_TRACKER_GOAL_5:Change(client, true)
+		end
+	end)
 end

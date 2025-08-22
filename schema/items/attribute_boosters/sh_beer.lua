@@ -26,4 +26,6 @@ end
 function ITEM:OnBoosted()
 	local client = self.player
 	Schema.achievement.Progress("liquid_courage", client)
+
+	hook.Run("OnPlayerDrinkAlcohol", client, self)
 end
