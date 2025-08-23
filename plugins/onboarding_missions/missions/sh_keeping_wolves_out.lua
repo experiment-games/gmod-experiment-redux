@@ -51,8 +51,11 @@ PLUGIN.MISSION_2_TRACKER_GOAL_2 = PLUGIN.MISSION_2_TRACKER:RegisterGoal({
 PLUGIN.MISSION_2_TRACKER_GOAL_3 = PLUGIN.MISSION_2_TRACKER:RegisterGoal({
 	key = PLUGIN.PROGRESSION_MISSION_2_CONTINUE,
 
-	-- TODO: Somehow get the name of the npc
-	name = "Continue your conversation with the NPC",
+	name = function(tracker)
+		local npcName = Schema.progression.Get(PLUGIN.uniqueID, "npc") or "the NPC"
+
+		return string.format("Continue your conversation with %s", npcName)
+	end,
 
 	type = "boolean",
 
@@ -103,8 +106,11 @@ PLUGIN.MISSION_2_TRACKER_GOAL_5 = PLUGIN.MISSION_2_TRACKER:RegisterGoal({
 PLUGIN.MISSION_2_TRACKER_GOAL_6 = PLUGIN.MISSION_2_TRACKER:RegisterGoal({
 	key = PLUGIN.PROGRESSION_MISSION_2_RETURN,
 
-	-- TODO: Somehow get the name of the npc
-	name = "Return to the NPC",
+	name = function(tracker)
+		local npcName = Schema.progression.Get(PLUGIN.uniqueID, "npc") or "the NPC"
+
+		return string.format("Return to %s", npcName)
+	end,
 
 	type = "boolean",
 

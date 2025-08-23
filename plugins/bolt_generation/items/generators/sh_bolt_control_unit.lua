@@ -8,10 +8,6 @@ ITEM.category = "Protection"
 ITEM.description = "Generates a steady rate of bolts over time and can be upgraded"
 ITEM.maximum = 1
 ITEM.noBusiness = true
-ITEM.data = {
-	upgrades = 0,
-	power = 0,
-}
 
 if (CLIENT) then
 	function ITEM:PopulateTooltip(tooltip)

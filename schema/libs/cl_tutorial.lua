@@ -40,41 +40,45 @@ end
 function Schema.tutorial.OnPostRegister(tutorial)
 	-- Register hooks for activateOn and deactivateOn
 	if (tutorial.activateOn) then
-		local hookName = tutorial.activateOn
+		local activateOn = istable(tutorial.activateOn) and tutorial.activateOn or { tutorial.activateOn }
 
-		hook.Add(hookName, "expTutorial" .. "#" .. tutorial.uniqueID .. ":" .. hookName, function(...)
-			local args = { ... }
+		for _, hookName in ipairs(activateOn) do
+			hook.Add(hookName, "expTutorial" .. "#" .. tutorial.uniqueID .. ":" .. hookName, function(...)
+				local args = { ... }
 
-			if (tutorial.ShouldActivate) then
-				if (tutorial.ShouldActivate(unpack(args)) == false) then
-					return
-				end
-			end
-
-			local delay = tutorial.activateOnDelay or 0
-
-			timer.Simple(delay, function()
-				if (not tutorial.active and not Schema.tutorial.isDisabled) then
-					Schema.tutorial.ShowTutorial(tutorial.uniqueID, unpack(args))
-				end
-			end)
-		end)
-	end
-
-	if (tutorial.deactivateOn) then
-		local hookName = tutorial.deactivateOn
-
-		hook.Add(hookName, "expTutorialDeactivate" .. "#" .. tutorial.uniqueID .. ":" .. hookName, function(...)
-			if (tutorial.active) then
-				if (tutorial.ShouldDeactivate) then
-					if (tutorial.ShouldDeactivate(...) == false) then
+				if (tutorial.ShouldActivate) then
+					if (tutorial.ShouldActivate(unpack(args)) == false) then
 						return
 					end
 				end
 
-				Schema.tutorial.HideTutorial(tutorial.uniqueID)
-			end
-		end)
+				local delay = tutorial.activateOnDelay or 0
+
+				timer.Simple(delay, function()
+					if (not tutorial.active and not Schema.tutorial.isDisabled) then
+						Schema.tutorial.ShowTutorial(tutorial.uniqueID, unpack(args))
+					end
+				end)
+			end)
+		end
+	end
+
+	if (tutorial.deactivateOn) then
+		local deactivateOn = istable(tutorial.deactivateOn) and tutorial.deactivateOn or { tutorial.deactivateOn }
+
+		for _, hookName in ipairs(deactivateOn) do
+			hook.Add(hookName, "expTutorialDeactivate" .. "#" .. tutorial.uniqueID .. ":" .. hookName, function(...)
+				if (tutorial.active) then
+					if (tutorial.ShouldDeactivate) then
+						if (tutorial.ShouldDeactivate(...) == false) then
+							return
+						end
+					end
+
+					Schema.tutorial.HideTutorial(tutorial.uniqueID)
+				end
+			end)
+		end
 	end
 end
 

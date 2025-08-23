@@ -71,7 +71,7 @@ function ENT:SetupGenerator(client, item)
 
 	self:SetHealth(self.expGenerator.health)
 	self:SetMaxHealth(self.expGenerator.health)
-	self:SetPower(item:GetData("power", self.expGenerator.power))
+	self:SetPower(item:GetData("power", 0))
 
 	self:SetItemID(item.uniqueID)
 	self:SetUpgrades(item:GetData("upgrades", 0))

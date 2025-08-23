@@ -4,7 +4,7 @@
 --- @field name string|fun(tracker: ProgressionTracker, goal: ProgressionTrackerGoal):(string) The name of the goal shown in the UI
 --- @field type "number"|"boolean" The type of the progression value
 --- @field getProgress fun(goal: ProgressionTrackerGoal, player: Player, progression: ProgressionValue): (number|boolean, any, any)
---- @field isVisible fun(goal: ProgressionTrackerGoal): (boolean) Whether the goal should be visible in the UI
+--- @field isVisible? fun(goal: ProgressionTrackerGoal): (boolean) Whether the goal should be visible in the UI
 
 --- @realm shared
 --- @class ProgressionTrackerGoal : ProgressionTrackerGoalInfo

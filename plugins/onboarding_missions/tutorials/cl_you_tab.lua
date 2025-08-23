@@ -2,7 +2,8 @@ local PLUGIN = PLUGIN
 local TUTORIAL = TUTORIAL
 
 TUTORIAL.uniqueID = "you_tab"
-TUTORIAL.activateOn = "PlayerProgressionChange"
+TUTORIAL.activateOn = { "PlayerProgressionChange", "OnSpawnSelectSuccess" }
+TUTORIAL.activateOnDelay = 0.5
 TUTORIAL.deactivateOn = "CreateCharacterBuffInfo"
 
 function TUTORIAL:ShouldActivate()

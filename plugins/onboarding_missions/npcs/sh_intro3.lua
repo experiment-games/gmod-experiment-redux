@@ -17,3 +17,7 @@ NPC.bodygroups = {
 	[5] = 0, -- No glasses
 }
 NPC.voicePitch = 100
+
+ix.util.Include(PLUGIN.folder .. "/interactions/sh_mission2.lua", true)
+ix.util.Include(PLUGIN.folder .. "/interactions/sh_mission3.lua", true)
+ix.util.Include(PLUGIN.folder .. "/interactions/sh_faq.lua", true)

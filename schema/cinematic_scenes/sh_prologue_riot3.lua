@@ -317,6 +317,8 @@ if (SERVER) then
 end
 
 if (CLIENT) then
+	local hasStartedOpenInventory = false
+
 	local function tryStartTutorials()
 		-- If both items are picked up, we can show the inventory hint
 		local glockPickedUp = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_PICKED_UP, true)
@@ -325,7 +327,10 @@ if (CLIENT) then
 		local ammoLoaded = Schema.progression.Check("prologue", SCENE.PROGRESSION_AMMO_LOADED, true)
 
 		if (glockPickedUp and ammoPickedUp and (not glockEquipped or not ammoLoaded)) then
-			Schema.tutorial.ShowTutorial("prologue_riot3_open_inventory")
+			if (not hasStartedOpenInventory) then
+				Schema.tutorial.ShowTutorial("prologue_riot3_open_inventory")
+				hasStartedOpenInventory = true
+			end
 		else
 			return
 		end

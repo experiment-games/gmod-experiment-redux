@@ -17,8 +17,11 @@ PLUGIN.MISSION_3_TRACKER = Schema.progression.RegisterTracker({
 PLUGIN.MISSION_3_TRACKER_GOAL_1 = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
 	key = PLUGIN.PROGRESSION_MISSION_3_INFORMATION,
 
-	-- TODO: Somehow get the name of the npc
-	name = "Talk to the NPC about making bolts",
+	name = function(tracker)
+		local npcName = Schema.progression.Get(PLUGIN.uniqueID, "npc") or "the NPC"
+
+		return string.format("Talk to %s about making bolts", npcName)
+	end,
 
 	type = "boolean",
 
@@ -69,8 +72,11 @@ PLUGIN.MISSION_3_TRACKER_GOAL_3 = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
 PLUGIN.MISSION_3_TRACKER_GOAL_3_POST = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
 	key = PLUGIN.PROGRESSION_MISSION_3_DRINK_BEER_POST,
 
-	-- TODO: Somehow get the name of the npc
-	name = "Talk to the NPC",
+	name = function(tracker)
+		local npcName = Schema.progression.Get(PLUGIN.uniqueID, "npc") or "the NPC"
+
+		return string.format("Talk to %s", npcName)
+	end,
 
 	type = "boolean",
 
@@ -165,8 +171,11 @@ PLUGIN.MISSION_3_TRACKER_GOAL_7 = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
 PLUGIN.MISSION_3_TRACKER_GOAL_8 = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
 	key = PLUGIN.PROGRESSION_MISSION_3_RETURN_TO_NPC,
 
-	-- TODO: Somehow get the name of the npc
-	name = "Return to the NPC",
+	name = function(tracker)
+		local npcName = Schema.progression.Get(PLUGIN.uniqueID, "npc") or "the NPC"
+
+		return string.format("Return to %s", npcName)
+	end,
 
 	type = "boolean",
 
