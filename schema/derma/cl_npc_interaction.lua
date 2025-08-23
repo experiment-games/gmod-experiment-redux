@@ -159,7 +159,10 @@ button:disabled {
 			end
 
 			if (answer:GetNextInteraction() == nil) then
-				if (IsValid(self)) then
+				if (IsValid(Schema.entityPanel)) then
+					Schema.entityPanel:Remove()
+					self:SetAlpha(0) -- Ensure the fade out of the entity panel shows nicely
+				elseif (IsValid(self)) then
 					self:Remove()
 				end
 
@@ -511,10 +514,6 @@ button:disabled {
 
 	function PANEL:OnRemove()
 		Schema.npc.panel = nil
-
-		if (IsValid(Schema.entityPanel)) then
-			Schema.entityPanel:Remove()
-		end
 	end
 
 	vgui.Register("expNpcInteraction", PANEL, "EditablePanel")
