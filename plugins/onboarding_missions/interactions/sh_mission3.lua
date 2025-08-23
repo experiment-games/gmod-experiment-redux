@@ -38,8 +38,14 @@ local INTERACTION_START_MISSION3 = INTERACTION_SET_MISSION3:RegisterInteraction(
 		.. "I wish everything there were as cheap as the beer.",
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
-		return PLUGIN.MISSION_3_TRACKER:IsInProgress(player)
-			and not PLUGIN.MISSION_3_TRACKER_GOAL_1:CheckProgress(player)
+		return not PLUGIN.MISSION_3_TRACKER_GOAL_1:CheckProgress(player)
+	end,
+
+	serverOnStart = function(interaction, player, npcEntity)
+		if (not PLUGIN.MISSION_3_TRACKER:IsInProgress(player)) then
+			-- Start in case the player abandoned and the auto-start from the previous mission isn't valid
+			PLUGIN.MISSION_3_TRACKER:Start(player)
+		end
 	end,
 })
 

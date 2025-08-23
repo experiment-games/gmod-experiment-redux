@@ -5,6 +5,7 @@ Schema.progression = ix.util.GetOrCreateLibrary("progression")
 util.AddNetworkString("expProgressionItemHeader")
 util.AddNetworkString("expProgressionItem")
 util.AddNetworkString("expProgressionRemove")
+util.AddNetworkString("expProgressionAbandonTracker")
 
 --- @alias ProgressionValue string|number|table|boolean|nil
 
@@ -412,9 +413,49 @@ function Schema.progression.OpenEditor(client)
 	Schema.chunkedNetwork.Send("ProgressionsEdit", client, progressions)
 end
 
+--- Abandons a progression tracker.
+--- @param client Player
+--- @param uniqueID string
+function Schema.progression.AbandonTracker(client, uniqueID)
+	local tracker = Schema.progression.GetTracker(uniqueID)
+
+	if (not tracker or not tracker:CanAbandon()) then
+		return
+	end
+
+	-- Remove the isInProgress key and completedKey for the tracker
+	local progressions = Schema.progression.GetProgressions(client)
+	local scope = tracker:GetScope()
+
+	if (progressions[scope]) then
+		progressions[scope][tracker:GetIsInProgressKey()] = nil
+		progressions[scope][tracker:GetCompletedKey()] = nil
+
+		-- Empty out all keys for the tracker goals
+		for _, goal in ipairs(tracker:GetGoals()) do
+			progressions[scope][goal:GetKey()] = nil
+		end
+	end
+
+	if (tracker.serverOnAbandon) then
+		tracker.serverOnAbandon(tracker, client)
+	end
+
+	-- Network the removal to the client by resetting progressions fully
+	Schema.progression.NetworkAll(client)
+end
+
+--[[
+	Hooks
+--]]
+
 hook.Add("InitializedSchema", "Schema.progression.LoadAllDynamic", function()
 	Schema.progression.dynamicTrackers = Schema.progression.LoadAll()
 end)
+
+--[[
+	Net Messages
+--]]
 
 net.Receive("expProgressionRemove", function(length, client)
 	local uniqueID = net.ReadString()
@@ -431,4 +472,10 @@ net.Receive("expProgressionRemove", function(length, client)
 	Schema.progression.UnRegisterTracker(progression)
 
 	Schema.progression.dynamicTrackers[uniqueID] = nil
+end)
+
+net.Receive("expProgressionAbandonTracker", function(length, client)
+	local uniqueID = net.ReadString()
+
+	Schema.progression.AbandonTracker(client, uniqueID)
 end)

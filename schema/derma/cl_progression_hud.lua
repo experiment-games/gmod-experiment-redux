@@ -94,10 +94,10 @@ do
 		local completed = {}
 
 		for _, tracker in ipairs(trackedTrackers) do
-			if tracker:IsCompleted(LocalPlayer()) then
+			if (tracker:IsCompleted(LocalPlayer())) then
 				-- Let's not show completed missions on the HUD ever
 				-- table.insert(completed, tracker)
-			else
+			elseif (tracker:IsInProgress()) then
 				table.insert(inProgress, tracker)
 			end
 		end

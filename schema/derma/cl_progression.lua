@@ -255,6 +255,23 @@ do
 
 		self.actions:SetWide(self.trackOnHUD:GetWide())
 
+		self.abandonButton = self.actions:Add("expButton")
+		self.abandonButton:SetText("Abandon")
+		self.abandonButton:SizeToContents()
+		self.abandonButton:Dock(BOTTOM)
+		self.abandonButton.DoClick = function()
+			if (self.tracker) then
+				Schema.progression.AbandonTracker(self.tracker)
+				ix.gui.menu:Remove()
+
+				timer.Simple(2, function()
+					if (IsValid(Schema.progression.hudPanel)) then
+						Schema.progression.hudPanel:Update()
+					end
+				end)
+			end
+		end
+
 		-- self.expandButton = self:Add("DButton")
 		-- self.expandButton:SetText("")
 		-- self.expandButton:SetWide(20)
@@ -300,8 +317,10 @@ do
 		if (not isCompleted) then
 			self.trackOnHUD:SetVisible(true)
 			self.trackOnHUD:SetChecked(Schema.progression.IsTrackerOnHUD(self.tracker), true)
+			self.abandonButton:SetVisible(tracker:CanAbandon())
 		else
 			self.trackOnHUD:SetVisible(false)
+			self.abandonButton:SetVisible(false)
 		end
 		-- self.expandButton:SetVisible(true)
 

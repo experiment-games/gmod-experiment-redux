@@ -12,6 +12,8 @@ PLUGIN.MISSION_1_TRACKER = Schema.progression.RegisterTracker({
 	isInProgress = PLUGIN.PROGRESSION_MISSION_1_ACCEPTED,
 
 	showOnHUD = true,
+
+	cannotAbandon = true
 })
 
 PLUGIN.MISSION_1_TRACKER_GOAL = PLUGIN.MISSION_1_TRACKER:RegisterGoal({

@@ -83,6 +83,14 @@ function Schema.progression.IsTrackerOnHUD(tracker)
 	return table.HasValue(Schema.progression.trackedOnHud, tracker:GetUniqueID())
 end
 
+--- Requests the server to abandon a progression tracker for the local player
+--- @param tracker ProgressionTracker
+function Schema.progression.AbandonTracker(tracker)
+	net.Start("expProgressionAbandonTracker")
+	net.WriteString(tracker:GetUniqueID())
+	net.SendToServer()
+end
+
 --[[
 	Hooks
 --]]

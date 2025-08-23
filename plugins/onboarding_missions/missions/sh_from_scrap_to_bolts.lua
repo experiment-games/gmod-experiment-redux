@@ -12,6 +12,11 @@ PLUGIN.MISSION_3_TRACKER = Schema.progression.RegisterTracker({
 	isInProgress = PLUGIN.PROGRESSION_MISSION_3_ACCEPTED,
 
 	showOnHUD = true,
+
+	serverOnAbandon = function(tracker, player)
+		Schema.progression.Change(player, PLUGIN.uniqueID, PLUGIN.PROGRESSION_MISSION_3_PLACE_BCU_GOT_SCRAP, nil)
+		Schema.progression.Change(player, PLUGIN.uniqueID, PLUGIN.PROGRESSION_MISSION_3_DRINK_SHARED, nil)
+	end,
 })
 
 PLUGIN.MISSION_3_TRACKER_GOAL_1 = PLUGIN.MISSION_3_TRACKER:RegisterGoal({

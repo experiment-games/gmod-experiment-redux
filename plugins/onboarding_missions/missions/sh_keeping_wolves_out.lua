@@ -12,6 +12,11 @@ PLUGIN.MISSION_2_TRACKER = Schema.progression.RegisterTracker({
 	isInProgress = PLUGIN.PROGRESSION_MISSION_2_ACCEPTED,
 
 	showOnHUD = true,
+
+	serverOnAbandon = function(tracker, player)
+		Schema.progression.Change(player, PLUGIN.uniqueID, "npc", nil)
+		Schema.progression.Change(player, PLUGIN.uniqueID, PLUGIN.PROGRESSION_MISSION_2_USE_NANO_TECH_ITEM, nil)
+	end,
 })
 
 PLUGIN.MISSION_2_TRACKER_GOAL_1 = PLUGIN.MISSION_2_TRACKER:RegisterGoal({

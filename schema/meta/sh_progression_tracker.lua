@@ -19,7 +19,9 @@ end
 ---
 --- @field completedKey string|boolean The key (string) of the progression that marks this tracker as completed, or false if it never completes
 --- @field isInProgress string|ProgressionTrackerCheck The key (string) of the progression that marks this tracker as in-progress, or a function that checks if the tracker is in-progress
---- @field showOnHUD boolean Whether the tracker should be shown on the HUD by default
+--- @field showOnHUD? boolean Whether the tracker should be shown on the HUD by default
+--- @field cannotAbandon? boolean Whether the tracker cannot be abandoned by the player
+--- @field serverOnAbandon? fun(tracker: ProgressionTracker, player: Player) A function that is called when the tracker is abandoned by the player
 
 --- Wrapper over the progression system to handle easily tracking progression values.
 --- This is useful for creating missions, quests, achievements, etc. without having
@@ -100,6 +102,11 @@ function META:GetProgressionKeys()
 	return self.progressionKeys
 end
 
+--- @realm shared
+function META:GetIsInProgressKey()
+	return self.isInProgress
+end
+
 --- Finds a progression key belonging to this tracker by its key.
 --- @param key string
 --- @return any?
@@ -110,6 +117,13 @@ function META:FindProgressionKey(key)
 			return progressionKey
 		end
 	end
+end
+
+--- Gets whether a tracker can be abandoned by the player.
+--- @return boolean
+--- @realm shared
+function META:CanAbandon()
+	return self.cannotAbandon ~= true
 end
 
 --- Initializes/resets the goals table. Only used internally.

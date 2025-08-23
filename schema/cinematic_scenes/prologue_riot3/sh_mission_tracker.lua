@@ -39,6 +39,8 @@ SCENE.INTRO_TUTORIAL_TRACKER = Schema.progression.RegisterTracker({
 
 	--- Show the tracker on HUD by default
 	showOnHUD = true,
+
+	cannotAbandon = true
 })
 
 --[[
