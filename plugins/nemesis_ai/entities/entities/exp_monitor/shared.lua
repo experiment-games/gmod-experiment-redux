@@ -11,7 +11,7 @@ ENT.MinScale = 0
 ENT.MaxScale = 5
 
 function ENT:SetupDataTables()
-	self:NetworkVar("Float", 0, "MonitorScale", {
+	self:NetworkVar("Float", "MonitorScale", {
 		KeyName = "monitor_scale",
 		Edit = {
 			type = "Float",
@@ -20,7 +20,7 @@ function ENT:SetupDataTables()
 			order = 1
 		}
 	})
-	self:NetworkVar("Float", 1, "MonitorWidth", {
+	self:NetworkVar("Float", "MonitorWidth", {
 		KeyName = "monitor_width",
 		Edit = {
 			type = "Float",
@@ -29,7 +29,7 @@ function ENT:SetupDataTables()
 			order = 2
 		}
 	})
-	self:NetworkVar("Float", 2, "MonitorHeight", {
+	self:NetworkVar("Float", "MonitorHeight", {
 		KeyName = "monitor_height",
 		Edit = {
 			type = "Float",
@@ -38,10 +38,12 @@ function ENT:SetupDataTables()
 			order = 3
 		}
 	})
-	self:NetworkVar("Bool", 2, "IsHelper", {
+	self:NetworkVar("Bool", "IsHelper", {
 		KeyName = "monitor_helper"
 	})
-	self:NetworkVar("Bool", 3, "PoweredOn", {
+	self:NetworkVar("Bool", "PoweredOn", {
 		KeyName = "monitor_powered_on"
 	})
+
+	self:NetworkVar("String", "SpecialID")
 end

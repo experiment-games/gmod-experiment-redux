@@ -1,12 +1,21 @@
 local META = FindMetaTable("Entity")
 
 if (SERVER) then
-    util.AddNetworkString("PlayerBodyGroupChanged")
-    util.AddNetworkString("PlayerBodyGroupsChanged")
-    util.AddNetworkString("expRemoveDecals")
+	util.AddNetworkString("PlayerBodyGroupChanged")
+	util.AddNetworkString("PlayerBodyGroupsChanged")
+	util.AddNetworkString("expRemoveDecals")
 
 	META.expSetBodygroup = META.expSetBodygroup or META.SetBodygroup
 	META.expSetBodyGroups = META.expSetBodyGroups or META.SetBodyGroups
+	META.expSetParent = META.expSetParent or META.SetParent
+
+	--- Call a hook when we set the parent
+	--- @param parent Entity
+	function META:SetParent(parent)
+		hook.Run("EntitySetParent", self, parent)
+
+		self:expSetParent(parent)
+	end
 
 	--[[
 		Override the bodygroup functions to call hooks
@@ -14,21 +23,21 @@ if (SERVER) then
 
 	--- @param index number
 	--- @param value number
-    function META:SetBodygroup(index, value)
-        if (self:IsPlayer()) then
-            local oldValue = self:GetBodygroup(index)
-            hook.Run("PlayerBodyGroupChanged", self, index, value, oldValue)
+	function META:SetBodygroup(index, value)
+		if (self:IsPlayer()) then
+			local oldValue = self:GetBodygroup(index)
+			hook.Run("PlayerBodyGroupChanged", self, index, value, oldValue)
 
-            net.Start("PlayerBodyGroupChanged")
-            net.WriteEntity(self)
-            net.WriteUInt(index, 32)
-            net.WriteUInt(value, 32)
-            net.WriteUInt(oldValue, 32)
-            net.Broadcast()
-        end
+			net.Start("PlayerBodyGroupChanged")
+			net.WriteEntity(self)
+			net.WriteUInt(index, 32)
+			net.WriteUInt(value, 32)
+			net.WriteUInt(oldValue, 32)
+			net.Broadcast()
+		end
 
-        self:expSetBodygroup(index, value)
-    end
+		self:expSetBodygroup(index, value)
+	end
 
 	--- @param index number
 	--- @param value number
@@ -37,28 +46,28 @@ if (SERVER) then
 	end
 
 	--- @param bodygroups string # Body groups to set. Each character in the string represents a separate bodygroup. (0 to 9, a to z being (10 to 35))
-    function META:SetBodyGroups(bodygroups)
-        if (self:IsPlayer()) then
-            local oldBodygroups = ""
+	function META:SetBodyGroups(bodygroups)
+		if (self:IsPlayer()) then
+			local oldBodygroups = ""
 
-            for i = 1, 9 do
-                local bodygroup = self:GetBodygroup(i)
-                oldBodygroups = oldBodygroups .. bodygroup
-            end
+			for i = 1, 9 do
+				local bodygroup = self:GetBodygroup(i)
+				oldBodygroups = oldBodygroups .. bodygroup
+			end
 
-            hook.Run("PlayerBodyGroupsChanged", self, bodygroups, oldBodygroups)
+			hook.Run("PlayerBodyGroupsChanged", self, bodygroups, oldBodygroups)
 
-            net.Start("PlayerBodyGroupsChanged")
-            net.WriteEntity(self)
-            net.WriteString(bodygroups)
-            net.WriteString(oldBodygroups)
-            net.Broadcast()
-        end
+			net.Start("PlayerBodyGroupsChanged")
+			net.WriteEntity(self)
+			net.WriteString(bodygroups)
+			net.WriteString(oldBodygroups)
+			net.Broadcast()
+		end
 
-        self:expSetBodyGroups(bodygroups)
-    end
+		self:expSetBodyGroups(bodygroups)
+	end
 
-    function META:RemoveAllClientDecals()
+	function META:RemoveAllClientDecals()
 		net.Start("expRemoveDecals")
 		net.WriteEntity(self)
 		net.Broadcast()
@@ -71,7 +80,7 @@ else
 		local oldValue = net.ReadUInt(32)
 
 		hook.Run("PlayerBodyGroupChanged", player, index, value, oldValue)
-    end)
+	end)
 
 	net.Receive("PlayerBodyGroupsChanged", function()
 		local player = net.ReadEntity()
@@ -79,10 +88,10 @@ else
 		local oldBodygroups = net.ReadString()
 
 		hook.Run("PlayerBodyGroupsChanged", player, bodygroups, oldBodygroups)
-    end)
+	end)
 
 	net.Receive("expRemoveDecals", function()
-        local entity = net.ReadEntity()
+		local entity = net.ReadEntity()
 
 		if (IsValid(entity)) then
 			entity:RemoveAllDecals()
@@ -92,27 +101,27 @@ end
 
 -- Override the default IsDoor logic to not include entities that are not doors. We call a hook to check.
 function META:IsDoor()
-    local class = self:GetClass()
-    local pluginIsDoor = hook.Run("EntityIsDoor", self)
+	local class = self:GetClass()
+	local pluginIsDoor = hook.Run("EntityIsDoor", self)
 
 	if (pluginIsDoor == true) then
 		return true
 	end
 
-    local baseIsDoor = (class and class:find("door") ~= nil)
+	local baseIsDoor = (class and class:find("door") ~= nil)
 
-    if (not baseIsDoor) then
-        return false
-    end
+	if (not baseIsDoor) then
+		return false
+	end
 
 	return pluginIsDoor ~= false
 end
 
 if (SERVER) then
-    function META:RemoveWithEffect()
-        Schema.ImpactEffect(self:GetPos(), 8, true)
-        self:Remove()
-    end
+	function META:RemoveWithEffect()
+		Schema.ImpactEffect(self:GetPos(), 8, true)
+		self:Remove()
+	end
 
 	function META:CreateServerRagdoll()
 		local entity = ents.Create("prop_ragdoll")

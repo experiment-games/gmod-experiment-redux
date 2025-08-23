@@ -98,8 +98,15 @@ function PANEL:Think()
 		return
 	end
 
+	if (hook.Run("ShouldShowBuffsHUD") == false) then
+		self:SetVisible(false)
+		return
+	else
+		self:SetVisible(true)
+	end
+
 	-- Don't update buffs when not visible and we're not in the character menu
-	local menu = (IsValid(ix.gui.characterMenu) and !ix.gui.characterMenu:IsClosing()) and ix.gui.characterMenu
+	local menu = (IsValid(ix.gui.characterMenu) and ! ix.gui.characterMenu:IsClosing()) and ix.gui.characterMenu
 		or IsValid(ix.gui.menu) and ix.gui.menu
 
 	if (menu) then
@@ -163,6 +170,8 @@ function PANEL:SetBuff(buff, key)
 	for _, panel in ipairs(panels) do
 		panel:SetHelixTooltip(function(tooltip)
 			Schema.buff.PopulateTooltip(tooltip, self.buffTable, buff)
+
+			hook.Run("PopulatedBuffTooltip", tooltip, self.buffTable, buff)
 		end)
 	end
 

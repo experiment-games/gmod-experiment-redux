@@ -1,7 +1,6 @@
 local PLUGIN = PLUGIN
 
-function PLUGIN:OnCharacterCreated(client, character)
-	local inventory = character:GetInventory()
+function PLUGIN:PlayerFillDefaultInventory(client, character, inventory)
 	inventory:Add("bolt_control_unit", 1)
 end
 
@@ -29,7 +28,8 @@ function PLUGIN:GeneratorAdjustDamage(generator, damageInfo)
 
 			if (IsValid(boltInformerOwner) and boltInformerOwner == generator.expClient) then
 				if (not boltInformerOwner.expNextBoltInformerWarn or CurTime() >= boltInformerOwner.expNextBoltInformerWarn) then
-					ix.chat.Send(boltInformerOwner, "bolt_informer", "We have detected that your bolt generator is under attack!")
+					ix.chat.Send(boltInformerOwner, "bolt_informer",
+						"We have detected that your bolt generator is under attack!")
 
 					boltInformerOwner.expNextBoltInformerWarn = CurTime() + self.boltInformerWarnInterval
 				end

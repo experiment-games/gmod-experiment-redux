@@ -1,4 +1,4 @@
-Schema.draw = ix.util.RegisterLibrary("draw")
+Schema.draw = ix.util.GetOrCreateLibrary("draw")
 
 --- Draws a circle on the screen.
 -- Source: https://wiki.facepunch.com/gmod/surface.DrawPoly
@@ -144,6 +144,28 @@ function Schema.draw.DrawLabeledValue(label, value, x, y)
 	)
 
 	return y + labelHeight + finalY
+end
+
+--- Draws dimmed rectangles everywhere except for the specified rectangle.
+--- Useful to draw attention to a specific area.
+--- @param x number
+--- @param y number
+--- @param w number
+--- @param h number
+--- @param a? number
+function Schema.draw.DrawUndimmedRect(x, y, w, h, a)
+	local scrW, scrH = ScrW(), ScrH()
+
+	a = a or 200
+
+	surface.SetDrawColor(0, 0, 0, a)
+	surface.DrawRect(0, 0, scrW, y)
+	surface.DrawRect(0, y, x, h)
+	surface.DrawRect(x + w, y, scrW - x - w, h)
+	surface.DrawRect(0, y + h, scrW, scrH - y - h)
+
+	surface.SetDrawColor(255, 255, 255, a)
+	surface.DrawOutlinedRect(x, y, w, h)
 end
 
 --- Shows a spritesheet picker to get the x and y position of a spritesheet part.

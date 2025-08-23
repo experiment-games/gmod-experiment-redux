@@ -17,10 +17,10 @@ ix.config.Add(
 	}
 )
 
+_G["PT"] = PrintTable
+
 if (SERVER) then
 	function PLUGIN:PlayerSpawn(client)
-		_G["PT"] = PrintTable
-
 		for k, otherClient in ipairs(player.GetAll()) do
 			-- P1, P2, etc... to get a player by index
 			_G["P" .. k] = otherClient
@@ -56,6 +56,13 @@ if (SERVER) then
 
 		if (not Schema.util.Throttle("alphaTestMessage", self.alphaTestMessageInterval)) then
 			ix.chat.Send(nil, "notice", alphaTestMessage)
+		end
+	end
+else
+	function PLUGIN:InitPostEntity()
+		_G["LP"] = LocalPlayer()
+		_G["LPT"] = function()
+			return LocalPlayer():GetEyeTraceNoCursor()
 		end
 	end
 end

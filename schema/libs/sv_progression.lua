@@ -1,33 +1,28 @@
 --- Server library to manage (dynamic) progressions and progression trackers. As
 --- well as to manage them for players.
-Schema.progression = ix.util.RegisterLibrary("progression")
+Schema.progression = ix.util.GetOrCreateLibrary("progression")
 
 util.AddNetworkString("expProgressionItemHeader")
 util.AddNetworkString("expProgressionItem")
 util.AddNetworkString("expProgressionRemove")
+util.AddNetworkString("expProgressionAbandonTracker")
 
 --- @alias ProgressionValue string|number|table|boolean|nil
 
---- Gets the progressions for a player and the dirty progressions table
+--- Gets the progressions for a player
 --- where progressions that need to be saved are referenced.
 --- @param player Player
---- @return table, table # The progressions and dirty progressions
+--- @return table # The progressions
 function Schema.progression.GetProgressions(player)
 	local character = player:GetCharacter()
 	local progressions = character:GetData("progressions")
-	local dirtyProgressions = character:GetData("dirtyProgressions")
 
 	if (not progressions) then
 		progressions = {}
 		character:SetData("progressions", progressions)
 	end
 
-	if (not dirtyProgressions) then
-		dirtyProgressions = {}
-		character:SetData("dirtyProgressions", dirtyProgressions)
-	end
-
-	return progressions, dirtyProgressions
+	return progressions
 end
 
 --- Gets the dynamic progressions for a player.
@@ -186,7 +181,7 @@ end
 --- @param noNetwork? boolean Whether to not send the change to the client
 --- @return any # The new value
 function Schema.progression.Change(player, scope, key, value, noNetwork)
-	local progressions, dirtyProgressions = Schema.progression.GetProgressions(player)
+	local progressions = Schema.progression.GetProgressions(player)
 
 	progressions[scope] = progressions[scope] or {}
 
@@ -195,9 +190,6 @@ function Schema.progression.Change(player, scope, key, value, noNetwork)
 	end
 
 	progressions[scope][key] = value
-
-	-- Force this to be dirty so it gets saved to the database
-	dirtyProgressions[scope] = progressions[scope]
 
 	if (noNetwork) then
 		return value
@@ -220,6 +212,8 @@ function Schema.progression.Change(player, scope, key, value, noNetwork)
 			value = value
 		}
 	})
+
+	hook.Run("PlayerProgressionChange", player, scope, key, value)
 
 	return value
 end
@@ -419,9 +413,49 @@ function Schema.progression.OpenEditor(client)
 	Schema.chunkedNetwork.Send("ProgressionsEdit", client, progressions)
 end
 
+--- Abandons a progression tracker.
+--- @param client Player
+--- @param uniqueID string
+function Schema.progression.AbandonTracker(client, uniqueID)
+	local tracker = Schema.progression.GetTracker(uniqueID)
+
+	if (not tracker or not tracker:CanAbandon()) then
+		return
+	end
+
+	-- Remove the isInProgress key and completedKey for the tracker
+	local progressions = Schema.progression.GetProgressions(client)
+	local scope = tracker:GetScope()
+
+	if (progressions[scope]) then
+		progressions[scope][tracker:GetIsInProgressKey()] = nil
+		progressions[scope][tracker:GetCompletedKey()] = nil
+
+		-- Empty out all keys for the tracker goals
+		for _, goal in ipairs(tracker:GetGoals()) do
+			progressions[scope][goal:GetKey()] = nil
+		end
+	end
+
+	if (tracker.serverOnAbandon) then
+		tracker.serverOnAbandon(tracker, client)
+	end
+
+	-- Network the removal to the client by resetting progressions fully
+	Schema.progression.NetworkAll(client)
+end
+
+--[[
+	Hooks
+--]]
+
 hook.Add("InitializedSchema", "Schema.progression.LoadAllDynamic", function()
 	Schema.progression.dynamicTrackers = Schema.progression.LoadAll()
 end)
+
+--[[
+	Net Messages
+--]]
 
 net.Receive("expProgressionRemove", function(length, client)
 	local uniqueID = net.ReadString()
@@ -438,4 +472,10 @@ net.Receive("expProgressionRemove", function(length, client)
 	Schema.progression.UnRegisterTracker(progression)
 
 	Schema.progression.dynamicTrackers[uniqueID] = nil
+end)
+
+net.Receive("expProgressionAbandonTracker", function(length, client)
+	local uniqueID = net.ReadString()
+
+	Schema.progression.AbandonTracker(client, uniqueID)
 end)

@@ -60,8 +60,7 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 	client:Notify("You have constructed a structure blueprint, complete it by filling it with materials.")
 end)
 
-function PLUGIN:OnCharacterCreated(client, character)
-	local inventory = character:GetInventory()
+function PLUGIN:PlayerFillDefaultInventory(client, character, inventory)
 	inventory:Add("crowbar", 1)
 end
 

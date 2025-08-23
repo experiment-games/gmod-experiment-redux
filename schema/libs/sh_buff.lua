@@ -1,4 +1,4 @@
-Schema.buff = ix.util.GetOrCreateCommonLibrary("Buff", function() return ix.util.NewMetaObject(Schema.meta.buff) end)
+Schema.buff = ix.util.GetOrCreateCommonLibrary("buff", function() return ix.util.NewMetaObject(Schema.meta.buff) end)
 Schema.buff.nextActiveBuffKey = Schema.buff.nextActiveBuffKey or 1
 
 --[[

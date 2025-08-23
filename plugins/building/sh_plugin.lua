@@ -6,40 +6,41 @@ PLUGIN.description = "Restricts construction to only allowed props. Requiring bl
 
 ix.util.Include("sv_plugin.lua")
 
-ix.config.Add("maxBuildGroundLevel", 2, "The maximum distance from the ground players can build (in structures on top of structures).", nil, {
-	data = {min = 0, max = 100, decimals = 0},
+ix.config.Add("maxBuildGroundLevel", 2,
+	"The maximum distance from the ground players can build (in structures on top of structures).", nil, {
+	data = { min = 0, max = 100, decimals = 0 },
 	category = "Building"
 })
 
 function PLUGIN:EntityIsDoor(entity)
-    if (entity.IsStructureOrPart) then
-        return true
-    end
+	if (entity.IsStructureOrPart) then
+		return true
+	end
 end
 
 if (CLIENT) then
 	-- Have the blueprint weapon not show the hazardous environment sheet, but a custom one with blueprints on them
-    Schema.util.ReplaceMaterialTexture(
-        Material("models/props_lab/clipboard_sheet"),
-        Material("experiment-redux/replacements/clipboard")
+	Schema.util.ReplaceMaterialTexture(
+		Material("models/props_lab/clipboard_sheet"),
+		Material("experiment-redux/replacements/clipboard")
 	)
 
-    function PLUGIN:RequestBuildStructure(position, angles)
-        net.Start("ixBuildingRequestBuildStructure")
-        net.WriteVector(position)
-        net.WriteAngle(angles)
-        net.SendToServer()
-    end
+	function PLUGIN:RequestBuildStructure(position, angles)
+		net.Start("ixBuildingRequestBuildStructure")
+		net.WriteVector(position)
+		net.WriteAngle(angles)
+		net.SendToServer()
+	end
 
-    function PLUGIN:GetDoorMenu(door, access, entity)
-        if (not entity.IsStructureOrPart) then
-            return
-        end
+	function PLUGIN:GetDoorMenu(door, access, entity)
+		if (not entity.IsStructureOrPart) then
+			return
+		end
 
 		door = door.IsStructurePart and door:GetParent() or door
 
 		local menu = vgui.Create("expStructureAccessMenu")
-        menu:SetStructure(door, access, entity)
+		menu:SetStructure(door, access, entity)
 		return menu
 	end
 end
@@ -49,29 +50,29 @@ function PLUGIN:InitializedPlugins()
 	helperMetaTable.__index = helperMetaTable
 	local toBeRemoved = {}
 
-    function helperMetaTable:Add(data)
-        table.insert(self, data)
-    end
+	function helperMetaTable:Add(data)
+		table.insert(self, data)
+	end
 
-    function helperMetaTable:Remove(uniqueID)
-        table.insert(toBeRemoved, uniqueID)
-    end
+	function helperMetaTable:Remove(uniqueID)
+		table.insert(toBeRemoved, uniqueID)
+	end
 
 	function helperMetaTable:RemoveQueued()
-        for _, uniqueID in ipairs(toBeRemoved) do
-            for i, data in ipairs(self) do
-                if (data.uniqueID == uniqueID) then
-                    table.remove(self, i)
-                end
-            end
-        end
+		for _, uniqueID in ipairs(toBeRemoved) do
+			for i, data in ipairs(self) do
+				if (data.uniqueID == uniqueID) then
+					table.remove(self, i)
+				end
+			end
+		end
 
 		toBeRemoved = {}
 	end
 
 	self.allowedProps = setmetatable({}, helperMetaTable)
 
-    hook.Run("AdjustAllowedProps", self.allowedProps)
+	hook.Run("AdjustAllowedProps", self.allowedProps)
 
 	self.allowedProps:RemoveQueued()
 
@@ -88,21 +89,21 @@ function PLUGIN:InitializedPlugins()
 end
 
 function PLUGIN:GetPlacementTrace(client)
-    local maxDistance = 100
-    local eyesPosition = client:EyePos()
-    local trace = util.TraceLine({
-        start = eyesPosition,
-        endpos = eyesPosition + (client:GetAimVector() * maxDistance),
-        filter = client
-    })
+	local maxDistance = 100
+	local eyesPosition = client:EyePos()
+	local trace = util.TraceLine({
+		start = eyesPosition,
+		endpos = eyesPosition + (client:GetAimVector() * maxDistance),
+		filter = client
+	})
 
-    return trace.HitPos, Angle(0, client:EyeAngles().y, 0)
+	return trace.HitPos, Angle(0, client:EyeAngles().y, 0)
 end
 
 function PLUGIN:GetPlacementValid(client, position, angles)
 	-- Allow buildings to clip by a margin
 	local clipMargin = 10
-    local maxDistance = clipMargin + 10
+	local maxDistance = clipMargin + 10
 	local groundTrace = util.TraceLine({
 		start = position + Vector(0, 0, clipMargin),
 		endpos = position - Vector(0, 0, maxDistance),
@@ -111,11 +112,8 @@ function PLUGIN:GetPlacementValid(client, position, angles)
 
 	-- ! This sucks: It's always close to a spawn point with the amount we have.
 	-- ! I "solve" the problem of people prop blocking eachother, by just giving everyone a crowbar by default.
-	-- local spawnPointsPlugin = ix.plugin.Get("spawn_select")
-
-	-- if (spawnPointsPlugin) then
 	-- 	-- Check if this is close to a spawn point
-	-- 	local spawns = spawnPointsPlugin.spawns or {}
+	-- 	local spawns = Schema.spawnPoints.GetAll()
 	-- 	local minimumDistance = 1048
 
 	-- 	for _, spawn in ipairs(spawns) do
@@ -125,15 +123,14 @@ function PLUGIN:GetPlacementValid(client, position, angles)
 	-- 			return false, "You cannot build this close to a spawn point."
 	-- 		end
 	-- 	end
-	-- end
 
-    if (groundTrace.HitWorld) then
-        return true
-    end
+	if (groundTrace.HitWorld) then
+		return true
+	end
 
-    if (IsValid(groundTrace.Entity) and (groundTrace.Entity.IsStructure or groundTrace.Entity.IsStructurePart)) then
+	if (IsValid(groundTrace.Entity) and (groundTrace.Entity.IsStructure or groundTrace.Entity.IsStructurePart)) then
 		-- Limit how far up players can build upon structures
-        local maxBuildGroundLevel = ix.config.Get("maxBuildGroundLevel")
+		local maxBuildGroundLevel = ix.config.Get("maxBuildGroundLevel")
 
 		if (groundTrace.Entity.IsStructure or groundTrace.Entity.IsStructurePart) then
 			local groundLevel = groundTrace.Entity:GetGroundLevel()
@@ -165,7 +162,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 			["material_metal"] = 1
 		},
 		structureOffset = Vector(0, 0, 28),
-    })
+	})
 
 	--[[
 		Hard metal props
@@ -181,20 +178,20 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 			["material_metal"] = 10
 		},
 		structureOffset = Vector(0, 0, 54),
-    })
+	})
 
-    allowedProps:Add({
-        uniqueID = "blueprint_blast_door",
-        name = "Blast Door",
-        description = "A blast door to protect your base.",
-        price = 200,
-        health = 5000,
-        model = "models/props_lab/blastdoor001b.mdl",
+	allowedProps:Add({
+		uniqueID = "blueprint_blast_door",
+		name = "Blast Door",
+		description = "A blast door to protect your base.",
+		price = 200,
+		health = 5000,
+		model = "models/props_lab/blastdoor001b.mdl",
 		constructionMaterials = {
 			["material_metal"] = 15
 		},
 		structureOffset = Vector(0, 0, 1),
-    })
+	})
 
 	-- Commented because we should only provide small to medium props (in order to prevent prop climbing to high places)
 	-- allowedProps:Add({
@@ -247,7 +244,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		model = "models/props_c17/oildrum001.mdl",
 		constructionMaterials = {
 			["material_metal"] = 5
-        },
+		},
 		structureOffset = Vector(0, 0, 1),
 	})
 end

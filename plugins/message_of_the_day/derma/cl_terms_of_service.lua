@@ -33,6 +33,20 @@ function PANEL:Init()
 			gui.OpenURL(message:sub(OPEN_URL_PREFIX:len() + 1))
 		end
 	end
+
+	self.html.OnDocumentReady = function()
+		self.targetAlpha = 0
+	end
+
+	self.currentAlpha = 255
+end
+
+-- Draws a black overlay that fades out when the document loads, preventing the character creation behind this panel to flash visible shortly on join
+function PANEL:PaintOver(width, height)
+	self.currentAlpha = math.Approach(self.currentAlpha, self.targetAlpha or self.currentAlpha, FrameTime() * 200)
+
+	surface.SetDrawColor(0, 0, 0, self.currentAlpha)
+	surface.DrawRect(0, 0, width, height)
 end
 
 vgui.Register("expTermsOfService", PANEL, "EditablePanel")

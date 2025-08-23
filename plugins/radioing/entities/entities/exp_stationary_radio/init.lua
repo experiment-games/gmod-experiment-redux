@@ -41,6 +41,7 @@ function ENT:ChangeFrequency(frequency)
 
 	itemTable:SetData("frequency", frequency)
 	self:SetFrequency(frequency)
+	-- self:EmitSound("ambient/levels/prison/radio_random12.wav")
 end
 
 function ENT:OnDuplicated(entTable)

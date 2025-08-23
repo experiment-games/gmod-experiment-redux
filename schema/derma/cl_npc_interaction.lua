@@ -17,6 +17,22 @@ do
 	box-sizing: border-box;
 }
 
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A33426;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C34A3B;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -55,6 +71,13 @@ h6 {
     overflow-y: auto;
     min-height: 0; /* for flexbox in older Chromium versions */
 	word-wrap: break-word;
+}
+
+.highlight {
+	background-color: #A33426;
+	color: white;
+	padding: 4px 8px;
+	border-radius: 4px;
 }
 
 button {
@@ -152,7 +175,10 @@ button:disabled {
 			end
 
 			if (answer:GetNextInteraction() == nil) then
-				if (IsValid(self)) then
+				if (IsValid(Schema.entityPanel)) then
+					Schema.entityPanel:Remove()
+					self:SetAlpha(0) -- Ensure the fade out of the entity panel shows nicely
+				elseif (IsValid(self)) then
 					self:Remove()
 				end
 
@@ -504,10 +530,6 @@ button:disabled {
 
 	function PANEL:OnRemove()
 		Schema.npc.panel = nil
-
-		if (IsValid(Schema.entityPanel)) then
-			Schema.entityPanel:Remove()
-		end
 	end
 
 	vgui.Register("expNpcInteraction", PANEL, "EditablePanel")

@@ -1,4 +1,3 @@
-
 AddCSLuaFile()
 
 if (CLIENT) then
@@ -9,46 +8,46 @@ if (CLIENT) then
 	SWEP.DrawCrosshair = false
 end
 
-SWEP.Author = "Chessnut"
-SWEP.Instructions = "Primary Fire: Lock\nSecondary Fire: Unlock"
-SWEP.Purpose = "Hitting things and knocking on doors."
-SWEP.Drop = false
+SWEP.Author                = "Chessnut"
+SWEP.Instructions          = "Primary Fire: Lock\nSecondary Fire: Unlock"
+SWEP.Purpose               = "Hitting things and knocking on doors."
+SWEP.Drop                  = false
 
-SWEP.ViewModelFOV = 45
-SWEP.ViewModelFlip = false
-SWEP.AnimPrefix	 = "rpg"
+SWEP.ViewModelFOV          = 45
+SWEP.ViewModelFlip         = false
+SWEP.AnimPrefix            = "rpg"
 
-SWEP.ViewTranslation = 4
+SWEP.ViewTranslation       = 4
 
-SWEP.Primary.ClipSize = -1
-SWEP.Primary.DefaultClip = -1
-SWEP.Primary.Automatic = false
-SWEP.Primary.Ammo = ""
-SWEP.Primary.Damage = 5
-SWEP.Primary.Delay = 0.75
+SWEP.Primary.ClipSize      = -1
+SWEP.Primary.DefaultClip   = -1
+SWEP.Primary.Automatic     = false
+SWEP.Primary.Ammo          = ""
+SWEP.Primary.Damage        = 5
+SWEP.Primary.Delay         = 0.75
 
-SWEP.Secondary.ClipSize = -1
+SWEP.Secondary.ClipSize    = -1
 SWEP.Secondary.DefaultClip = 0
-SWEP.Secondary.Automatic = false
-SWEP.Secondary.Ammo = ""
+SWEP.Secondary.Automatic   = false
+SWEP.Secondary.Ammo        = ""
 
-SWEP.ViewModel = Model("models/weapons/c_arms_animations.mdl")
-SWEP.WorldModel = ""
+SWEP.ViewModel             = Model("models/weapons/c_arms_animations.mdl")
+SWEP.WorldModel            = ""
 
-SWEP.UseHands = false
-SWEP.LowerAngles = Angle(0, 5, -14)
-SWEP.LowerAngles2 = Angle(0, 5, -22)
+SWEP.UseHands              = false
+SWEP.LowerAngles           = Angle(0, 5, -14)
+SWEP.LowerAngles2          = Angle(0, 5, -22)
 
-SWEP.IsAlwaysLowered = true
-SWEP.FireWhenLowered = true
-SWEP.HoldType = "passive"
+SWEP.IsAlwaysLowered       = true
+SWEP.FireWhenLowered       = true
+SWEP.HoldType              = "passive"
 
 -- luacheck: globals ACT_VM_FISTS_DRAW ACT_VM_FISTS_HOLSTER
-ACT_VM_FISTS_DRAW = 2
-ACT_VM_FISTS_HOLSTER = 1
+ACT_VM_FISTS_DRAW          = 2
+ACT_VM_FISTS_HOLSTER       = 1
 
 function SWEP:Holster()
-	if (!IsValid(self.Owner)) then
+	if (! IsValid(self.Owner)) then
 		return
 	end
 
@@ -76,7 +75,7 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + time2)
 	self:SetNextSecondaryFire(CurTime() + time2)
 
-	if (!IsFirstTimePredicted()) then
+	if (! IsFirstTimePredicted()) then
 		return
 	end
 
@@ -85,9 +84,9 @@ function SWEP:PrimaryAttack()
 	end
 
 	local data = {}
-		data.start = self.Owner:GetShootPos()
-		data.endpos = data.start + self.Owner:GetAimVector()*96
-		data.filter = self.Owner
+	data.start = self.Owner:GetShootPos()
+	data.endpos = data.start + self.Owner:GetAimVector() * 96
+	data.filter = self.Owner
 	local entity = util.TraceLine(data).Entity
 
 	--[[
@@ -96,11 +95,11 @@ function SWEP:PrimaryAttack()
 			2. The entity is vehicle and the "owner" variable is same as client's character ID.
 	--]]
 	if (IsValid(entity) and
-		(
-			(entity:CheckDoorAccess(self.Owner)) or
-			(entity:IsVehicle() and entity.CPPIGetOwner and entity:CPPIGetOwner() == self.Owner)
-		)
-	) then
+			(
+				(entity:CheckDoorAccess(self.Owner)) or
+				(entity:IsVehicle() and entity.CPPIGetOwner and entity:CPPIGetOwner() == self.Owner)
+			)
+		) then
 		self.Owner:SetAction("@locking", time, function()
 			self:ToggleLock(entity, true)
 		end)
@@ -170,7 +169,7 @@ function SWEP:SecondaryAttack()
 	self:SetNextPrimaryFire(CurTime() + time2)
 	self:SetNextSecondaryFire(CurTime() + time2)
 
-	if (!IsFirstTimePredicted()) then
+	if (! IsFirstTimePredicted()) then
 		return
 	end
 
@@ -179,9 +178,9 @@ function SWEP:SecondaryAttack()
 	end
 
 	local data = {}
-		data.start = self.Owner:GetShootPos()
-		data.endpos = data.start + self.Owner:GetAimVector()*96
-		data.filter = self.Owner
+	data.start = self.Owner:GetShootPos()
+	data.endpos = data.start + self.Owner:GetAimVector() * 96
+	data.filter = self.Owner
 	local entity = util.TraceLine(data).Entity
 
 
@@ -189,13 +188,13 @@ function SWEP:SecondaryAttack()
 		Unlocks the entity if the contiditon fits:
 			1. The entity is door and client has access to the door.
 			2. The entity is vehicle and the "owner" variable is same as client's character ID.
-	]]--
+	]] --
 	if (IsValid(entity) and
-		(
-			(entity:CheckDoorAccess(self.Owner)) or
-			(entity:IsVehicle() and entity.CPPIGetOwner and entity:CPPIGetOwner() == self.Owner)
-		)
-	) then
+			(
+				(entity:CheckDoorAccess(self.Owner)) or
+				(entity:IsVehicle() and entity.CPPIGetOwner and entity:CPPIGetOwner() == self.Owner)
+			)
+		) then
 		self.Owner:SetAction("@unlocking", time, function()
 			self:ToggleLock(entity, false)
 		end)

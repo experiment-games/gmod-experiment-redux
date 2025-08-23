@@ -28,11 +28,6 @@ local variables = {
 	"visible"
 }
 
-function PLUGIN:OnCharacterCreated(client, character)
-	local inventory = character:GetInventory()
-	inventory:Add("door_protector", 1)
-end
-
 function PLUGIN:EntityIsDoor(entity)
 	if (entity:GetClass() == "exp_door_protector") then
 		return false

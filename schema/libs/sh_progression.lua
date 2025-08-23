@@ -1,7 +1,7 @@
 --- Shared library to handle progression tracking. Allows creating missions/quests,
 --- achievements, faction relationships, interaction progression and more.
 --- @realm shared
-Schema.progression = ix.util.RegisterLibrary("progression", {
+Schema.progression = ix.util.GetOrCreateLibrary("progression", {
 	-- Where trackers are stored
 	trackers = {},
 
@@ -97,12 +97,21 @@ function Schema.progression.GetTracker(uniqueID)
 	return Schema.progression.trackersByID[uniqueID]
 end
 
---- Gets a progression trackers by their scope.
+--- Gets a progression trackers by their scope and optionally by their isInProgress key.
 --- @param scope string
+--- @param isInProgressKey string
 --- @return table<string, ProgressionTracker>
 --- @realm shared
-function Schema.progression.GetTrackersByScope(scope)
-	return Schema.progression.trackersByScope[scope] or {}
+function Schema.progression.GetTrackersByScope(scope, isInProgressKey)
+	local trackers = {}
+
+	for uniqueID, tracker in pairs(Schema.progression.trackersByScope[scope] or {}) do
+		if (isInProgressKey == nil or tracker.isInProgress == isInProgressKey) then
+			trackers[uniqueID] = tracker
+		end
+	end
+
+	return trackers
 end
 
 --- Gets a debug string listing all active progression trackers for a player.

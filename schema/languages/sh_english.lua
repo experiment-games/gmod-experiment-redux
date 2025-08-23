@@ -4,6 +4,8 @@ LANGUAGE = {
 	theBusiness = "The Business",
 	missionTracker = "Mission Tracker",
 
+	optShowTutorial = "Show Tutorial",
+	optdShowTutorial = "Show the tutorial hints, intended for new players.",
 	optAccessibilityFont = "Enable more readable font",
 	optdAccessibilityFont =
 	"Enables a more readable font for those who have trouble reading the default font.",

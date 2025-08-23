@@ -8,6 +8,7 @@
 	"Experiment Monitor that matches the position and angles of a prop_static with the same model"
 [
     monitorPreset(string) : "Monitor Preset" : "combine_big" : "Preset used to determine the monitor's screen size"
+    specialID(string) : "Special ID" : "" : "For when you want to filter out this monitor specifically for use in a cinematic for example"
 ]
 
 @PointClass base(Origin, Angles) color(160 78 69) sphere(fademindist) sphere(fademaxdist) studioprop() = exp_scavenging_source :
@@ -107,4 +108,42 @@
     cameraName(string) : "Camera Name" : "Camera" : "Display name for this camera view"
     targetName(target_destination) : "Look At Target" : "" : "Entity to point the camera towards (optional)"
     fov(integer) : "Field of View" : 75 : "Camera field of view in degrees"
+]
+
+// For cinematic spawns, like the prologue, where the player is dropped in a scene outside of regular map bounds
+@PointClass base(Angles) studio("models/editor/playerstart.mdl") = exp_cinematic_spawn :
+    "Cinematic spawn point for scripted sequences"
+[
+    sequenceID(string) : "Sequence ID" : "" : "ID of the scripted sequence to identify this spawn by"
+]
+
+// For item spawns in cinematic sequences
+@PointClass base(Angles) = exp_cinematic_item_spawn :
+    "Cinematic spawn point for items in scripted sequences"
+[
+    sequenceID(string) : "Sequence ID" : "" : "ID of the scripted sequence to identify this spawn by"
+    itemSpawnID(string) : "Item Spawn ID" : "" : "ID of the item spawn point"
+]
+
+// For enemy spawns in cinematic sequences
+@PointClass base(Angles) = exp_cinematic_enemy_spawn :
+    "Cinematic spawn point for enemies in scripted sequences"
+[
+    sequenceID(string) : "Sequence ID" : "" : "ID of the scripted sequence to identify this spawn by"
+    enemySpawnID(string) : "Enemy Spawn ID" : "" : "ID of the enemy spawn point"
+]
+
+// General purpose area trigger that fires hooks when players enter/exit
+@SolidClass base(Trigger, Targetname) = exp_area :
+    "General purpose area trigger that fires hooks when players enter and exit"
+[
+    areaID(string) : "Area ID" : "" : "Unique identifier for this area"
+    areaName(string) : "Area Name" : "" : "Human-readable name for this area"
+]
+
+// Trigger that marks an area where resources can be placed
+@SolidClass base(Trigger, Targetname) = exp_resource_area :
+    "Resource area trigger that allows resource placement (like crops)"
+[
+    resourceTypeID(string) : "Resource Type ID" : "" : "The type of resource that can be placed here"
 ]

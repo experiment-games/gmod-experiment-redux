@@ -82,9 +82,16 @@ function Schema:LoadFonts(headingFont, readableFont)
 		weight = 600,
 	})
 
-	surface.CreateFont("expMonitorFont", {
+	surface.CreateFont("expMonitorLarge", {
 		font = "Consolas",
-		size = 256,
+		size = 255, -- max is 255
+		extended = true,
+		weight = 100
+	})
+
+	surface.CreateFont("expMonitorMedium", {
+		font = "Consolas",
+		size = 128,
 		extended = true,
 		weight = 100
 	})
@@ -202,6 +209,14 @@ function Schema:LoadFonts(headingFont, readableFont)
 			size = scaleFont(36),
 			extended = true,
 			weight = 4000
+		})
+
+		surface.CreateFont("ixBigFontOutlined", {
+			font = headingFont,
+			size = scaleFont(36),
+			extended = true,
+			weight = 4000,
+			outline = true
 		})
 
 		surface.CreateFont("ixMediumFont", {
@@ -471,6 +486,8 @@ function Schema:CreateCharacterInfo(panel)
 	buffManager:RefreshBuffs()
 	buffManager.characterPanel = panel
 	panel.buffs.manager = buffManager
+
+	ix.gui.characterBuffs = buffManager
 
 	panel.buffs:SizeToContents()
 

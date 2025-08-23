@@ -2,8 +2,6 @@ if SERVER then
 	AddCSLuaFile()
 end
 
-local PLUGIN = PLUGIN
-
 ENT.Type = "anim"
 ENT.PrintName = "Spawn Point"
 ENT.Author = "Experiment Redux"
@@ -17,13 +15,13 @@ if (not SERVER) then
 end
 
 function ENT:Initialize()
-	PLUGIN.mapSpawns[#PLUGIN.mapSpawns + 1] = {
+	Schema.spawnPoints.AddMapSpawn({
 		name = self.expName,
 		position = self:GetPos(),
 		angles = self:GetAngles(),
-        shouldNotSave = true, -- The map will always dictate where this spawn point is
+		shouldNotSave = true,     -- The map will always dictate where this spawn point is
 		status = self.expStatus or nil, -- Let the map decide the status of this spawn point
-	}
+	})
 
 	-- This entity only exists temporarily for mappers to mark a spawn point
 	self:Remove()
@@ -31,9 +29,9 @@ end
 
 function ENT:KeyValue(key, value)
 	if (key == "name") then
-        self.expName = value
+		self.expName = value
 	elseif (key == "status") then
-        self.expStatus = tonumber(value)
+		self.expStatus = tonumber(value)
 		self.expStatus = self.expStatus > -1 and self.expStatus or nil
 	end
 end

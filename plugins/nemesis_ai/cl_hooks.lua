@@ -1,7 +1,16 @@
 local PLUGIN = PLUGIN
 
 function PLUGIN:NetworkEntityCreated(entity)
-	self:HandleMonitorEntityEnteringPVS(entity)
+	if (entity:GetClass() ~= "exp_monitor") then
+		return
+	end
+
+	-- Delay this call, because SetupDataTables is called after NetworkEntityCreated and the hook inside this function may need those
+	timer.Simple(0, function()
+		if (IsValid(entity) and entity:GetClass() == "exp_monitor") then
+			self:HandleMonitorEntityEnteringPVS(entity)
+		end
+	end)
 end
 
 -- Draw location to locker with anti-virus (if this player has a locker rot event)
@@ -23,7 +32,8 @@ function PLUGIN:PostDrawTranslucentRenderables(isDrawingDepth, isDrawingSkybox)
 	local monitorEntities = ents.FindByClass("exp_monitor")
 
 	for _, monitor in pairs(monitorEntities) do
-		if (not monitor:GetPoweredOn() or monitor:IsDormant()) then
+		-- Use the new ShouldDrawMonitor function that handles both client-specific and global content
+		if (not self:ShouldDrawMonitor(monitor) or monitor:IsDormant()) then
 			continue
 		end
 

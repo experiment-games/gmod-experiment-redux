@@ -1,4 +1,4 @@
-Schema.util = ix.util.RegisterLibrary("util", {
+Schema.util = ix.util.GetOrCreateLibrary("util", {
 	transactions = {},
 	throttles = {}
 })
@@ -493,17 +493,23 @@ if (CLIENT) then
 		net.SendToServer()
 	end
 
-	function Schema.util.LookupBinding(bind)
+	function Schema.util.LookupBinding(bind, forceUpper)
 		local binding = input.LookupBinding(bind)
 
 		if (not binding) then
-			return nil
+			return forceUpper and bind:upper() or bind
 		end
 
 		local translationKey = "bind_" .. binding:lower()
 		local name = L(translationKey)
 
-		return name ~= translationKey and name or binding:upper()
+		local key = name ~= translationKey and name or binding:upper()
+
+		if (forceUpper) then
+			key = key:upper()
+		end
+
+		return key
 	end
 
 	--- Finds bindings surrounded by curly braces and replaces them with their actual key.

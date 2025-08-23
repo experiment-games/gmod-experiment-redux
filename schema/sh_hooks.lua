@@ -32,11 +32,13 @@ hook.Add("InitializedSchema", "hackEnglishOnlyInitialize", hackOptionRestriction
 hook.Add("OnReloaded", "hackEnglishOnlyOnReloaded", hackOptionRestrictions)
 
 function Schema:DoPluginIncludes(path, plugin)
+	Schema.cinematics.IncludeDirectory(path .. "/cinematic_scenes", "SCENE")
 	Schema.achievement.IncludeDirectory(path .. "/achievements")
 	Schema.buff.IncludeDirectory(path .. "/buffs")
 	Schema.perk.IncludeDirectory(path .. "/perks")
 	Schema.npc.IncludeDirectory(path .. "/npcs")
 	Schema.map.IncludeDirectory(path .. "/maps")
+	Schema.tutorial.IncludeDirectory(path .. "/tutorials")
 end
 
 function Schema:Tick()

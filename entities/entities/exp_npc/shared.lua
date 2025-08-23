@@ -17,6 +17,10 @@ function ENT:SetupDataTables()
 end
 
 function ENT:SetAnim()
+	if (self.expCachedIdleSequence) then
+		return self:ResetSequence(self.expCachedIdleSequence)
+	end
+
 	local sequenceList = self:GetSequenceList()
 
 	if (not sequenceList) then
@@ -26,6 +30,7 @@ function ENT:SetAnim()
 
 	for k, v in ipairs(self:GetSequenceList()) do
 		if (v:lower():find("idle") and v ~= "idlenoise") then
+			self.expCachedIdleSequence = k
 			return self:ResetSequence(k)
 		end
 	end

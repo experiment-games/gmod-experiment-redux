@@ -1,26 +1,6 @@
-do
-	local COMMAND = {}
-
-	COMMAND.description = "Search the tied character you are looking at."
-
-	function COMMAND:OnRun(client)
-		local data = {}
-		data.start = client:GetShootPos()
-		data.endpos = data.start + client:GetAimVector() * 96
-		data.filter = client
-		local target = util.TraceLine(data).Entity
-
-		if (IsValid(target) and target:IsPlayer() and target:IsRestricted()) then
-			if (! client:IsRestricted()) then
-				Schema.SearchPlayer(client, target)
-			else
-				return "@notNow"
-			end
-		end
-	end
-
-	ix.command.Add("CharSearch", COMMAND)
-end
+--[[
+	Alliance Commands
+--]]
 
 do
 	local COMMAND = {}
@@ -123,6 +103,160 @@ do
 	ix.command.Add("AllianceLeave", COMMAND)
 end
 
+--[[
+	Entity commands
+--]]
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Bump the entity position you are looking at towards where you are looking."
+	COMMAND.arguments = {
+		bit.bor(ix.type.number, ix.type.optional)
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, amount)
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 1000
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (not IsValid(target)) then
+			client:Notify("You must look at a valid entity!")
+			return
+		end
+
+		target:SetPos(target:GetPos() + client:GetAimVector() * (amount or 10))
+	end
+
+	ix.command.Add("EntityBump", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove entities of a certain class within a radius around you."
+	COMMAND.arguments = {
+		ix.type.string,
+		bit.bor(ix.type.number, ix.type.optional)
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, class, radius)
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (IsValid(target)) then
+			if (target:IsPlayer()) then
+				client:Notify("You must look at an entity, not a player!")
+				return
+			end
+
+			class = target:GetClass()
+		end
+
+		local entities = ents.FindInSphere(client:GetPos(), radius or 256)
+		local count = 0
+
+		for _, entity in ipairs(entities) do
+			if (entity:GetClass() == class) then
+				count = count + 1
+				entity:Remove()
+			end
+		end
+
+		client:Notify("Removed " .. count .. " entities of class '" .. class .. "'.")
+	end
+
+	ix.command.Add("EntityRemove", COMMAND)
+end
+
+--[[
+	NPC commands
+--]]
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Spawn an NPC with the NPC config based on the id you provide."
+	COMMAND.arguments = {
+		ix.type.string,
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, npcId)
+		local npc = Schema.npc.Get(npcId)
+
+		if (not npc) then
+			client:Notify("Invalid NPC ID!")
+			return
+		end
+
+		Schema.npc.SpawnForPlayer(npc, client)
+
+		client:Notify("NPC spawned successfully.")
+	end
+
+	ix.command.Add("NpcSpawn", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove the NPC you are looking at."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client)
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (IsValid(target) and target:GetClass() == "exp_npc") then
+			target:Remove()
+			client:Notify("NPC removed successfully.")
+		else
+			client:Notify("You must look at an NPC!")
+		end
+	end
+
+	ix.command.Add("NpcRemove", COMMAND)
+end
+
+--[[
+	Character commands
+--]]
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Search the tied character you are looking at."
+
+	function COMMAND:OnRun(client)
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (IsValid(target) and target:IsPlayer() and target:IsRestricted()) then
+			if (! client:IsRestricted()) then
+				Schema.SearchPlayer(client, target)
+			else
+				return "@notNow"
+			end
+		end
+	end
+
+	ix.command.Add("CharSearch", COMMAND)
+end
+
 do
 	local COMMAND = {}
 	COMMAND.description = "Fake damage to a certain body part of yourself or the character you are looking at."
@@ -195,124 +329,6 @@ do
 	end
 
 	ix.command.Add("CharTakeDamage", COMMAND)
-end
-
-do
-	local COMMAND = {}
-
-	COMMAND.description = "Bump the entity position you are looking at towards where you are looking."
-	COMMAND.arguments = {
-		bit.bor(ix.type.number, ix.type.optional)
-	}
-	COMMAND.superAdminOnly = true
-
-	function COMMAND:OnRun(client, amount)
-		local data = {}
-		data.start = client:GetShootPos()
-		data.endpos = data.start + client:GetAimVector() * 1000
-		data.filter = client
-		local target = util.TraceLine(data).Entity
-
-		if (not IsValid(target)) then
-			client:Notify("You must look at a valid entity!")
-			return
-		end
-
-		target:SetPos(target:GetPos() + client:GetAimVector() * (amount or 10))
-	end
-
-	ix.command.Add("EntityBump", COMMAND)
-end
-
-do
-	local COMMAND = {}
-
-	COMMAND.description = "Remove entities of a certain class within a radius around you."
-	COMMAND.arguments = {
-		ix.type.string,
-		bit.bor(ix.type.number, ix.type.optional)
-	}
-	COMMAND.superAdminOnly = true
-
-	function COMMAND:OnRun(client, class, radius)
-		local data = {}
-		data.start = client:GetShootPos()
-		data.endpos = data.start + client:GetAimVector() * 96
-		data.filter = client
-		local target = util.TraceLine(data).Entity
-
-		if (IsValid(target)) then
-			if (target:IsPlayer()) then
-				client:Notify("You must look at an entity, not a player!")
-				return
-			end
-
-			class = target:GetClass()
-		end
-
-		local entities = ents.FindInSphere(client:GetPos(), radius or 256)
-		local count = 0
-
-		for _, entity in ipairs(entities) do
-			if (entity:GetClass() == class) then
-				count = count + 1
-				entity:Remove()
-			end
-		end
-
-		client:Notify("Removed " .. count .. " entities of class '" .. class .. "'.")
-	end
-
-	ix.command.Add("EntityRemove", COMMAND)
-end
-
-do
-	local COMMAND = {}
-
-	COMMAND.description = "Spawn an NPC with the NPC config based on the id you provide."
-	COMMAND.arguments = {
-		ix.type.string,
-	}
-	COMMAND.superAdminOnly = true
-
-	function COMMAND:OnRun(client, npcId)
-		local npc = Schema.npc.Get(npcId)
-
-		if (not npc) then
-			client:Notify("Invalid NPC ID!")
-			return
-		end
-
-		Schema.npc.SpawnForPlayer(npc, client)
-
-		client:Notify("NPC spawned successfully.")
-	end
-
-	ix.command.Add("NpcSpawn", COMMAND)
-end
-
-do
-	local COMMAND = {}
-
-	COMMAND.description = "Remove the NPC you are looking at."
-	COMMAND.superAdminOnly = true
-
-	function COMMAND:OnRun(client)
-		local data = {}
-		data.start = client:GetShootPos()
-		data.endpos = data.start + client:GetAimVector() * 96
-		data.filter = client
-		local target = util.TraceLine(data).Entity
-
-		if (IsValid(target) and target:GetClass() == "exp_npc") then
-			target:Remove()
-			client:Notify("NPC removed successfully.")
-		else
-			client:Notify("You must look at an NPC!")
-		end
-	end
-
-	ix.command.Add("NpcRemove", COMMAND)
 end
 
 do
@@ -504,4 +520,198 @@ do
 	end
 
 	ix.command.Add("CharPerkRemove", COMMAND)
+end
+
+--[[
+	Commands for testing the scene-based cinematic system.
+--]]
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Put a player in a cinematic scene."
+	COMMAND.arguments = {
+		ix.type.player,
+		ix.type.string
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target, sceneID)
+		local success = Schema.cinematics.PutPlayerInScene(target, sceneID)
+
+		if (success) then
+			client:Notify("Put " .. target:Name() .. " in scene '" .. sceneID .. "'")
+		else
+			client:Notify("Failed to put " .. target:Name() .. " in scene '" .. sceneID .. "'")
+		end
+	end
+
+	ix.command.Add("ScenePut", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove a player from their current scene."
+	COMMAND.arguments = {
+		ix.type.player
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target)
+		local currentScene = Schema.cinematics.GetPlayerScene(target)
+
+		if (currentScene) then
+			Schema.cinematics.RemovePlayerFromScene(target)
+			client:Notify("Removed " .. target:Name() .. " from scene '" .. currentScene .. "'")
+		else
+			client:Notify(target:Name() .. " is not in any scene")
+		end
+	end
+
+	ix.command.Add("SceneRemove", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Transition a player to a different scene."
+	COMMAND.arguments = {
+		ix.type.player,
+		ix.type.string,
+		bit.bor(ix.type.number, ix.type.optional),
+		bit.bor(ix.type.number, ix.type.optional)
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target, newSceneID, fadeTime, blackPeriod)
+		local success = Schema.cinematics.TransitionPlayerToScene(target, newSceneID, fadeTime, blackPeriod)
+
+		if (success) then
+			client:Notify("Transitioning " .. target:Name() .. " to scene '" .. newSceneID .. "'")
+		else
+			client:Notify("Failed to transition " .. target:Name() .. " to scene '" .. newSceneID .. "'")
+		end
+	end
+
+	ix.command.Add("SceneTransition", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Show cinematic text to a player."
+	COMMAND.arguments = {
+		ix.type.player,
+		ix.type.string,
+		bit.bor(ix.type.number, ix.type.optional)
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target, text, duration)
+		Schema.cinematics.ShowCinematicText(target, text, duration)
+
+		client:Notify("Showing text to " .. target:Name() .. ": '" .. text .. "'")
+	end
+
+	ix.command.Add("SceneText", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Check which scene a player is currently in."
+	COMMAND.arguments = {
+		ix.type.player
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target)
+		local currentScene = Schema.cinematics.GetPlayerScene(target)
+
+		if (currentScene) then
+			client:Notify(target:Name() .. " is in scene '" .. currentScene .. "'")
+		else
+			client:Notify(target:Name() .. " is not in any scene")
+		end
+	end
+
+	ix.command.Add("SceneCheck", COMMAND)
+end
+
+--[[
+	Commands for Spawn Points
+--]]
+
+do
+	local COMMAND = {}
+
+	COMMAND.description =
+	"Make where you are standing (and the way you are looking) a spawn location, providing information on where it's located on the 2D map."
+	COMMAND.arguments = {
+		ix.type.string,
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, name)
+		local position = client:GetPos()
+		local angles = client:EyeAngles()
+
+		Schema.spawnPoints.spawns[#Schema.spawnPoints.spawns + 1] = {
+			name = name,
+			position = position,
+			angles = angles,
+		}
+
+		hook.Run("SaveData")
+
+		client:Notify("You added a spawn point.")
+	end
+
+	ix.command.Add("SpawnAdd", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove the spawn point closest to where you are looking."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client)
+		local position = client:GetPos()
+		local closestSpawn
+		local closestDistance = math.huge
+		local maxDistance = 256
+
+		for k, v in ipairs(Schema.spawnPoints.spawns) do
+			local distance = v.position:Distance(position)
+
+			if (distance > maxDistance) then
+				continue
+			end
+
+			if (distance < closestDistance) then
+				closestDistance = distance
+				closestSpawn = k
+			end
+		end
+
+		if (closestSpawn) then
+			table.remove(Schema.spawnPoints.spawns, closestSpawn)
+
+			hook.Run("SaveData")
+
+			client:Notify("You removed a spawn point.")
+		else
+			client:Notify("No spawn points found.")
+		end
+	end
+
+	ix.command.Add("SpawnRemove", COMMAND)
 end

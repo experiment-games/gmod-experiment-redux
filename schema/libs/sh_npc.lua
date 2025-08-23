@@ -1,7 +1,7 @@
 --- Client library that exposes functions to interact with NPCs.
 --- It also has all functions a `CommonLibrary` has.
 --- @class Schema.npc : CommonLibrary
-Schema.npc = ix.util.GetOrCreateCommonLibrary("NPC", function() return ix.util.NewMetaObject(Schema.meta.npc) end)
+Schema.npc = ix.util.GetOrCreateCommonLibrary("npc", function() return ix.util.NewMetaObject(Schema.meta.npc) end)
 
 Schema.npc.NO_HEALTH = -1
 Schema.npc.MAX_EDICT_BITS = 13

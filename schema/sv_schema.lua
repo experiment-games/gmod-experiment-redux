@@ -17,10 +17,6 @@ ix.util.AddResourceFile("materials/experiment-redux/mission_unavailable.png")
 -- Experiment Official Server Content (https://steamcommunity.com/sharedfiles/filedetails/?id=3546782165)
 resource.AddWorkshop("3546782165")
 
--- JersonGaming's Model/Real RNG Ammo Boxes (https://steamcommunity.com/sharedfiles/filedetails/?id=1741790902)
--- Higher quality ammo boxes, they replace the default ones.
-resource.AddWorkshop("1741790902")
-
 -- Aperture Scientists Players (https://steamcommunity.com/sharedfiles/filedetails/?id=634829400)
 -- Scientists for citizens, they can be used to create scientist monsters.
 resource.AddWorkshop("634829400")

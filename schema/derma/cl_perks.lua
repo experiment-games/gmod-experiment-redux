@@ -118,20 +118,22 @@ function PANEL:OnMouseReleased(keyCode)
 		return
 	end
 
-	if (Schema.perk.GetOwned(self.perk.uniqueID)) then
+	local perk = self.perk
+
+	if (Schema.perk.GetOwned(perk.uniqueID)) then
 		return
 	end
 
 	Derma_Query(
 		string.format(
 			"Are you sure you want to buy the perk '%s' for %s?",
-			self.perk.name,
-			ix.currency.Get(self.perk.price)
+			perk.name,
+			ix.currency.Get(perk.price)
 		),
 		"Confirm Purchase Perk",
 		L("yes"),
 		function()
-			Schema.perk.RequestBuy(self.perk)
+			Schema.perk.RequestBuy(perk)
 		end,
 		L("no")
 	)

@@ -1,1 +1,1 @@
-Schema.map = ix.util.GetOrCreateCommonLibrary("Map")
+Schema.map = ix.util.GetOrCreateCommonLibrary("map")

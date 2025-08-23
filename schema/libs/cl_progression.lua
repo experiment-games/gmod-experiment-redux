@@ -1,5 +1,5 @@
 --- Client library to work with the progression panel and information.
-Schema.progression = ix.util.RegisterLibrary("progression", {
+Schema.progression = ix.util.GetOrCreateLibrary("progression", {
 	-- Where the local player stored are tracked
 	stored = {},
 
@@ -83,6 +83,51 @@ function Schema.progression.IsTrackerOnHUD(tracker)
 	return table.HasValue(Schema.progression.trackedOnHud, tracker:GetUniqueID())
 end
 
+--- Requests the server to abandon a progression tracker for the local player
+--- @param tracker ProgressionTracker
+function Schema.progression.AbandonTracker(tracker)
+	net.Start("expProgressionAbandonTracker")
+	net.WriteString(tracker:GetUniqueID())
+	net.SendToServer()
+end
+
+--[[
+	Hooks
+--]]
+
+-- Draws the current amount of operations happening, so the player knows the progression is being updated
+hook.Add("PostDrawHUD", "Schema.progression.ShowManySyncOperations", function()
+	local currentOperation = Schema.progression.currentOperation
+
+	if (not currentOperation) then
+		return
+	end
+
+	-- Only if there's more than 10 messages we'll show the message, as it's not really needed
+	-- to communicate for a few messages.
+	if (currentOperation.remainingMessages < 10) then
+		return
+	end
+
+	local remainingMessages = currentOperation.remainingMessages
+
+	local text = "Progression: updating " .. remainingMessages .. " items"
+
+	local yOffset = 0
+
+	if (Schema.inventory.currentOperation and currentOperation.remainingMessages >= 10) then
+		-- If the inventory is also updating, we'll move the text up a bit
+		yOffset = 20
+	end
+
+	draw.SimpleText(text, "expDebugBold", ScrW() - 10, ScrH() - yOffset - 10, color_white, TEXT_ALIGN_RIGHT,
+		TEXT_ALIGN_BOTTOM)
+end)
+
+--[[
+	Network Messages
+--]]
+
 -- The header lets the client know how many messages to expect
 -- If we're told 0 message are to arrive and the operation is reset, we can assume the progressions are empty
 -- and reset it (for switching characters)
@@ -123,6 +168,17 @@ net.Receive("expProgressionItem", function(length)
 	Schema.progression.stored[scope] = Schema.progression.stored[scope] or {}
 	Schema.progression.stored[scope][key] = value
 
+	hook.Run("PlayerProgressionChange", LocalPlayer(), scope, key, value)
+
+	-- Try find a tracker belonging to this progression key (isInProgress), if it is to be on hud by default, set it on hud
+	local trackers = Schema.progression.GetTrackersByScope(scope, key)
+
+	for _, tracker in pairs(trackers) do
+		if (tracker.showOnHUD) then
+			Schema.progression.SetTrackerOnHUD(tracker, true)
+		end
+	end
+
 	remainingMessages = remainingMessages - 1
 
 	if (remainingMessages == 0) then
@@ -132,33 +188,4 @@ net.Receive("expProgressionItem", function(length)
 	else
 		currentOperation.remainingMessages = remainingMessages
 	end
-end)
-
--- Draws the current amount of operations happening, so the player knows the progression is being updated
-hook.Add("PostDrawHUD", "Schema.progression.ShowManySyncOperations", function()
-	local currentOperation = Schema.progression.currentOperation
-
-	if (not currentOperation) then
-		return
-	end
-
-	-- Only if there's more than 10 messages we'll show the message, as it's not really needed
-	-- to communicate for a few messages.
-	if (currentOperation.remainingMessages < 10) then
-		return
-	end
-
-	local remainingMessages = currentOperation.remainingMessages
-
-	local text = "Progression: updating " .. remainingMessages .. " items"
-
-	local yOffset = 0
-
-	if (Schema.inventory.currentOperation and currentOperation.remainingMessages >= 10) then
-		-- If the inventory is also updating, we'll move the text up a bit
-		yOffset = 20
-	end
-
-	draw.SimpleText(text, "expDebugBold", ScrW() - 10, ScrH() - yOffset - 10, color_white, TEXT_ALIGN_RIGHT,
-		TEXT_ALIGN_BOTTOM)
 end)

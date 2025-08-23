@@ -13,18 +13,17 @@ end
 -- Initialize the entity
 function ENT:Initialize()
 	self:SetSolid(SOLID_BSP)
-	self:SetMoveType(MOVETYPE_PUSH)
-	self:SetUseType(SIMPLE_USE)
 
 	-- Set up the trigger
 	self:SetTrigger(true)
 
 	-- Get keyvalues from the map
-	self.TargetName = self:GetName() or ""
 	self.expTeleportTarget = self.expTeleportTarget or ""
 
 	-- Create a list of entity types to remove/teleport
 	self.RemovableEntities = {
+		"ix_item",
+
 		-- Experiment Redux specific entities
 		"exp_*",
 
@@ -36,8 +35,7 @@ function ENT:Initialize()
 		"prop_physics",
 		"prop_physics_multiplayer",
 
-		-- NPCs and ragdolls (corpses)
-		"npc_*",
+		-- Ragdolls (corpses)
 		"prop_ragdoll",
 	}
 end
@@ -100,7 +98,8 @@ end
 
 -- Called when an entity starts touching the trigger
 function ENT:StartTouch(ent)
-	if (not IsValid(ent)) then
+	-- Don't remove map entities
+	if (not IsValid(ent) or ent:MapCreationID() > -1) then
 		return
 	end
 
@@ -113,7 +112,7 @@ function ENT:StartTouch(ent)
 			self:TeleportEntity(ent, teleportDest)
 		else
 			-- Remove the entity after a small delay to avoid issues
-			timer.Simple(0.1, function()
+			timer.Simple(0, function()
 				if (IsValid(ent)) then
 					self:RemoveEntity(ent)
 				end
@@ -155,31 +154,28 @@ function ENT:TeleportEntity(ent, destination)
 end
 
 -- Function to remove an entity safely
-function ENT:RemoveEntity(ent)
-	if (not IsValid(ent)) then
-		return
-	end
-
-	-- Create removal effect
-	self:CreateRemovalEffect(ent:GetPos())
+function ENT:RemoveEntity(entity)
+	self:CreateRemovalEffect(entity:GetPos())
 
 	-- Special handling for different entity types
-	if (ent:IsPlayer()) then
+	if (entity:IsPlayer()) then
 		-- Don't remove players, just teleport them out if possible
 		local teleportDest = self:GetTeleportDestination()
 
 		if (IsValid(teleportDest)) then
-			self:TeleportEntity(ent, teleportDest)
+			self:TeleportEntity(entity, teleportDest)
 		end
 
 		return
 	end
 
 	if (GetConVar("developer"):GetInt() > 0) then
-		print("[NonEntityArea] Removed " .. ent:GetClass() .. " from area " .. self.TargetName)
+		print("[NonEntityArea] Removed " .. entity:GetClass() .. " from area ", self)
 	end
 
-	ent:Remove()
+	hook.Run("OnNonEntityAreaRemoval", entity)
+
+	entity:Remove()
 end
 
 -- Create visual effect for teleportation
@@ -201,9 +197,9 @@ end
 
 -- Handle keyvalues from the map
 function ENT:KeyValue(key, value)
-	if (key == "name") then
-		self:SetName(value)
-	elseif (key == "teleportTarget") then
+	key = key:lower()
+
+	if (key == "teleporttarget") then
 		self.expTeleportTarget = value
 	end
 end

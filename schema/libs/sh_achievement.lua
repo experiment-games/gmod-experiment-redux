@@ -1,4 +1,4 @@
-Schema.achievement = ix.util.GetOrCreateCommonLibrary("Achievement")
+Schema.achievement = ix.util.GetOrCreateCommonLibrary("achievement")
 
 if (SERVER) then
 	util.AddNetworkString("expAchievementProgress")

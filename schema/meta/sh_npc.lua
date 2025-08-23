@@ -8,6 +8,8 @@
 --- @field health number The health of the NPC. This is how much damage the NPC can take before dying. Set to Schema.npc.NO_HEALTH to make the NPC invincible.
 ---
 --- @field model string|table The model of the NPC. This is what the NPC will look like. Can be a table, in which case a random model will be chosen each server restart.
+--- @field skin number The skin of the NPC. This determines the appearance of the NPC's model.
+--- @field bodygroups table<number, number> A table representing the bodygroups of the NPC. The keys are the bodygroup IDs, and the values are the bodygroup values.
 ---
 --- @field voicePitch number The voice pitch of the NPC. This can be a number between 0 and 255. It will change the voice set lines to sound higher or lower.
 --- @field voiceSet table The voice set, a random table of voice lines that the NPC will say when interacted with.

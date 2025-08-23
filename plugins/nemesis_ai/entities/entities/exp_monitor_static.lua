@@ -15,26 +15,34 @@ ENT.Spawnable = false
 ENT.AdminOnly = false
 
 if (not SERVER) then
-    return
+	return
 end
 
 function ENT:Initialize()
-    local preset = PLUGIN.presets[self.monitorPreset]
+	local preset = PLUGIN.presets[self.monitorPreset]
 
-    PLUGIN:SetupParentEntity(self, preset)
+	PLUGIN:SetupParentEntity(self, preset)
 	self:SetSolid(SOLID_NONE)
-    self:SetMoveType(MOVETYPE_NONE)
+	self:SetMoveType(MOVETYPE_NONE)
 
 	-- We do not draw this parent, since it only communicates the angles of a static prop with the real monitor parent
-    self:SetNoDraw(true)
+	self:SetNoDraw(true)
 
 	for _, monitor in ipairs(preset.monitors) do
-		PLUGIN:SpawnMonitor(self, monitor)
+		local monitorEntity = PLUGIN:SpawnMonitor(self, monitor)
+
+		if (self.specialID) then
+			monitorEntity:SetSpecialID(self.specialID)
+		end
 	end
 end
 
 function ENT:KeyValue(key, value)
-	if (key:lower() == "monitorpreset") then
+	key = key:lower()
+
+	if (key == "monitorpreset") then
 		self.monitorPreset = value
+	elseif (key == "specialid") then
+		self.specialID = value
 	end
 end

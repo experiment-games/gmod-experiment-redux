@@ -1,4 +1,4 @@
-Schema.perk = ix.util.GetOrCreateCommonLibrary("Perk")
+Schema.perk = ix.util.GetOrCreateCommonLibrary("perk")
 
 local function checkHasPerk(perks, perkTable, client)
 	local hasPerk = perks[perkTable.uniqueID]
@@ -24,25 +24,25 @@ if (SERVER) then
 	util.AddNetworkString("PerkLoadOwned")
 	util.AddNetworkString("PerkRequestBuy")
 
-    function Schema.perk.Give(client, perk)
-        local perkTable = Schema.perk.Get(perk)
-        local perks = client:GetCharacter():GetData("perks", {})
+	function Schema.perk.Give(client, perk)
+		local perkTable = Schema.perk.Get(perk)
+		local perks = client:GetCharacter():GetData("perks", {})
 
-        if (not perkTable) then
-            return false, "That is not a valid perk!"
-        end
+		if (not perkTable) then
+			return false, "That is not a valid perk!"
+		end
 
-        perks[perkTable.uniqueID] = true
-        client:GetCharacter():SetData("perks", perks)
+		perks[perkTable.uniqueID] = true
+		client:GetCharacter():SetData("perks", perks)
 
-        net.Start("PerkGive")
-        net.WriteUInt(perkTable.index, 32)
-        net.Send(client)
+		net.Start("PerkGive")
+		net.WriteUInt(perkTable.index, 32)
+		net.Send(client)
 
-        if (perkTable.OnGiven) then
-            perkTable:OnGiven(client)
-        end
-    end
+		if (perkTable.OnGiven) then
+			perkTable:OnGiven(client)
+		end
+	end
 
 	function Schema.perk.Take(client, perk)
 		local perkTable = Schema.perk.Get(perk)
@@ -82,15 +82,15 @@ if (SERVER) then
 	function Schema.perk.GetOwned(perk, client, character)
 		local perkTable = Schema.perk.Get(perk)
 
-        character = character or client:GetCharacter()
+		character = character or client:GetCharacter()
 
-        if (not perkTable) then
-            ix.log.Add(client, "schemaDebug", "Schema.perk.GetOwned", "Attempt to check for invalid perk: " ..
-                tostring(perk))
-            return false
-        end
+		if (not perkTable) then
+			ix.log.Add(client, "schemaDebug", "Schema.perk.GetOwned", "Attempt to check for invalid perk: " ..
+				tostring(perk))
+			return false
+		end
 
-		if (client:IsBot())then
+		if (client:IsBot()) then
 			return false
 		end
 
@@ -111,10 +111,10 @@ if (SERVER) then
 
 		if (not character:HasMoney(perkTable.price)) then
 			client:Notify(
-                "You need another "
-                .. ix.currency.Get(perkTable.price - character:GetMoney(), nil, true)
-                .. "!"
-            )
+				"You need another "
+				.. ix.currency.Get(perkTable.price - character:GetMoney(), nil, true)
+				.. "!"
+			)
 
 			return
 		end
@@ -131,7 +131,7 @@ if (SERVER) then
 
 		hook.Run("PlayerPerkBought", client, perkTable)
 
-        ix.log.Add(client, "perkBought", perkTable.name)
+		ix.log.Add(client, "perkBought", perkTable.name)
 	end)
 else
 	Schema.perk.localOwned = Schema.perk.localOwned or {}
@@ -140,8 +140,8 @@ else
 		return ix.gui.perksPanel
 	end
 
-    function Schema.perk.UpdatePanel()
-        local panel = Schema.perk.GetPanel()
+	function Schema.perk.UpdatePanel()
+		local panel = Schema.perk.GetPanel()
 
 		if (IsValid(panel)) then
 			panel:Update()
@@ -166,9 +166,9 @@ else
 
 	net.Receive("PerkGive", function()
 		local perkIndex = net.ReadUInt(32)
-        local perkTable = Schema.perk.Get(perkIndex)
+		local perkTable = Schema.perk.Get(perkIndex)
 
-        if (not perkTable) then
+		if (not perkTable) then
 			error("Perk with index " .. perkIndex .. " does not exist.")
 			return
 		end
@@ -178,7 +178,7 @@ else
 		Schema.perk.UpdatePanel()
 
 		hook.Run("PlayerPerkBought", LocalPlayer(), perkTable)
-    end)
+	end)
 
 	net.Receive("PerkTake", function()
 		local perkIndex = net.ReadUInt(32)

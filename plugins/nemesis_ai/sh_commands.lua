@@ -4,7 +4,7 @@ do
 	local COMMAND = {}
 
 	COMMAND.description =
-		"Spawn a monitor screen and configure it's size or spawn a preset (use `/MonitorSpawn help` to print a list of presets in console)."
+	"Spawn a monitor screen and configure it's size or spawn a preset (use `/MonitorSpawn help` to print a list of presets in console)."
 	COMMAND.arguments = {
 		bit.bor(ix.type.string, ix.type.optional),
 	}
@@ -30,10 +30,10 @@ do
 				return
 			end
 
-            local parent = ents.Create("prop_physics")
-            parent:SetPos(trace.HitPos + (preset.spawnOffset or Vector(0, 0, 0)))
+			local parent = ents.Create("prop_physics")
+			parent:SetPos(trace.HitPos + (preset.spawnOffset or Vector(0, 0, 0)))
 			PLUGIN:SetupParentEntity(parent, preset)
-            parent:Spawn()
+			parent:Spawn()
 
 			for _, monitor in ipairs(preset.monitors) do
 				local monitorEnt = PLUGIN:SpawnMonitor(parent, monitor)
@@ -85,7 +85,11 @@ do
 	COMMAND.superAdminOnly = true
 
 	function COMMAND:OnRun(client, random)
-		PLUGIN:DramaticDelayEachMonitor(function(monitor)
+		local monitorEntities = ents.FindByClass("exp_monitor")
+
+		hook.Run("ExperimentMonitorsFilter", monitorEntities, "turn_off")
+
+		PLUGIN:DramaticDelayEachMonitor(monitorEntities, function(monitor)
 			if (random and math.random(0, 1) == 1) then
 				return
 			end
@@ -110,7 +114,11 @@ do
 	COMMAND.superAdminOnly = true
 
 	function COMMAND:OnRun(client, vguiScreen)
-		PLUGIN:DramaticDelayEachMonitor(function(monitor)
+		local monitorEntities = ents.FindByClass("exp_monitor")
+
+		hook.Run("ExperimentMonitorsFilter", monitorEntities, "vgui")
+
+		PLUGIN:DramaticDelayEachMonitor(monitorEntities, function(monitor)
 			monitor:SetPoweredOn(true)
 		end)
 
@@ -128,14 +136,14 @@ do
 	local COMMAND = {}
 
 	COMMAND.description =
-		"Force the Nemesis AI to play the specified text"
+	"Force the Nemesis AI to play the specified text"
 	COMMAND.arguments = {
 		ix.type.text,
 	}
 
 	COMMAND.superAdminOnly = true
 
-    function COMMAND:OnRun(client, text)
+	function COMMAND:OnRun(client, text)
 		PLUGIN:PlayNemesisAudio(text)
 	end
 
@@ -146,16 +154,16 @@ do
 	local COMMAND = {}
 
 	COMMAND.description =
-		"Force the locker rot event to start for the specified character."
+	"Force the locker rot event to start for the specified character."
 	COMMAND.arguments = {
-        ix.type.character,
+		ix.type.character,
 		ix.type.string,
 	}
 
 	COMMAND.superAdminOnly = true
 
-    function COMMAND:OnRun(client, character, metricName)
-        local taunts = PLUGIN.metricTaunts[metricName]
+	function COMMAND:OnRun(client, character, metricName)
+		local taunts = PLUGIN.metricTaunts[metricName]
 
 		if (not taunts) then
 			client:Notify("Invalid metric name specified!")
@@ -168,7 +176,7 @@ do
 			metricName = metricName,
 			taunts = taunts,
 			rank = 1,
-        }
+		}
 
 		PLUGIN:StartLockerRotEvent(character, lockerRotEvent)
 	end

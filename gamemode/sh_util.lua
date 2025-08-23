@@ -68,7 +68,7 @@ end
 --- @param data? table The data to set for the library.
 --- @return table The library.
 --- @realm shared
-function ix.util.RegisterLibrary(libraryName, data)
+function ix.util.GetOrCreateLibrary(libraryName, data)
 	if (ix.util._existingLibraries[libraryName]) then
 		-- Since client and server files may be loaded before shared files, we
 		-- want to check if data contains any new keys so none are missing from
@@ -84,7 +84,7 @@ function ix.util.RegisterLibrary(libraryName, data)
 		return ix.util._existingLibraries[libraryName]
 	end
 
-	-- Ensure we can register the library inside the Schema table with Schema.{libraryName} = ix.util.RegisterLibrary
+	-- Ensure we can register the library inside the Schema table with Schema.{libraryName} = ix.util.GetOrCreateLibrary
 	assert(Schema[libraryName] == nil, "Failed to create Library! Name " .. libraryName .. " is already in use!")
 
 	ix.util._existingLibraries[libraryName] = data or {}
@@ -95,14 +95,14 @@ end
 --- @realm shared
 --- @class CommonLibrary
 --- @field Get fun(identifierOrItem: string|number|table, allowPartialMatch?: boolean):(table) deprecated, use Find instead
---- @field Find fun(identifierOrItem: string|number|table, allowPartialMatch?: boolean):(table) Finds an object by index/uniqueID/name, or if a table is passed, that is checked to exist in the buffer and returned.
+--- @field Find fun(identifierOrItem: string|number|table, allowPartialMatch?: boolean):(table?) Finds an object by index/uniqueID/name, or if a table is passed, that is checked to exist in the buffer and returned.
 --- @field GetAll fun():(table) Gets all objects in the.
 --- @field GetBuffer fun():(table) Gets all objects in a table where the key is the objects index.
 --- @field UnRegister fun(libraryObject: table):(table) Unregisters an object.
 --- @field Exists fun(name: string):(boolean) Checks if an object exists.
 --- @field FindByProperty fun(key: string, value: any, handleLibraryValueAsPattern?: boolean):(table) Finds objects by a property value, optionally treating the value as a pattern.
 --- @field GetProperty fun(name: string, key: string):(any) Gets a property of an object.
---- @field IncludeDirectory fun(directory: string) Includes all files in a directory and registers them as objects.
+--- @field IncludeDirectory fun(directory: string, libraryGlobalNameOverride?: string) Includes all files in a directory and registers them as objects.
 --- @field OnPreRegister fun(libraryObject: table)? Called before an object is registered. (You are expected override this)
 --- @field OnPostRegister fun(libraryObject: table)? Called after an object is registered. (You are expected override this)
 --- @field OnGetNotFound fun(name: string, allowPartialMatch?: boolean):(table)? Called when an object is not found. (You are expected override this)
@@ -112,18 +112,20 @@ end
 --- which would then be loaded from the buffs, achievements, and perks directories.
 ---
 --- Example usage:
---- Schema.achievement = ix.util.GetOrCreateCommonLibrary("achievement")
+--- `Schema.achievement = ix.util.GetOrCreateCommonLibrary("achievement")`
 --- @param libraryName string The unique name of the library.
 --- @param constructor? fun(): table The constructor function for an object.
+--- @param data? table The data to set for the library.
 --- @return CommonLibrary # The library object.
 --- @realm shared
-function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
-	local libraryGlobalName = libraryName:gsub("%s+", "_"):upper()
+function ix.util.GetOrCreateCommonLibrary(libraryName, constructor, data)
+	local defaultLibraryGlobalName = libraryName:gsub("%s+", "_"):upper()
 
-	local library = ix.util.RegisterLibrary(libraryName, {
-		stored = {},
-		buffer = {}
-	})
+	data = data or {}
+	data.stored = data.stored or {}
+	data.buffer = data.buffer or {}
+
+	local library = ix.util.GetOrCreateLibrary(libraryName, data)
 
 	library.GetBuffer = function()
 		return library.buffer
@@ -165,7 +167,8 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 		return libraryObject
 	end
 
-	library.IncludeDirectory = function(directory)
+	library.IncludeDirectory = function(directory, libraryGlobalNameOverride)
+		local libraryGlobalName = libraryGlobalNameOverride or defaultLibraryGlobalName
 		local oldGlobal = _G[libraryGlobalName]
 
 		if (directory:sub(-1) ~= "/") then
@@ -188,7 +191,15 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 
 			_G[libraryGlobalName] = LIBRARY_OBJECT
 
-			ix.util.Include(directory .. fileName, "shared")
+			local realm = "shared"
+
+			if (fileName:StartsWith("sv_")) then
+				realm = "server"
+			elseif (fileName:StartsWith("cl_")) then
+				realm = "client"
+			end
+
+			ix.util.Include(directory .. fileName, realm)
 
 			if (SERVER) then
 				if (LIBRARY_OBJECT.backgroundImage) then

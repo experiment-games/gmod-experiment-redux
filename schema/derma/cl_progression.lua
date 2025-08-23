@@ -241,8 +241,8 @@ do
 		self.actions:Dock(RIGHT)
 
 		self.trackOnHUD = self.actions:Add("ixCheckBox")
-		self.trackOnHUD:SetEnabledText("Track on HUD")
-		self.trackOnHUD:SetDisabledText("Don't Track")
+		self.trackOnHUD:SetEnabledText("On HUD")
+		self.trackOnHUD:SetDisabledText("Not on HUD")
 		self.trackOnHUD:SizeToContents()
 		self.trackOnHUD:Dock(TOP)
 		self.trackOnHUD.DoClick = function(panel)
@@ -254,6 +254,23 @@ do
 		end
 
 		self.actions:SetWide(self.trackOnHUD:GetWide())
+
+		self.abandonButton = self.actions:Add("expButton")
+		self.abandonButton:SetText("Abandon")
+		self.abandonButton:SizeToContents()
+		self.abandonButton:Dock(BOTTOM)
+		self.abandonButton.DoClick = function()
+			if (self.tracker) then
+				Schema.progression.AbandonTracker(self.tracker)
+				ix.gui.menu:Remove()
+
+				timer.Simple(2, function()
+					if (IsValid(Schema.progression.hudPanel)) then
+						Schema.progression.hudPanel:Update()
+					end
+				end)
+			end
+		end
 
 		-- self.expandButton = self:Add("DButton")
 		-- self.expandButton:SetText("")
@@ -300,8 +317,10 @@ do
 		if (not isCompleted) then
 			self.trackOnHUD:SetVisible(true)
 			self.trackOnHUD:SetChecked(Schema.progression.IsTrackerOnHUD(self.tracker), true)
+			self.abandonButton:SetVisible(tracker:CanAbandon())
 		else
 			self.trackOnHUD:SetVisible(false)
+			self.abandonButton:SetVisible(false)
 		end
 		-- self.expandButton:SetVisible(true)
 
@@ -336,6 +355,10 @@ do
 		local yPos = 0
 
 		for _, goal in ipairs(goals) do
+			if (not goal:IsVisible()) then
+				continue
+			end
+
 			local goalPanel = vgui.Create("expProgressionGoal", goalsList)
 			goalPanel:SetProgressionGoal(goal, isCompleted)
 			goalPanel:SetPos(0, yPos)
