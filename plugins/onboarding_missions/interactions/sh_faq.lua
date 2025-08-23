@@ -25,17 +25,18 @@ local INTERACTION_GREETING = INTERACTION_SET:RegisterInteraction({
 
 	text = function(interaction, player, npcEntity)
 		local greetings = {
-			"Well hello there, " ..
+			"Hello there, " ..
 			player:Name() ..
-			". *adjusts his worn beanie* I've been around these parts long enough to know a thing or two. What can this old fool help you with today?",
-			"*looks up with tired but kind eyes* Oh, " ..
+			". I can help you with some basic questions about getting around. What would you like to know?",
+			"Greetings, " ..
 			player:Name() ..
-			"! Don't mind the weathered face - I've seen better days, but I'm still kicking. Got any questions for an old timer like me?",
-			"Ah, another soul looking for guidance. *chuckles dryly* Name's Liam, and despite what my appearance might suggest, I know my way around this place. What's troubling you, " ..
-			player:Name() .. "?",
-			"*straightens up slightly* " ..
+			"! I'm here to assist with common questions. How can I help you today?",
+			"Welcome, " ..
 			player:Name() ..
-			", is it? I may look like I've been through the wringer - and believe me, I have - but there's still some wisdom left in this old noggin. How can I assist you?"
+			". I've got answers to frequently asked questions. What's on your mind?",
+			"Hi " ..
+			player:Name() ..
+			"! Need some guidance? I can help explain the basics. What would you like to learn about?"
 		}
 		return table.Random(greetings)
 	end,
@@ -87,15 +88,14 @@ local INTERACTION_INVENTORY = INTERACTION_SET:RegisterInteraction({
 		local bindScore = Schema.util.LookupBinding("+showscores", true)
 
 		return
-			"*nods knowingly* Ah yes, the inventory. Been fumbling around looking for your belongings, have you? " ..
-			"*taps his temple with a gnarled finger* I remember when I first started carrying gear around here - took me ages to figure out the simple stuff.\n\n" ..
-			"Listen carefully now: <span class=\"highlight\">Press " ..
+			"To access your inventory, you'll need to use the scores key. " ..
+			"<span class=\"highlight\">Press " ..
 			bindScore ..
-			" once to toggle your inventory open and closed</span>. It'll be the first thing that pops up - can't miss it. " ..
-			"Now here's a little trick I learned the hard way: if you want to keep that inventory open while you're doing other things, " ..
-			"just <span class=\"highlight\">hold down " ..
-			bindScore .. " and it'll stay open as long as you're holding it</span>.\n\n" ..
-			"*chuckles softly* Simple once you know it, but Lord knows I spent half a day trying to figure that out when I was starting."
+			" once to toggle your inventory open and closed</span>.\n\n" ..
+			"Here's a useful tip: if you want to keep the inventory open while doing other tasks, " ..
+			"<span class=\"highlight\">hold down " ..
+			bindScore .. " and it will stay open as long as you keep the key pressed</span>.\n\n" ..
+			"This makes it easy to manage your items while moving around or interacting with the environment."
 	end,
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
@@ -124,14 +124,13 @@ local INTERACTION_WEAPON_EQUIP = INTERACTION_SET:RegisterInteraction({
 		local bindScore = Schema.util.LookupBinding("+showscores", true)
 
 		return
-			"*straightens up and his expression grows more serious* Weapons, eh? *sighs heavily* Been handling firearms longer than I care to remember. " ..
-			"Some lessons you learn the hard way, others... well, let me save you the trouble.\n\n" ..
-			"First things first: <span class=\"highlight\">get to your inventory by pressing " ..
-			bindScore .. "</span>. Find that weapon of yours in there - should be easy enough to spot. " ..
-			"<span class=\"highlight\">Right-click on the weapon and select 'Equip'</span> from the menu that pops up.\n\n" ..
-			"Now for the ammunition - and listen close because this is important - <span class=\"highlight\">find your ammo in the inventory, right-click on it, " ..
-			"and select 'Load'</span>. Don't go trying to force things or you'll end up with problems.\n\n" ..
-			"*looks down at his worn hands* Trust me on this one - I've made enough mistakes with weapons to know the proper way by now."
+			"Equipping weapons and loading ammunition is straightforward once you know the steps.\n\n" ..
+			"First, <span class=\"highlight\">open your inventory by pressing " ..
+			bindScore .. "</span>. Locate the weapon you want to equip. " ..
+			"<span class=\"highlight\">Right-click on the weapon and select 'Equip'</span> from the context menu.\n\n" ..
+			"To load ammunition: <span class=\"highlight\">find your ammo in the inventory, right-click on it, " ..
+			"and select 'Load'</span>. The ammunition will be loaded into your equipped weapon.\n\n" ..
+			"Make sure you have the correct ammunition type for your weapon, as different weapons require different ammo."
 	end,
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
@@ -162,15 +161,15 @@ local INTERACTION_WEAPON_RAISE = INTERACTION_SET:RegisterInteraction({
 		local bindReload = Schema.util.LookupBinding("reload", true)
 
 		return
-			"*his eyes grow distant for a moment* Raising your weapon... *shakes his head slowly* That's something I hoped I'd never have to teach anyone again. " ..
-			"But these are hard times, and sometimes you need to be ready.\n\n" ..
-			"First, you'll need to <span class=\"highlight\">switch to your weapon using " ..
-			bindInvNext .. " and " .. bindInvPrevious .. "</span> - mess with those until you've got it selected. " ..
-			"Then, when you need to be ready for trouble, <span class=\"highlight\">hold down the " ..
-			bindReload .. " key to raise your weapon up</span>. " ..
-			"Once it's raised you can let go of the key - it'll stay up until you either lower it or switch to something else.\n\n" ..
-			"*looks directly at you with weary but serious eyes* Just... be careful with that thing, will you? " ..
-			"I've seen too much trouble come from folks who weren't careful enough."
+			"To raise your weapon into a ready position, follow these steps:\n\n"
+			.. "First, <span class=\"highlight\">switch to your weapon using "
+			.. bindInvNext
+			.. " and " .. bindInvPrevious
+			.. "</span> to cycle through your items until the weapon is selected.\n\n"
+			.. "Then, <span class=\"highlight\">hold down the "
+			.. bindReload .. " key to raise your weapon</span>. "
+			.. "Once raised, you can release the key and the weapon will remain in the ready position.\n\n"
+			.. "The weapon will stay raised until you lower it manually or switch to a different item."
 	end,
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
@@ -179,7 +178,7 @@ local INTERACTION_WEAPON_RAISE = INTERACTION_SET:RegisterInteraction({
 })
 
 INTERACTION_WEAPON_RAISE:RegisterResponse({
-	answer = "I'll be careful. Thank you for the warning.",
+	answer = "Got it. Thank you for the explanation.",
 	next = "anything_else",
 })
 
@@ -198,14 +197,13 @@ local INTERACTION_WEAPON_UNEQUIP = INTERACTION_SET:RegisterInteraction({
 	text = function(interaction, player, npcEntity)
 		local bindScore = Schema.util.LookupBinding("+showscores", true)
 
-		return "*nods approvingly* Smart question. Sometimes the best thing you can do is put the weapon away. " ..
-			"*manages a small, sad smile* Wish more folks thought like that.\n\n" ..
-			"Here's the thing - when you equip a weapon, it doesn't disappear from your inventory. It just gets marked with a little green indicator " ..
-			"to show you it's currently equipped. Pretty handy system once you get used to it.\n\n" ..
-			"To unequip it, just <span class=\"highlight\">press " ..
+		return "Unequipping weapons is simple once you understand how the system works.\n\n" ..
+			"When you equip a weapon, it remains in your inventory but gets marked with a green indicator " ..
+			"to show that it's currently equipped.\n\n" ..
+			"To unequip it: <span class=\"highlight\">press " ..
 			bindScore .. " to open your inventory, find the weapon with the green marker, right-click on it, " ..
-			"and select 'Unequip'</span>. Simple as that.\n\n" ..
-			"*adjusts his vest absently* Sometimes the most important thing to know about a weapon is how to put it down properly."
+			"and select 'Unequip'</span>.\n\n" ..
+			"The weapon will remain in your inventory but will no longer be equipped for use."
 	end,
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
@@ -214,7 +212,7 @@ local INTERACTION_WEAPON_UNEQUIP = INTERACTION_SET:RegisterInteraction({
 })
 
 INTERACTION_WEAPON_UNEQUIP:RegisterResponse({
-	answer = "Wise words. Thank you.",
+	answer = "That makes sense. Thank you.",
 	next = "anything_else",
 })
 
@@ -234,15 +232,13 @@ local INTERACTION_AMMO_UNLOAD = INTERACTION_SET:RegisterInteraction({
 		local bindScore = Schema.util.LookupBinding("+showscores", true)
 
 		return
-			"*rubs his chin thoughtfully* Unloading ammo... now that's a practical skill. Sometimes you need to reorganize, " ..
-			"sometimes you've got the wrong type loaded. *nods knowingly* Been there myself more times than I can count.\n\n" ..
-			"It's a bit different from the regular inventory - you'll need to go to what they call the 'You' screen. " ..
+			"Unloading ammunition requires accessing a different section of your interface.\n\n" ..
 			"<span class=\"highlight\">Press " ..
 			bindScore ..
-			" to open your inventory, then click on the 'You' tab</span>. That'll show you more detailed information about yourself and your gear.\n\n" ..
-			"Look for the 'Equipped Ammunition' section - you'll see little icons for each type of ammo you've got loaded up. " ..
-			"<span class=\"highlight\">Simply click on the ammo you want to unload and it'll go right back into your main inventory</span>.\n\n" ..
-			"*chuckles softly* Took me a while to find that one. Sometimes the most useful features are hiding in plain sight."
+			" to open your inventory, then click on the 'You' tab</span>. This displays detailed information about your character and equipped items.\n\n" ..
+			"Look for the 'Equipped Ammunition' section, which shows icons for each type of ammunition you have loaded. " ..
+			"<span class=\"highlight\">Click on the ammunition you want to unload and it will return to your main inventory</span>.\n\n" ..
+			"This is useful for reorganizing your ammunition or switching to different ammo types."
 	end,
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
@@ -269,11 +265,11 @@ local INTERACTION_ANYTHING_ELSE = INTERACTION_SET:RegisterInteraction({
 
 	text = function(interaction, player, npcEntity)
 		local responses = {
-			"*gives a weathered but warm smile* Glad I could help, " ..
-			player:Name() .. ". Is there anything else this old timer can assist you with?",
-			"Hope that cleared things up for you. *adjusts his beanie* Got any other questions rattling around in your head?",
-			"*nods with satisfaction* Always feels good to help someone avoid the mistakes I made. Anything else you need to know?",
-			"There you go - one less thing to worry about. *looks at you kindly* What else can I help you figure out?"
+			"I hope that information was helpful, " ..
+			player:Name() .. ". Is there anything else you'd like to know?",
+			"Glad I could assist you. Do you have any other questions?",
+			"That should help you get started. What else would you like to learn about?",
+			"I'm here to help with any other questions you might have, " .. player:Name() .. "."
 		}
 		return table.Random(responses)
 	end,
@@ -302,15 +298,16 @@ local INTERACTION_FAREWELL = INTERACTION_SET:RegisterInteraction({
 
 	text = function(interaction, player, npcEntity)
 		local farewells = {
-			"*tips his beanie slightly* Take care of yourself out there, " ..
+			"You're welcome, " ..
 			player:Name() ..
-			". And remember - when in doubt, ask questions. Better to look foolish for a moment than to make a costly mistake.",
-			"Safe travels, " ..
+			". Feel free to come back if you need help with anything else.",
+			"Happy to help, " ..
 			player:Name() ..
-			". *gives a gentle nod* You know where to find me if you need any more help from this old coot.",
-			"*manages a genuine smile despite his tired features* Always a pleasure to help someone get their bearings. Don't be a stranger now, " ..
-			player:Name() .. ".",
-			"Off you go then. *waves slightly* Remember what I taught you, and you'll do just fine. Come back anytime you need guidance."
+			". Good luck out there!",
+			"Take care, " ..
+			player:Name() ..
+			". Don't hesitate to ask if you have more questions later.",
+			"Glad I could assist you. Have a great day, " .. player:Name() .. "!"
 		}
 		return table.Random(farewells)
 	end,
@@ -321,5 +318,5 @@ local INTERACTION_FAREWELL = INTERACTION_SET:RegisterInteraction({
 })
 
 INTERACTION_FAREWELL:RegisterResponse({
-	answer = "Goodbye, Liam.",
+	answer = "Goodbye.",
 })

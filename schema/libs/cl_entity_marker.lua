@@ -268,6 +268,11 @@ end)
 
 net.Receive("expEntityMarkerForce", function(len, client)
 	local entityIndex = net.ReadUInt(MAX_EDICT_BITS)
+	local shouldMark = net.ReadBool()
 
-	Schema.entityMarker.Mark(entityIndex)
+	if (shouldMark) then
+		Schema.entityMarker.Mark(entityIndex)
+	else
+		Schema.entityMarker.Unmark(entityIndex)
+	end
 end)

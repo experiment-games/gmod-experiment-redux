@@ -17,6 +17,22 @@ do
 	box-sizing: border-box;
 }
 
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A33426;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C34A3B;
+}
+
 html, body {
     margin: 0;
     padding: 0;

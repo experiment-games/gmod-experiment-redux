@@ -40,6 +40,7 @@ local INTERACTION_START_MISSION2 = INTERACTION_SET_MISSION2:RegisterInteraction(
 
 	serverOnStart = function(interaction, player, npcEntity)
 		Schema.progression.Change(player, PLUGIN.uniqueID, "npc", npcEntity:GetDisplayName())
+		Schema.entityMarker.UnmarkForPlayer(player, npcEntity)
 	end,
 })
 
