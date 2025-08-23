@@ -64,6 +64,12 @@ if (SERVER) then
 
 	function META:RemoveLimitedObject(objectType, object)
 		local character = self:GetCharacter()
+
+		if (not character) then
+			-- Can happen when the character disconnects and their limited objects are removed.
+			return
+		end
+
 		local limitedObjects = character:GetVar("limitedObjects", {})
 		local objects = limitedObjects[objectType] or {}
 

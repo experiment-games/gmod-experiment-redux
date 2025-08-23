@@ -1,9 +1,18 @@
+local PLUGIN = PLUGIN
 local TUTORIAL = TUTORIAL
 
 TUTORIAL.uniqueID = "spawn_selection"
 TUTORIAL.activateOn = "OnSpawnSelectOpen"
 TUTORIAL.activateOnDelay = 0.5
 TUTORIAL.deactivateOn = "OnSpawnSelectSuccess"
+
+function TUTORIAL:ShouldActivate()
+	return not Schema.progression.Check(
+		PLUGIN.uniqueID,
+		PLUGIN.PROGRESSION_SPAWN_SELECTION_EXPLAINED,
+		true
+	)
+end
 
 function TUTORIAL:GetText()
 	return {

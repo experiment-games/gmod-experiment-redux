@@ -8,26 +8,20 @@ util.AddNetworkString("expProgressionRemove")
 
 --- @alias ProgressionValue string|number|table|boolean|nil
 
---- Gets the progressions for a player and the dirty progressions table
+--- Gets the progressions for a player
 --- where progressions that need to be saved are referenced.
 --- @param player Player
---- @return table, table # The progressions and dirty progressions
+--- @return table # The progressions
 function Schema.progression.GetProgressions(player)
 	local character = player:GetCharacter()
 	local progressions = character:GetData("progressions")
-	local dirtyProgressions = character:GetData("dirtyProgressions")
 
 	if (not progressions) then
 		progressions = {}
 		character:SetData("progressions", progressions)
 	end
 
-	if (not dirtyProgressions) then
-		dirtyProgressions = {}
-		character:SetData("dirtyProgressions", dirtyProgressions)
-	end
-
-	return progressions, dirtyProgressions
+	return progressions
 end
 
 --- Gets the dynamic progressions for a player.
@@ -186,7 +180,7 @@ end
 --- @param noNetwork? boolean Whether to not send the change to the client
 --- @return any # The new value
 function Schema.progression.Change(player, scope, key, value, noNetwork)
-	local progressions, dirtyProgressions = Schema.progression.GetProgressions(player)
+	local progressions = Schema.progression.GetProgressions(player)
 
 	progressions[scope] = progressions[scope] or {}
 
@@ -195,9 +189,6 @@ function Schema.progression.Change(player, scope, key, value, noNetwork)
 	end
 
 	progressions[scope][key] = value
-
-	-- Force this to be dirty so it gets saved to the database
-	dirtyProgressions[scope] = progressions[scope]
 
 	if (noNetwork) then
 		return value

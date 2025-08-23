@@ -66,6 +66,29 @@ PLUGIN.MISSION_3_TRACKER_GOAL_3 = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
 	end,
 })
 
+PLUGIN.MISSION_3_TRACKER_GOAL_3_POST = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
+	key = PLUGIN.PROGRESSION_MISSION_3_DRINK_BEER_POST,
+
+	-- TODO: Somehow get the name of the npc
+	name = "Talk to the NPC",
+
+	type = "boolean",
+
+	getProgress = function(goal, player, progression)
+		local isCompleted = progression or false
+		return isCompleted, "1", isCompleted and "1" or "0"
+	end,
+
+	isVisible = function(goal)
+		return PLUGIN.MISSION_3_TRACKER_GOAL_3:CheckProgress()
+			and not Schema.progression.Check(
+				PLUGIN.uniqueID,
+				PLUGIN.PROGRESSION_MISSION_3_PLACE_BCU_GOT_SCRAP,
+				true
+			)
+	end,
+})
+
 PLUGIN.MISSION_3_TRACKER_GOAL_4 = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
 	key = PLUGIN.PROGRESSION_MISSION_3_PLACE_BCU,
 
@@ -80,6 +103,11 @@ PLUGIN.MISSION_3_TRACKER_GOAL_4 = PLUGIN.MISSION_3_TRACKER:RegisterGoal({
 
 	isVisible = function(goal)
 		return PLUGIN.MISSION_3_TRACKER_GOAL_3:CheckProgress()
+			and Schema.progression.Check(
+				PLUGIN.uniqueID,
+				PLUGIN.PROGRESSION_MISSION_3_PLACE_BCU_GOT_SCRAP,
+				true
+			)
 	end,
 })
 

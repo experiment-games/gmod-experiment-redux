@@ -51,7 +51,7 @@ local INTERACTION_START_MISSION2 = INTERACTION_SET_MISSION2:RegisterInteraction(
 	text =
 		"*chuckles* You look like you think you're new here. Don't worry, we've all been there. "
 		.. "Not like I was born here, but I know the ropes. *gestures around* "
-		.. "Just keep your head down and stay out of trouble, alright?"
+		.. "Just keep your head down and stay out of trouble, alright?<br><br>"
 		.. " *leans in slightly* "
 		.. "And don't worry too much about death not being the end here. You'll get used to it.",
 
@@ -59,16 +59,15 @@ local INTERACTION_START_MISSION2 = INTERACTION_SET_MISSION2:RegisterInteraction(
 		return PLUGIN.MISSION_1_TRACKER:IsInProgress(player)
 			and not PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
 	end,
-
-	serverOnStart = function(interaction, player, npcEntity)
-		PLUGIN.MISSION_1_TRACKER:Complete(player)
-		PLUGIN.MISSION_2_TRACKER:Start(player)
-	end,
 })
 
 INTERACTION_START_MISSION2:RegisterResponse({
 	answer = "What do I do now?",
 	next = "mission_2_instructions",
+	serverOnChoose = function(response, player, npcEntity)
+		PLUGIN.MISSION_1_TRACKER:Complete(player)
+		PLUGIN.MISSION_2_TRACKER:Start(player)
+	end,
 })
 
 INTERACTION_START_MISSION2:RegisterResponse({
@@ -97,8 +96,17 @@ local INTERACTION_MISSION2_INSTRUCTIONS = INTERACTION_SET_MISSION2:RegisterInter
 			and not PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
 			and not character:GetInventory():HasItem("newbie_nano_tech")
 	end,
+})
 
-	serverOnStart = function(interaction, player, npcEntity)
+INTERACTION_MISSION2_INSTRUCTIONS:RegisterResponse({
+	answer = "What are Nano Buffs?",
+	next = "mission_2_nano_buffs",
+})
+
+INTERACTION_MISSION2_INSTRUCTIONS:RegisterResponse({
+	answer = "Thanks, I'll try it out.",
+
+	serverOnChoose = function(response, player, npcEntity)
 		local character = player:GetCharacter()
 		local itemUniqueID = "newbie_nano_tech"
 
@@ -109,17 +117,14 @@ local INTERACTION_MISSION2_INSTRUCTIONS = INTERACTION_SET_MISSION2:RegisterInter
 				"could not receive item",
 				itemUniqueID, "for mission 2."
 			)
+
+			player:Notify(
+				"You do not have space in your inventory for the Nano-Tech Injector. Please make some space and talk to the NPC again."
+			)
+
+			return
 		end
 	end,
-})
-
-INTERACTION_MISSION2_INSTRUCTIONS:RegisterResponse({
-	answer = "What are Nano Buffs?",
-	next = "mission_2_nano_buffs",
-})
-
-INTERACTION_MISSION2_INSTRUCTIONS:RegisterResponse({
-	answer = "Thanks, I'll try it out.",
 })
 
 --[[
@@ -212,12 +217,20 @@ local INTERACTION_MISSION2_USED_AND_VIEWED = INTERACTION_SET_MISSION2:RegisterIn
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
 			and PLUGIN.MISSION_2_TRACKER_GOAL_2:CheckProgress(player)
 			and not PLUGIN.MISSION_2_TRACKER_GOAL_3:CheckProgress(player)
 	end,
+})
 
-	serverOnStart = function(interaction, player, npcEntity)
+INTERACTION_MISSION2_USED_AND_VIEWED:RegisterResponse({
+	answer = "Is a Door Protector really necessary?",
+	next = "mission_2_door_protectors",
+})
+
+INTERACTION_MISSION2_USED_AND_VIEWED:RegisterResponse({
+	answer = "That sounds easy enough.",
+
+	serverOnChoose = function(response, player, npcEntity)
 		local character = player:GetCharacter()
 		local itemUniqueID = "door_protector"
 
@@ -229,22 +242,17 @@ local INTERACTION_MISSION2_USED_AND_VIEWED = INTERACTION_SET_MISSION2:RegisterIn
 				itemUniqueID, "for mission 2."
 			)
 
+			player:Notify(
+				"You do not have space in your inventory for the Door Protector. Please make some space and talk to the NPC again."
+			)
+
 			return
 		end
 
 		-- TODO: We should give the player a temporary nano buff that prevents their door from getting shot open and prevents their BCU from being destroyed, so they can complete this mission quite safely.
 
 		PLUGIN.MISSION_2_TRACKER_GOAL_3:Change(player, true)
-	end
-})
-
-INTERACTION_MISSION2_USED_AND_VIEWED:RegisterResponse({
-	answer = "Is a Door Protector really necessary?",
-	next = "mission_2_door_protectors",
-})
-
-INTERACTION_MISSION2_USED_AND_VIEWED:RegisterResponse({
-	answer = "That sounds easy enough.",
+	end,
 })
 
 --[[
@@ -264,7 +272,6 @@ local INTERACTION_MISSION2_DOOR_PROTECTORS = INTERACTION_SET_MISSION2:RegisterIn
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
 			and PLUGIN.MISSION_2_TRACKER_GOAL_2:CheckProgress(player)
 			and not PLUGIN.MISSION_2_TRACKER_GOAL_3:CheckProgress(player)
 	end,
@@ -272,6 +279,12 @@ local INTERACTION_MISSION2_DOOR_PROTECTORS = INTERACTION_SET_MISSION2:RegisterIn
 
 INTERACTION_MISSION2_DOOR_PROTECTORS:RegisterResponse({
 	answer = "Got it, thanks.",
+	checkCanChoose = function(response, player, npcEntity)
+		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
+			and PLUGIN.MISSION_2_TRACKER_GOAL_3:CheckProgress(player)
+			and not PLUGIN.MISSION_2_TRACKER_GOAL_4:CheckProgress(player)
+	end,
+	next = "mission_2_used_and_viewed",
 })
 
 --[[
@@ -287,8 +300,6 @@ local INTERACTION_MISSION2_NOT_USED_DOOR_PROTECTOR_YET = INTERACTION_SET_MISSION
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_2:CheckProgress(player)
 			and PLUGIN.MISSION_2_TRACKER_GOAL_3:CheckProgress(player)
 			and not PLUGIN.MISSION_2_TRACKER_GOAL_4:CheckProgress(player)
 	end,
@@ -316,9 +327,6 @@ local INTERACTION_MISSION2_USED_DOOR_PROTECTOR = INTERACTION_SET_MISSION2:Regist
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_2:CheckProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_3:CheckProgress(player)
 			and PLUGIN.MISSION_2_TRACKER_GOAL_4:CheckProgress(player)
 			and not PLUGIN.MISSION_2_TRACKER_GOAL_5:CheckProgress(player)
 	end,
@@ -335,6 +343,17 @@ INTERACTION_MISSION2_USED_DOOR_PROTECTOR:RegisterResponse({
 --[[
 	When the player returns to complete the mission, we give them a bit of money
 --]]
+local function claimReward2(response, player, npcEntity)
+	PLUGIN.MISSION_2_TRACKER:Complete(player)
+
+	local character = player:GetCharacter()
+	local moneyToGive = 100
+
+	character:GiveMoney(moneyToGive)
+
+	PLUGIN.MISSION_3_TRACKER:Start(player)
+end
+
 local INTERACTION_MISSION2_COMPLETE = INTERACTION_SET_MISSION2:RegisterInteraction({
 	uniqueID = "mission_2_complete",
 
@@ -347,32 +366,19 @@ local INTERACTION_MISSION2_COMPLETE = INTERACTION_SET_MISSION2:RegisterInteracti
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		return PLUGIN.MISSION_2_TRACKER:IsInProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_1:CheckProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_2:CheckProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_3:CheckProgress(player)
-			and PLUGIN.MISSION_2_TRACKER_GOAL_4:CheckProgress(player)
 			and PLUGIN.MISSION_2_TRACKER_GOAL_5:CheckProgress(player)
 			and not PLUGIN.MISSION_2_TRACKER:IsCompleted(player)
-	end,
-
-	serverOnStart = function(interaction, player, npcEntity)
-		PLUGIN.MISSION_2_TRACKER:Complete(player)
-
-		local character = player:GetCharacter()
-		local moneyToGive = 100
-
-		character:GiveMoney(moneyToGive)
-
-		PLUGIN.MISSION_3_TRACKER:Start(player)
 	end,
 })
 
 INTERACTION_MISSION2_COMPLETE:RegisterResponse({
 	answer = "Thanks for the reward!",
+	serverOnChoose = claimReward2,
 })
 
 INTERACTION_MISSION2_COMPLETE:RegisterResponse({
 	answer = "I appreciate it.",
+	serverOnChoose = claimReward2,
 })
 
 --[[
@@ -391,8 +397,17 @@ local INTERACTION_SET_MISSION3 = NPC:RegisterInteractionSet({
 --[[
 	Starts Mission 3
 --]]
+local function startMission3(response, player, npcEntity)
+	PLUGIN.MISSION_3_TRACKER_GOAL_1:Change(player, true)
+
+	local beerItemTable = ix.item.Get("beer")
+
+	local character = player:GetCharacter()
+	character:GiveMoney(beerItemTable.price * (beerItemTable.shipmentSize or 1))
+end
+
 local INTERACTION_START_MISSION3 = INTERACTION_SET_MISSION3:RegisterInteraction({
-	uniqueID = "startMission3",
+	uniqueID = "mission_3_start",
 
 	text =
 		"*looks around and leans in closer* "
@@ -407,15 +422,6 @@ local INTERACTION_START_MISSION3 = INTERACTION_SET_MISSION3:RegisterInteraction(
 		return PLUGIN.MISSION_3_TRACKER:IsInProgress(player)
 			and not PLUGIN.MISSION_3_TRACKER_GOAL_1:CheckProgress(player)
 	end,
-
-	serverOnStart = function(interaction, player, npcEntity)
-		PLUGIN.MISSION_3_TRACKER_GOAL_1:Change(player, true)
-
-		local beerItemTable = ix.item.Get("beer")
-
-		local character = player:GetCharacter()
-		character:GiveMoney(beerItemTable.price * (beerItemTable.shipmentSize or 1))
-	end,
 })
 
 INTERACTION_START_MISSION3:RegisterResponse({
@@ -425,6 +431,7 @@ INTERACTION_START_MISSION3:RegisterResponse({
 
 INTERACTION_START_MISSION3:RegisterResponse({
 	answer = "I'll go buy that beer.",
+	serverOnChoose = startMission3,
 })
 
 --[[
@@ -453,6 +460,7 @@ INTERACTION_MISSION3_SHOP_ITEMS:RegisterResponse({
 
 INTERACTION_MISSION3_SHOP_ITEMS:RegisterResponse({
 	answer = "I'll go buy that beer now.",
+	serverOnChoose = startMission3,
 })
 
 --[[
@@ -474,6 +482,7 @@ local INTERACTION_MISSION3_MONOPOLY_TALK = INTERACTION_SET_MISSION3:RegisterInte
 
 INTERACTION_MISSION3_MONOPOLY_TALK:RegisterResponse({
 	answer = "I'll get that beer.",
+	serverOnChoose = startMission3,
 })
 
 --[[
@@ -642,6 +651,22 @@ INTERACTION_MISSION3_NO_SAFE_PLACE:RegisterResponse({
 --[[
 	Explains BCU and bolt generation
 --]]
+local function goPlaceBcu(response, player, npcEntity)
+	local character = player:GetCharacter()
+
+	if (not character:GetInventory():Add("scrap", 2)) then
+		ix.util.SchemaErrorNoHalt("Player", player:GetName(), "could not receive scrap for mission 3.")
+
+		player:Notify(
+			"You do not have space in your inventory for the scrap item. Please make some space and talk to the NPC again."
+		)
+
+		return
+	end
+
+	Schema.progression.Change(player, PLUGIN.uniqueID, PLUGIN.PROGRESSION_MISSION_3_PLACE_BCU_GOT_SCRAP, true)
+end
+
 local INTERACTION_MISSION3_EXPLAIN_BCU = INTERACTION_SET_MISSION3:RegisterInteraction({
 	uniqueID = "mission_3_explain_bcu",
 
@@ -651,7 +676,9 @@ local INTERACTION_MISSION3_EXPLAIN_BCU = INTERACTION_SET_MISSION3:RegisterIntera
 		.. "*hands you some scrap* "
 		.. "Take the BCU to your secured room and place it somewhere safe. It'll start with zero power, "
 		.. "so you'll need to recharge it with this scrap I'm giving you.<br><br>"
-		.. "<span class=\"highlight\">Go to your secured room and place the BCU.</span>",
+		.. "<span class=\"highlight\">Go to your secured room and place the BCU.</span><br><br>"
+		.. "Once it's placed, interact with it and add the scrap to recharge it. "
+		.. "You can find more scrap by scavenging around, which I can explain later if you like.",
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		return PLUGIN.MISSION_3_TRACKER:IsInProgress(player)
@@ -664,16 +691,6 @@ local INTERACTION_MISSION3_EXPLAIN_BCU = INTERACTION_SET_MISSION3:RegisterIntera
 				true
 			)
 	end,
-
-	serverOnStart = function(interaction, player, npcEntity)
-		local character = player:GetCharacter()
-
-		if (not character:GetInventory():Add("scrap", 2)) then
-			ix.util.SchemaErrorNoHalt("Player", player:GetName(), "could not receive scrap for mission 3.")
-		end
-
-		Schema.progression.Change(player, PLUGIN.uniqueID, PLUGIN.PROGRESSION_MISSION_3_PLACE_BCU_GOT_SCRAP, true)
-	end,
 })
 
 INTERACTION_MISSION3_EXPLAIN_BCU:RegisterResponse({
@@ -683,6 +700,7 @@ INTERACTION_MISSION3_EXPLAIN_BCU:RegisterResponse({
 
 INTERACTION_MISSION3_EXPLAIN_BCU:RegisterResponse({
 	answer = "I'll go place it now.",
+	serverOnChoose = goPlaceBcu,
 })
 
 --[[
@@ -704,6 +722,7 @@ local INTERACTION_MISSION3_BCU_DETAILS = INTERACTION_SET_MISSION3:RegisterIntera
 
 INTERACTION_MISSION3_BCU_DETAILS:RegisterResponse({
 	answer = "Sounds useful. I'll set it up.",
+	serverOnChoose = goPlaceBcu,
 })
 
 --[[
@@ -762,7 +781,8 @@ local INTERACTION_MISSION3_GET_MORE_SCRAP = INTERACTION_SET_MISSION3:RegisterInt
 		.. "Time to learn about scavenging. Look around for scavenging points, they can be piles of rubbish, "
 		.. "trash cans, or other interactive objects that look like they might contain useful items.<br><br>"
 		.. "You might find more scrap, or other items you can break down into scrap.<br><br>"
-		.. "<span class=\"highlight\">Find a scavenging point and scavenge for materials.</span>",
+		.. "<span class=\"highlight\">Find a scavenging point and scavenge for materials.</span><br><br>"
+		.. "Once you've found a junk item, <span class=\"highlight\">right-click it in your inventory and select 'Scrap'.</span>",
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		return PLUGIN.MISSION_3_TRACKER:IsInProgress(player)
@@ -854,6 +874,13 @@ INTERACTION_MISSION3_PRODUCTION_TIME:RegisterResponse({
 --[[
 	Player withdrew bolts, mission nearly complete
 --]]
+local function claimReward3(interaction, player, npcEntity)
+	PLUGIN.MISSION_3_TRACKER:Complete(player)
+
+	local character = player:GetCharacter()
+	character:GiveMoney(100)
+end
+
 local INTERACTION_MISSION3_SUCCESS = INTERACTION_SET_MISSION3:RegisterInteraction({
 	uniqueID = "mission_3_success",
 
@@ -868,23 +895,18 @@ local INTERACTION_MISSION3_SUCCESS = INTERACTION_SET_MISSION3:RegisterInteractio
 			and PLUGIN.MISSION_3_TRACKER_GOAL_7:CheckProgress(player)
 			and not PLUGIN.MISSION_3_TRACKER:IsCompleted(player)
 	end,
-
-	serverOnStart = function(interaction, player, npcEntity)
-		PLUGIN.MISSION_3_TRACKER:Complete(player)
-
-		local character = player:GetCharacter()
-		character:GiveMoney(100)
-	end,
 })
 
 INTERACTION_MISSION3_SUCCESS:RegisterResponse({
 	answer = "Thanks! I want to share this beer with you.",
 	next = "mission_3_share_beer",
+	serverOnChoose = claimReward3,
 })
 
 INTERACTION_MISSION3_SUCCESS:RegisterResponse({
 	answer = "Thanks for teaching me!",
 	next = "mission_3_final_advice",
+	serverOnChoose = claimReward3,
 })
 
 --[[
@@ -910,7 +932,7 @@ local INTERACTION_MISSION3_SHARE_BEER = INTERACTION_SET_MISSION3:RegisterInterac
 		local beer = inventory:HasItem("beer")
 		if (beer) then
 			beer:Remove()
-			PLUGIN.MISSION_3_TRACKER_GOAL_DRINK_SHARED:Change(player, true)
+			Schema.progression.Change(player, PLUGIN.uniqueID, PLUGIN.PROGRESSION_MISSION_3_DRINK_SHARED, true)
 		end
 	end,
 })

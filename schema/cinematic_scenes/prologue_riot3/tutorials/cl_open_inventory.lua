@@ -10,6 +10,7 @@ function TUTORIAL:OnActivate()
 		-- If the menu is opened, deactivate this tutorial
 		if (IsValid(ix.gui.menu)) then
 			self:Deactivate()
+			return
 		end
 
 		local glockEquipped = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_EQUIPPED, true)
@@ -18,6 +19,7 @@ function TUTORIAL:OnActivate()
 		-- If the glock is equipped and ammo is loaded, deactivate this tutorial
 		if (glockEquipped and ammoLoaded) then
 			self:Deactivate()
+			return
 		end
 	end)
 end
