@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8870"
-	"mapversion" "2449"
+	"mapversion" "2450"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -101,7 +101,7 @@ bgimages_plus
 world
 {
 	"id" "1"
-	"mapversion" "2449"
+	"mapversion" "2450"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -951291,13 +951291,28 @@ entity
 		"logicalpos" "[500 -13768]"
 	}
 }
+entity
+{
+	"id" "2910737"
+	"classname" "exp_npc"
+	"angles" "0 241 0"
+	"npcId" "intro_perk"
+	"origin" "-727 1992 848"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[500 -13768]"
+	}
+}
 cameras
 {
 	"activecamera" "0"
 	camera
 	{
-		"position" "[889.696 -1138.82 1276.29]"
-		"look" "[18061.2 61.9204 -14663.6]"
+		"position" "[-842.191 1922.87 934.14]"
+		"look" "[19195.6 13679 -2330.94]"
 	}
 	camera
 	{
