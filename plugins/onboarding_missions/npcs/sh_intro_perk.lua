@@ -20,3 +20,15 @@ NPC.voicePitch = 98
 
 ix.util.Include(PLUGIN.folder .. "/interactions/sh_perk_mission.lua", true)
 ix.util.Include(PLUGIN.folder .. "/interactions/sh_perk_mission_reject.lua", true)
+
+if (CLIENT) then
+	--- Having this function will cause the npc to have a mission marker over their head
+	--- Return false to show to unavailable marker and true to show the available marker.
+	--- This is only called on the client.
+	--- @param npcEntity Entity
+	--- @return boolean?
+	function NPC:ClientGetAvailable(npcEntity)
+		return PLUGIN.MISSION_3_TRACKER:IsCompleted()
+			and not PLUGIN.MISSION_4_TRACKER:IsCompleted()
+	end
+end
