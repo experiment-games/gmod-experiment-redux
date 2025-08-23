@@ -20,30 +20,32 @@ ITEM.functions.Place = {
 			return false
 		end
 
-		local entity = trace.Entity
+		local door = trace.Entity
 
-		if (not IsValid(entity) or not entity:IsDoor() or entity:GetNetVar("disabled")) then
+		door = IsValid(door.ixParent) and door.ixParent or door
+
+		if (not IsValid(door) or not door:IsDoor() or door:GetNetVar("disabled")) then
 			client:NotifyLocalized("dNotValid")
 
 			return false
 		end
 
-		if (not entity:GetNetVar("ownable") or entity:GetNetVar("faction") or entity:GetNetVar("class")) then
+		if (not door:GetNetVar("ownable") or door:GetNetVar("faction") or door:GetNetVar("class")) then
 			client:NotifyLocalized("dNotAllowedToOwn")
 			return false
 		end
 
-		if (IsValid(entity:GetDTEntity(0)) or IsValid(entity.expProtector)) then
+		if (IsValid(door:GetDTEntity(0)) or IsValid(door.expProtector)) then
 			client:Notify("This door is already owned by someone else.")
 			return false
 		end
 
 		local protector = ents.Create("exp_door_protector")
-		protector:SetupDoorProtector(client, entity, item)
+		protector:SetupDoorProtector(client, door, item)
 		protector:Spawn()
 		client:RegisterEntityToRemoveOnLeave(protector)
 
-		hook.Run("PlayerUsedDoorProtector", client, entity, protector)
+		hook.Run("PlayerUsedDoorProtector", client, door, protector)
 	end,
 
 	OnCanRun = function(item)

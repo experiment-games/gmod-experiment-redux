@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8870"
-	"mapversion" "2463"
+	"mapversion" "2505"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -101,7 +101,7 @@ bgimages_plus
 world
 {
 	"id" "1"
-	"mapversion" "2463"
+	"mapversion" "2505"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -407851,6 +407851,408 @@ world
 	}
 	solid
 	{
+		"id" "2937247"
+		side
+		{
+			"id" "127072"
+			"plane" "(1312 3216 1152) (1312 3376 1152) (1384 3376 1152)"
+			vertices_plus
+			{
+				"v" "1312 3216 1152"
+				"v" "1312 3376 1152"
+				"v" "1384 3376 1152"
+				"v" "1384 3216 1152"
+			}
+			"material" "DE_CBBLE/GROUNDDIRT"
+			"uaxis" "[1 0 0 -280] 0.25"
+			"vaxis" "[0 -1 0 76] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+			dispinfo
+			{
+				"power" "3"
+				"startposition" "[1312 3216 1152]"
+				"flags" "0"
+				"elevation" "0"
+				"subdiv" "0"
+				normals
+				{
+					"row0" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row1" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1"
+					"row2" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1"
+					"row3" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 0 0 0 1 0 0 1"
+					"row4" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row5" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row6" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row7" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1"
+					"row8" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+				}
+				distances
+				{
+					"row0" "6.98938 5.0625 2.3064 4.07886 6.26758 5.28296 5.16162 5.23975 4.07983"
+					"row1" "7.28418 9.56104 6.28418 1.47375 0 0 0 1.66223 3"
+					"row2" "8 4.45837 0 1.66223 3 1.66223 0 2.77368 5"
+					"row3" "8 4.31726 0.555542 1 0.555542 0 0 2.77368 5"
+					"row4" "9 4.88159 0 0.555542 2.66492 3.55554 1.65161 1.66223 3"
+					"row5" "10 5.29016 0 1.89209 4.03589 3.98425 1.85852 3.34351 5"
+					"row6" "5.99951 4.57458 5.5332 7 4.31555 1.55554 1.55469 3.27307 5"
+					"row7" "9.05664 6.83997 1.9989 2.77319 4 2.20984 0 3.26221 6"
+					"row8" "5.41724 5.29492 6.17981 7.05969 6.60364 6 3.79614 3.20984 4.54126"
+				}
+				offsets
+				{
+					"row0" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row1" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row2" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row3" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row4" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row5" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row6" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row7" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row8" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+				}
+				offset_normals
+				{
+					"row0" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row1" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row2" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row3" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row4" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row5" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row6" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row7" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row8" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+				}
+				alphas
+				{
+					"row0" "0 0 0 0 0 0 0 0 0"
+					"row1" "0 0 0 0 0 0 0 0 0"
+					"row2" "0 0 0 0 0 0 0 0 0"
+					"row3" "0 0 0 0 0 0 0 0 0"
+					"row4" "0 0 0 0 0 0 0 0 0"
+					"row5" "0 0 0 0 0 0 0 0 0"
+					"row6" "0 0 0 0 0 0 0 0 0"
+					"row7" "0 0 0 0 0 0 0 0 0"
+					"row8" "0 0 0 0 0 0 0 0 0"
+				}
+				triangle_tags
+				{
+					"row0" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row1" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row2" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row3" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row4" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row5" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row6" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row7" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+				}
+				allowed_verts
+				{
+					"10" "-1 -1 -1 -1 -1 -1 -1 -1 -1 -1"
+				}
+			}
+		}
+		side
+		{
+			"id" "127071"
+			"plane" "(1312 3376 1144) (1312 3216 1144) (1384 3216 1144)"
+			vertices_plus
+			{
+				"v" "1312 3376 1144"
+				"v" "1312 3216 1144"
+				"v" "1384 3216 1144"
+				"v" "1384 3376 1144"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[1 0 0 -24] 0.25"
+			"vaxis" "[0 -1 0 12] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127070"
+			"plane" "(1312 3216 1144) (1312 3376 1144) (1312 3376 1152)"
+			vertices_plus
+			{
+				"v" "1312 3216 1144"
+				"v" "1312 3376 1144"
+				"v" "1312 3376 1152"
+				"v" "1312 3216 1152"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[0 1 0 -12] 0.25"
+			"vaxis" "[0 0 -1 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127069"
+			"plane" "(1312 3376 1144) (1384 3376 1144) (1384 3376 1152)"
+			vertices_plus
+			{
+				"v" "1312 3376 1144"
+				"v" "1384 3376 1144"
+				"v" "1384 3376 1152"
+				"v" "1312 3376 1152"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[1 0 0 -24] 0.25"
+			"vaxis" "[0 0 -1 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127068"
+			"plane" "(1384 3216 1144) (1312 3216 1144) (1312 3216 1152)"
+			vertices_plus
+			{
+				"v" "1384 3216 1144"
+				"v" "1312 3216 1144"
+				"v" "1312 3216 1152"
+				"v" "1384 3216 1152"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[1 0 0 -24] 0.25"
+			"vaxis" "[0 0 -1 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127067"
+			"plane" "(1384 3376 1144) (1384 3216 1144) (1384 3216 1152)"
+			vertices_plus
+			{
+				"v" "1384 3376 1144"
+				"v" "1384 3216 1144"
+				"v" "1384 3216 1152"
+				"v" "1384 3376 1152"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[0 1 0 32] 0.25"
+			"vaxis" "[0 0 -1 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		editor
+		{
+			"color" "0 180 249"
+			"visgroupshown" "1"
+			"visgroupautoshown" "1"
+		}
+	}
+	solid
+	{
+		"id" "2937374"
+		side
+		{
+			"id" "127174"
+			"plane" "(968 -1056 1192) (1152 -1056 1192) (1152 -1144 1192)"
+			vertices_plus
+			{
+				"v" "968 -1056 1192"
+				"v" "1152 -1056 1192"
+				"v" "1152 -1144 1192"
+				"v" "968 -1144 1192"
+			}
+			"material" "DE_CBBLE/GROUNDDIRT"
+			"uaxis" "[0 -1 0 -280] 0.25"
+			"vaxis" "[-1 0 0 300] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+			dispinfo
+			{
+				"power" "3"
+				"startposition" "[968 -1056 1192]"
+				"flags" "0"
+				"elevation" "0"
+				"subdiv" "0"
+				normals
+				{
+					"row0" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row1" "0 0 1 0 0 1 0 0 1 0 0 -1 0 0 -1 0 0 0 0 0 0 0 0 1 0 0 1"
+					"row2" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1"
+					"row3" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 0 0 0 1 0 0 1"
+					"row4" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row5" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row6" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row7" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1"
+					"row8" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+				}
+				distances
+				{
+					"row0" "5.36475 4.22363 3.3783 2.27002 3.97876 5.28296 5.16162 5.23975 4.07983"
+					"row1" "7.28418 9.56104 4.4873 3.52625 2.26282 0 0 1.66223 3"
+					"row2" "8 4.45837 0 1.66223 3 1.66223 0 2.77368 5"
+					"row3" "8 4.31726 0.555542 1 0.555542 0 0 2.77368 5"
+					"row4" "9 4.88159 0 0.555542 2.66492 3.55554 1.65161 1.66223 3"
+					"row5" "10 5.29016 0 1.89209 4.03589 3.98425 1.85852 3.34351 5"
+					"row6" "5.99951 4.57458 5.5332 7 4.31555 1.55554 1.55469 3.27307 5"
+					"row7" "9.05664 6.83997 1.9989 2.77319 4 2.20984 0 3.8584 7"
+					"row8" "10.6874 9.83301 7.41553 7.05969 6.60364 6 3.79614 3.20984 4.54126"
+				}
+				offsets
+				{
+					"row0" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row1" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row2" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row3" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row4" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row5" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row6" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row7" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+					"row8" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+				}
+				offset_normals
+				{
+					"row0" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row1" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row2" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row3" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row4" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row5" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row6" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row7" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+					"row8" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
+				}
+				alphas
+				{
+					"row0" "0 0 0 0 0 0 0 0 0"
+					"row1" "0 0 0 0 0 0 0 0 0"
+					"row2" "0 0 0 0 0 0 0 0 0"
+					"row3" "0 0 0 0 0 0 0 0 0"
+					"row4" "0 0 0 0 0 0 0 0 0"
+					"row5" "0 0 0 0 0 0 0 0 0"
+					"row6" "0 0 0 0 0 0 0 0 0"
+					"row7" "0 0 0 0 0 0 0 0 0"
+					"row8" "0 0 0 0 0 0 0 0 0"
+				}
+				triangle_tags
+				{
+					"row0" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row1" "9 9 9 9 1 9 9 9 9 9 9 9 9 9 9 9"
+					"row2" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row3" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row4" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row5" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row6" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+					"row7" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
+				}
+				allowed_verts
+				{
+					"10" "-1 -1 -1 -1 -1 -1 -1 -1 -1 -1"
+				}
+			}
+		}
+		side
+		{
+			"id" "127173"
+			"plane" "(1152 -1056 1184) (968 -1056 1184) (968 -1144 1184)"
+			vertices_plus
+			{
+				"v" "1152 -1056 1184"
+				"v" "968 -1056 1184"
+				"v" "968 -1144 1184"
+				"v" "1152 -1144 1184"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[0 -1 0 -24] 0.25"
+			"vaxis" "[-1 0 0 44] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127172"
+			"plane" "(968 -1056 1184) (1152 -1056 1184) (1152 -1056 1192)"
+			vertices_plus
+			{
+				"v" "968 -1056 1184"
+				"v" "1152 -1056 1184"
+				"v" "1152 -1056 1192"
+				"v" "968 -1056 1192"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[1 0 0 -44] 0.25"
+			"vaxis" "[0 0 -1 32] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127171"
+			"plane" "(1152 -1056 1184) (1152 -1144 1184) (1152 -1144 1192)"
+			vertices_plus
+			{
+				"v" "1152 -1056 1184"
+				"v" "1152 -1144 1184"
+				"v" "1152 -1144 1192"
+				"v" "1152 -1056 1192"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[0 -1 0 -24] 0.25"
+			"vaxis" "[0 0 -1 32] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127170"
+			"plane" "(968 -1144 1184) (968 -1056 1184) (968 -1056 1192)"
+			vertices_plus
+			{
+				"v" "968 -1144 1184"
+				"v" "968 -1056 1184"
+				"v" "968 -1056 1192"
+				"v" "968 -1144 1192"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[0 -1 0 -24] 0.25"
+			"vaxis" "[0 0 -1 32] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127169"
+			"plane" "(1152 -1144 1184) (968 -1144 1184) (968 -1144 1192)"
+			vertices_plus
+			{
+				"v" "1152 -1144 1184"
+				"v" "968 -1144 1184"
+				"v" "968 -1144 1192"
+				"v" "1152 -1144 1192"
+			}
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[1 0 0 -0] 0.25"
+			"vaxis" "[0 0 -1 32] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		editor
+		{
+			"color" "0 180 249"
+			"visgroupshown" "1"
+			"visgroupautoshown" "1"
+		}
+	}
+	solid
+	{
 		"id" "2165111"
 		side
 		{
@@ -417008,526 +417410,6 @@ world
 		{
 			"color" "243 184 0"
 			"groupid" "2512921"
-			"visgroupshown" "1"
-			"visgroupautoshown" "1"
-		}
-	}
-	solid
-	{
-		"id" "2937247"
-		side
-		{
-			"id" "127072"
-			"plane" "(1312 3216 1152) (1312 3376 1152) (1384 3376 1152)"
-			vertices_plus
-			{
-				"v" "1312 3216 1152"
-				"v" "1312 3376 1152"
-				"v" "1384 3376 1152"
-				"v" "1384 3216 1152"
-			}
-			"material" "DE_CBBLE/GROUNDDIRT"
-			"uaxis" "[1 0 0 -280] 0.25"
-			"vaxis" "[0 -1 0 76] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-			dispinfo
-			{
-				"power" "3"
-				"startposition" "[1312 3216 1152]"
-				"flags" "0"
-				"elevation" "0"
-				"subdiv" "0"
-				normals
-				{
-					"row0" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row1" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1"
-					"row2" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1"
-					"row3" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 0 0 0 1 0 0 1"
-					"row4" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row5" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row6" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row7" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1"
-					"row8" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-				}
-				distances
-				{
-					"row0" "6.98938 5.0625 2.3064 4.07886 6.26758 5.28296 5.16162 5.23975 4.07983"
-					"row1" "7.28418 9.56104 6.28418 1.47375 0 0 0 1.66223 3"
-					"row2" "8 4.45837 0 1.66223 3 1.66223 0 2.77368 5"
-					"row3" "8 4.31726 0.555542 1 0.555542 0 0 2.77368 5"
-					"row4" "9 4.88159 0 0.555542 2.66492 3.55554 1.65161 1.66223 3"
-					"row5" "10 5.29016 0 1.89209 4.03589 3.98425 1.85852 3.34351 5"
-					"row6" "5.99951 4.57458 5.5332 7 4.31555 1.55554 1.55469 3.27307 5"
-					"row7" "9.05664 6.83997 1.9989 2.77319 4 2.20984 0 3.26221 6"
-					"row8" "5.41724 5.29492 6.17981 7.05969 6.60364 6 3.79614 3.20984 4.54126"
-				}
-				offsets
-				{
-					"row0" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row1" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row2" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row3" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row4" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row5" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row6" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row7" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row8" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-				}
-				offset_normals
-				{
-					"row0" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row1" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row2" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row3" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row4" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row5" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row6" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row7" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row8" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-				}
-				alphas
-				{
-					"row0" "0 0 0 0 0 0 0 0 0"
-					"row1" "0 0 0 0 0 0 0 0 0"
-					"row2" "0 0 0 0 0 0 0 0 0"
-					"row3" "0 0 0 0 0 0 0 0 0"
-					"row4" "0 0 0 0 0 0 0 0 0"
-					"row5" "0 0 0 0 0 0 0 0 0"
-					"row6" "0 0 0 0 0 0 0 0 0"
-					"row7" "0 0 0 0 0 0 0 0 0"
-					"row8" "0 0 0 0 0 0 0 0 0"
-				}
-				triangle_tags
-				{
-					"row0" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row1" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row2" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row3" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row4" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row5" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row6" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row7" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-				}
-				allowed_verts
-				{
-					"10" "-1 -1 -1 -1 -1 -1 -1 -1 -1 -1"
-				}
-			}
-		}
-		side
-		{
-			"id" "127071"
-			"plane" "(1312 3376 1144) (1312 3216 1144) (1384 3216 1144)"
-			vertices_plus
-			{
-				"v" "1312 3376 1144"
-				"v" "1312 3216 1144"
-				"v" "1384 3216 1144"
-				"v" "1384 3376 1144"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[1 0 0 -24] 0.25"
-			"vaxis" "[0 -1 0 12] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127070"
-			"plane" "(1312 3216 1144) (1312 3376 1144) (1312 3376 1152)"
-			vertices_plus
-			{
-				"v" "1312 3216 1144"
-				"v" "1312 3376 1144"
-				"v" "1312 3376 1152"
-				"v" "1312 3216 1152"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[0 1 0 -12] 0.25"
-			"vaxis" "[0 0 -1 0] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127069"
-			"plane" "(1312 3376 1144) (1384 3376 1144) (1384 3376 1152)"
-			vertices_plus
-			{
-				"v" "1312 3376 1144"
-				"v" "1384 3376 1144"
-				"v" "1384 3376 1152"
-				"v" "1312 3376 1152"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[1 0 0 -24] 0.25"
-			"vaxis" "[0 0 -1 0] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127068"
-			"plane" "(1384 3216 1144) (1312 3216 1144) (1312 3216 1152)"
-			vertices_plus
-			{
-				"v" "1384 3216 1144"
-				"v" "1312 3216 1144"
-				"v" "1312 3216 1152"
-				"v" "1384 3216 1152"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[1 0 0 -24] 0.25"
-			"vaxis" "[0 0 -1 0] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127067"
-			"plane" "(1384 3376 1144) (1384 3216 1144) (1384 3216 1152)"
-			vertices_plus
-			{
-				"v" "1384 3376 1144"
-				"v" "1384 3216 1144"
-				"v" "1384 3216 1152"
-				"v" "1384 3376 1152"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[0 1 0 32] 0.25"
-			"vaxis" "[0 0 -1 0] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		editor
-		{
-			"color" "0 180 249"
-			"visgroupshown" "1"
-			"visgroupautoshown" "1"
-		}
-	}
-	solid
-	{
-		"id" "2937374"
-		side
-		{
-			"id" "127174"
-			"plane" "(968 -1056 1192) (1152 -1056 1192) (1152 -1144 1192)"
-			vertices_plus
-			{
-				"v" "968 -1056 1192"
-				"v" "1152 -1056 1192"
-				"v" "1152 -1144 1192"
-				"v" "968 -1144 1192"
-			}
-			"material" "DE_CBBLE/GROUNDDIRT"
-			"uaxis" "[0 -1 0 -280] 0.25"
-			"vaxis" "[-1 0 0 300] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-			dispinfo
-			{
-				"power" "3"
-				"startposition" "[968 -1056 1192]"
-				"flags" "0"
-				"elevation" "0"
-				"subdiv" "0"
-				normals
-				{
-					"row0" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row1" "0 0 1 0 0 1 0 0 1 0 0 -1 0 0 -1 0 0 0 0 0 0 0 0 1 0 0 1"
-					"row2" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1"
-					"row3" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 0 0 0 1 0 0 1"
-					"row4" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row5" "0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row6" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row7" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1"
-					"row8" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-				}
-				distances
-				{
-					"row0" "5.36475 4.22363 3.3783 2.27002 3.97876 5.28296 5.16162 5.23975 4.07983"
-					"row1" "7.28418 9.56104 4.4873 3.52625 2.26282 0 0 1.66223 3"
-					"row2" "8 4.45837 0 1.66223 3 1.66223 0 2.77368 5"
-					"row3" "8 4.31726 0.555542 1 0.555542 0 0 2.77368 5"
-					"row4" "9 4.88159 0 0.555542 2.66492 3.55554 1.65161 1.66223 3"
-					"row5" "10 5.29016 0 1.89209 4.03589 3.98425 1.85852 3.34351 5"
-					"row6" "5.99951 4.57458 5.5332 7 4.31555 1.55554 1.55469 3.27307 5"
-					"row7" "9.05664 6.83997 1.9989 2.77319 4 2.20984 0 3.8584 7"
-					"row8" "10.6874 9.83301 7.41553 7.05969 6.60364 6 3.79614 3.20984 4.54126"
-				}
-				offsets
-				{
-					"row0" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row1" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row2" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row3" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row4" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row5" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row6" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row7" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-					"row8" "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
-				}
-				offset_normals
-				{
-					"row0" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row1" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row2" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row3" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row4" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row5" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row6" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row7" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-					"row8" "0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1"
-				}
-				alphas
-				{
-					"row0" "0 0 0 0 0 0 0 0 0"
-					"row1" "0 0 0 0 0 0 0 0 0"
-					"row2" "0 0 0 0 0 0 0 0 0"
-					"row3" "0 0 0 0 0 0 0 0 0"
-					"row4" "0 0 0 0 0 0 0 0 0"
-					"row5" "0 0 0 0 0 0 0 0 0"
-					"row6" "0 0 0 0 0 0 0 0 0"
-					"row7" "0 0 0 0 0 0 0 0 0"
-					"row8" "0 0 0 0 0 0 0 0 0"
-				}
-				triangle_tags
-				{
-					"row0" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row1" "9 9 9 9 1 9 9 9 9 9 9 9 9 9 9 9"
-					"row2" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row3" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row4" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row5" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row6" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-					"row7" "9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9"
-				}
-				allowed_verts
-				{
-					"10" "-1 -1 -1 -1 -1 -1 -1 -1 -1 -1"
-				}
-			}
-		}
-		side
-		{
-			"id" "127173"
-			"plane" "(1152 -1056 1184) (968 -1056 1184) (968 -1144 1184)"
-			vertices_plus
-			{
-				"v" "1152 -1056 1184"
-				"v" "968 -1056 1184"
-				"v" "968 -1144 1184"
-				"v" "1152 -1144 1184"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[0 -1 0 -24] 0.25"
-			"vaxis" "[-1 0 0 44] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127172"
-			"plane" "(968 -1056 1184) (1152 -1056 1184) (1152 -1056 1192)"
-			vertices_plus
-			{
-				"v" "968 -1056 1184"
-				"v" "1152 -1056 1184"
-				"v" "1152 -1056 1192"
-				"v" "968 -1056 1192"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[1 0 0 -44] 0.25"
-			"vaxis" "[0 0 -1 32] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127171"
-			"plane" "(1152 -1056 1184) (1152 -1144 1184) (1152 -1144 1192)"
-			vertices_plus
-			{
-				"v" "1152 -1056 1184"
-				"v" "1152 -1144 1184"
-				"v" "1152 -1144 1192"
-				"v" "1152 -1056 1192"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[0 -1 0 -24] 0.25"
-			"vaxis" "[0 0 -1 32] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127170"
-			"plane" "(968 -1144 1184) (968 -1056 1184) (968 -1056 1192)"
-			vertices_plus
-			{
-				"v" "968 -1144 1184"
-				"v" "968 -1056 1184"
-				"v" "968 -1056 1192"
-				"v" "968 -1144 1192"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[0 -1 0 -24] 0.25"
-			"vaxis" "[0 0 -1 32] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127169"
-			"plane" "(1152 -1144 1184) (968 -1144 1184) (968 -1144 1192)"
-			vertices_plus
-			{
-				"v" "1152 -1144 1184"
-				"v" "968 -1144 1184"
-				"v" "968 -1144 1192"
-				"v" "1152 -1144 1192"
-			}
-			"material" "TOOLS/TOOLSNODRAW"
-			"uaxis" "[1 0 0 -0] 0.25"
-			"vaxis" "[0 0 -1 32] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		editor
-		{
-			"color" "0 180 249"
-			"visgroupshown" "1"
-			"visgroupautoshown" "1"
-		}
-	}
-	solid
-	{
-		"id" "2937434"
-		side
-		{
-			"id" "127192"
-			"plane" "(1376 1944 1176.38) (1632 1944 1176.38) (1632 1856 1176.38)"
-			vertices_plus
-			{
-				"v" "1376 1944 1176.38"
-				"v" "1632 1944 1176.38"
-				"v" "1632 1856 1176.38"
-				"v" "1376 1856 1176.38"
-			}
-			"material" "TOOLS/TOOLSTRIGGER"
-			"uaxis" "[0 1 0 12.8477] 0.25"
-			"vaxis" "[1 0 0 -29.3496] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127191"
-			"plane" "(1376 1856 1144.38) (1632 1856 1144.38) (1632 1944 1144.38)"
-			vertices_plus
-			{
-				"v" "1376 1856 1144.38"
-				"v" "1632 1856 1144.38"
-				"v" "1632 1944 1144.38"
-				"v" "1376 1944 1144.38"
-			}
-			"material" "TOOLS/TOOLSTRIGGER"
-			"uaxis" "[1 0 0 -21.3496] 0.25"
-			"vaxis" "[0 -1 0 -12.8477] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127190"
-			"plane" "(1632 1944 1144.38) (1632 1856 1144.38) (1632 1856 1176.38)"
-			vertices_plus
-			{
-				"v" "1632 1944 1144.38"
-				"v" "1632 1856 1144.38"
-				"v" "1632 1856 1176.38"
-				"v" "1632 1944 1176.38"
-			}
-			"material" "TOOLS/TOOLSTRIGGER"
-			"uaxis" "[0 1 0 12.8477] 0.25"
-			"vaxis" "[0 0 -1 1.50049] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127189"
-			"plane" "(1376 1944 1144.38) (1632 1944 1144.38) (1632 1944 1176.38)"
-			vertices_plus
-			{
-				"v" "1376 1944 1144.38"
-				"v" "1632 1944 1144.38"
-				"v" "1632 1944 1176.38"
-				"v" "1376 1944 1176.38"
-			}
-			"material" "TOOLS/TOOLSTRIGGER"
-			"uaxis" "[1 0 0 -21.3496] 0.25"
-			"vaxis" "[0 0 -1 1.50049] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127188"
-			"plane" "(1632 1856 1144.38) (1376 1856 1144.38) (1376 1856 1176.38)"
-			vertices_plus
-			{
-				"v" "1632 1856 1144.38"
-				"v" "1376 1856 1144.38"
-				"v" "1376 1856 1176.38"
-				"v" "1632 1856 1176.38"
-			}
-			"material" "TOOLS/TOOLSTRIGGER"
-			"uaxis" "[1 0 0 -21.3496] 0.25"
-			"vaxis" "[0 0 -1 1.50049] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		side
-		{
-			"id" "127187"
-			"plane" "(1376 1856 1144.38) (1376 1944 1144.38) (1376 1944 1176.38)"
-			vertices_plus
-			{
-				"v" "1376 1856 1144.38"
-				"v" "1376 1944 1144.38"
-				"v" "1376 1944 1176.38"
-				"v" "1376 1856 1176.38"
-			}
-			"material" "TOOLS/TOOLSTRIGGER"
-			"uaxis" "[0 1 0 12.8477] 0.25"
-			"vaxis" "[0 0 1 30.5015] 0.25"
-			"rotation" "0"
-			"lightmapscale" "16"
-			"smoothing_groups" "0"
-		}
-		editor
-		{
-			"color" "220 30 220"
 			"visgroupshown" "1"
 			"visgroupautoshown" "1"
 		}
@@ -482952,6 +482834,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -482980,6 +482863,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -483008,6 +482892,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -483035,6 +482920,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -483062,6 +482948,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -483090,7 +482977,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "plaza_bld2_door2"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -483118,6 +483007,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -483160,6 +483050,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -483188,6 +483079,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -483230,6 +483122,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -483257,6 +483150,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -483285,7 +483179,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "plaza_bld4_door1"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -483312,6 +483208,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -484273,7 +484170,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "plaza_bld3_door1"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "0"
@@ -484301,6 +484200,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -484343,7 +484243,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "plaza_bld3_door1"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "0"
@@ -484503,6 +484405,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -484531,6 +484434,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -484559,6 +484463,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -485365,7 +485270,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor5_2"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -485392,6 +485299,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -485420,7 +485328,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor5"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -485447,6 +485357,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -486039,6 +485950,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -487353,12 +487265,14 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "4"
 	"spawnflags" "8192"
 	"speed" "100"
+	"targetname" "slums_storage"
 	"origin" "367 1923 1334.28"
 	editor
 	{
@@ -487380,7 +487294,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "slums_storage"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "4"
@@ -487463,6 +487379,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -487701,10 +487618,12 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "3"
+	"slavename" "nogardsplace_slave"
 	"spawnflags" "8192"
 	"speed" "100"
 	"targetname" "nogardsplace"
@@ -487729,13 +487648,16 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "nogardsplace"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "3"
+	"slavename" "nogardsplace"
 	"spawnflags" "8192"
 	"speed" "100"
-	"targetname" "nogardsplace"
+	"targetname" "nogardsplace_slave"
 	"origin" "1246.09 3040.72 1198"
 	editor
 	{
@@ -487791,10 +487713,13 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "nogardsplace"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "4"
+	"slavename" "1lockers_1_door_left"
 	"spawnflags" "8192"
 	"speed" "100"
 	"origin" "836 3592 1150.28"
@@ -487835,7 +487760,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "nogardsplace"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "4"
@@ -488319,6 +488246,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -488346,6 +488274,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -488898,7 +488827,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor4_2"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -488925,6 +488856,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -488953,7 +488885,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor4"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -488980,6 +488914,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -489470,12 +489405,14 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "10"
 	"spawnflags" "8192"
 	"speed" "100"
+	"targetname" "souvenirs"
 	"origin" "-223 3460 934.281"
 	editor
 	{
@@ -489511,7 +489448,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "souvenirs"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "0"
@@ -489659,12 +489598,14 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "4"
 	"spawnflags" "8192"
 	"speed" "100"
+	"targetname" "pub"
 	"origin" "-999 2953 790.281"
 	editor
 	{
@@ -489742,7 +489683,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "pub"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "0"
@@ -489769,7 +489712,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "pub"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "1"
@@ -490177,6 +490122,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -490289,13 +490235,15 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
+	"slavename" "n_br_doors2"
 	"spawnflags" "8192"
 	"speed" "100"
-	"targetname" "n_br_doors"
+	"targetname" "n_br_doors1"
 	"origin" "2375 60 1108"
 	editor
 	{
@@ -490317,13 +490265,16 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "n_br_doors1"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
+	"slavename" "n_br_doors1"
 	"spawnflags" "8192"
 	"speed" "100"
-	"targetname" "n_br_doors"
+	"targetname" "n_br_doors2"
 	"origin" "2281 60 1108"
 	editor
 	{
@@ -490490,6 +490441,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -490517,6 +490469,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -490544,6 +490497,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -490778,6 +490732,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -490806,6 +490761,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -492819,12 +492775,14 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "10"
 	"spawnflags" "8192"
 	"speed" "100"
+	"targetname" "atlantic_neighbor"
 	"origin" "988 -3991 718.281"
 	editor
 	{
@@ -492846,7 +492804,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "atlantic_neighbor"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "1"
@@ -492915,7 +492875,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "atlantic_neighbor"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "0"
@@ -492942,6 +492904,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -493339,6 +493302,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -493367,6 +493331,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -493619,6 +493584,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -493646,6 +493612,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -494038,6 +494005,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -494674,7 +494642,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "warehaus1"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "4"
@@ -494702,6 +494672,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -495338,7 +495309,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "nogardsplace"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "7"
@@ -496399,7 +496372,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor3_2"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -496426,6 +496401,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -496454,7 +496430,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor3"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -496481,6 +496459,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -497088,7 +497067,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor2_2"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -497115,6 +497096,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -497143,7 +497125,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor2"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -497766,7 +497750,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor1_2"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -497793,6 +497779,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -497821,7 +497808,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "apsDoor1"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -497848,6 +497837,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -498038,7 +498028,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "hosp_doors"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -498065,7 +498057,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "hosp_doors"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -498309,6 +498303,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -498956,7 +498951,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "sniperspotdoor"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "4"
@@ -499037,6 +499034,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -499226,12 +499224,14 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "7"
 	"spawnflags" "8192"
 	"speed" "100"
+	"targetname" "bar_storage"
 	"origin" "-1919 4372 922"
 	editor
 	{
@@ -499253,7 +499253,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "bar_storage"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "7"
@@ -499509,7 +499511,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "bar_door"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "7"
@@ -499536,7 +499540,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "bar_door"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "7"
@@ -716733,6 +716739,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -739626,6 +739633,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -741092,6 +741100,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -741120,7 +741129,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "hosp_doors"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "2"
@@ -751595,9 +751606,10 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "2"
-	"health" "0"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
+	"parentDoorTarget" "nexus_balcony_room_door"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "8"
@@ -754741,7 +754753,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -758671,6 +758683,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -758924,6 +758937,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -759699,7 +759713,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -759735,7 +759749,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -759771,7 +759785,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -767661,6 +767675,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -767690,6 +767705,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -769004,6 +769020,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -784379,7 +784396,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788080,7 +788097,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788116,7 +788133,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788152,7 +788169,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788311,7 +788328,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788346,7 +788363,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788381,7 +788398,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788416,7 +788433,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788451,7 +788468,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788486,7 +788503,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788521,7 +788538,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788615,7 +788632,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
-	"health" "0"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -788800,6 +788817,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -789548,6 +789566,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -789576,6 +789595,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -792253,12 +792273,14 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
 	"spawnflags" "8192"
 	"speed" "100"
+	"targetname" "sim_apts_door1_aptmt"
 	"origin" "2163 110 686"
 	editor
 	{
@@ -792280,7 +792302,9 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
+	"parentDoorTarget" "sim_apts_door1_aptmt"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
 	"skin" "2"
@@ -832616,6 +832640,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -834377,6 +834402,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -834405,6 +834431,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "-1"
@@ -857796,7 +857823,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "2"
-	"health" "0"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "0"
 	"rendercolor" "255 255 255"
@@ -887521,6 +887548,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "1"
 	"rendercolor" "255 255 255"
@@ -888952,6 +888980,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door03_left.mdl"
 	"opendir" "1"
 	"rendercolor" "255 255 255"
@@ -888988,6 +889017,7 @@ entity
 	"forceclosed" "0"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door03_left.mdl"
 	"opendir" "2"
 	"rendercolor" "255 255 255"
@@ -891360,14 +891390,16 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "2"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "2"
+	"slavename" "obstacle_zero_door1"
 	"spawnflags" "8192"
 	"speed" "100"
-	"targetname" "hosp_doors"
+	"targetname" "obstacle_zero_door2"
 	"origin" "4011 -193 718"
 	editor
 	{
@@ -891389,14 +891421,16 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "0"
 	"model" "models/props_c17/door01_left.mdl"
 	"opendir" "1"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
 	"skin" "2"
+	"slavename" "obstacle_zero_door2"
 	"spawnflags" "8192"
 	"speed" "100"
-	"targetname" "hosp_doors"
+	"targetname" "obstacle_zero_door1"
 	"origin" "4011 -287 718"
 	editor
 	{
@@ -911950,6 +911984,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -926900,6 +926935,7 @@ entity
 	"fadescale" "1"
 	"gmod_allowphysgun" "1"
 	"hardware" "1"
+	"isOwnable" "1"
 	"model" "models/props_c17/door01_left.mdl"
 	"rendercolor" "255 255 255"
 	"returndelay" "4"
@@ -953055,13 +953091,147 @@ entity
 		"logicalpos" "[0 0]"
 	}
 }
+entity
+{
+	"id" "2950646"
+	"classname" "exp_resource_area"
+	"origin" "1504 1900 1160.38"
+	"resourceTypeID" "crops"
+	"spawnflags" "1"
+	"StartDisabled" "0"
+	solid
+	{
+		"id" "2937434"
+		side
+		{
+			"id" "127198"
+			"plane" "(1376 1944 1176.38) (1632 1944 1176.38) (1632 1856 1176.38)"
+			vertices_plus
+			{
+				"v" "1376 1944 1176.38"
+				"v" "1632 1944 1176.38"
+				"v" "1632 1856 1176.38"
+				"v" "1376 1856 1176.38"
+			}
+			"material" "TOOLS/TOOLSTRIGGER"
+			"uaxis" "[0 1 0 12.8477] 0.25"
+			"vaxis" "[1 0 0 -29.3496] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127197"
+			"plane" "(1376 1856 1144.38) (1632 1856 1144.38) (1632 1944 1144.38)"
+			vertices_plus
+			{
+				"v" "1376 1856 1144.38"
+				"v" "1632 1856 1144.38"
+				"v" "1632 1944 1144.38"
+				"v" "1376 1944 1144.38"
+			}
+			"material" "TOOLS/TOOLSTRIGGER"
+			"uaxis" "[1 0 0 -21.3496] 0.25"
+			"vaxis" "[0 -1 0 -12.8477] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127196"
+			"plane" "(1632 1944 1144.38) (1632 1856 1144.38) (1632 1856 1176.38)"
+			vertices_plus
+			{
+				"v" "1632 1944 1144.38"
+				"v" "1632 1856 1144.38"
+				"v" "1632 1856 1176.38"
+				"v" "1632 1944 1176.38"
+			}
+			"material" "TOOLS/TOOLSTRIGGER"
+			"uaxis" "[0 1 0 12.8477] 0.25"
+			"vaxis" "[0 0 -1 1.50049] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127195"
+			"plane" "(1376 1944 1144.38) (1632 1944 1144.38) (1632 1944 1176.38)"
+			vertices_plus
+			{
+				"v" "1376 1944 1144.38"
+				"v" "1632 1944 1144.38"
+				"v" "1632 1944 1176.38"
+				"v" "1376 1944 1176.38"
+			}
+			"material" "TOOLS/TOOLSTRIGGER"
+			"uaxis" "[1 0 0 -21.3496] 0.25"
+			"vaxis" "[0 0 -1 1.50049] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127194"
+			"plane" "(1632 1856 1144.38) (1376 1856 1144.38) (1376 1856 1176.38)"
+			vertices_plus
+			{
+				"v" "1632 1856 1144.38"
+				"v" "1376 1856 1144.38"
+				"v" "1376 1856 1176.38"
+				"v" "1632 1856 1176.38"
+			}
+			"material" "TOOLS/TOOLSTRIGGER"
+			"uaxis" "[1 0 0 -21.3496] 0.25"
+			"vaxis" "[0 0 -1 1.50049] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "127193"
+			"plane" "(1376 1856 1144.38) (1376 1944 1144.38) (1376 1944 1176.38)"
+			vertices_plus
+			{
+				"v" "1376 1856 1144.38"
+				"v" "1376 1944 1144.38"
+				"v" "1376 1944 1176.38"
+				"v" "1376 1856 1176.38"
+			}
+			"material" "TOOLS/TOOLSTRIGGER"
+			"uaxis" "[0 1 0 12.8477] 0.25"
+			"vaxis" "[0 0 1 30.5015] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		editor
+		{
+			"color" "220 30 220"
+			"visgroupshown" "1"
+			"visgroupautoshown" "1"
+		}
+	}
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
+	}
+}
 cameras
 {
 	"activecamera" "0"
 	camera
 	{
-		"position" "[1536.36 2089.41 1150.29]"
-		"look" "[22524.3 -8328.98 4.35144]"
+		"position" "[-1683.95 3695.58 994.698]"
+		"look" "[-20851 17216.4 1322.23]"
 	}
 	camera
 	{

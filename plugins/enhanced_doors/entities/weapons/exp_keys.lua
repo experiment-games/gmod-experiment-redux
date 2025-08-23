@@ -109,7 +109,7 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:ToggleLock(door, state)
-	if (IsValid(self.Owner) and self.Owner:GetPos():Distance(door:GetPos()) > 96) then
+	if (IsValid(self.Owner) and self.Owner:GetShootPos():DistToSqr(door:GetPos()) > 128 ^ 2) then
 		return
 	end
 

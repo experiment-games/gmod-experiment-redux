@@ -147,3 +147,21 @@
 [
     resourceTypeID(string) : "Resource Type ID" : "" : "The type of resource that can be placed here"
 ]
+
+//
+// Extend doors to get ownable properties
+//
+@ExtendClass prop_door_rotating() = prop_door_rotating : ""
+[
+    parentDoorTarget(target_destination) : "Parent Door Target"
+]
+
+@ExtendClass prop_door_rotating() = prop_door_rotating : ""
+[
+    doorName(string) : "Door Name" : "" : "The name of this door"
+]
+
+@ExtendClass prop_door_rotating() = prop_door_rotating : ""
+[
+    isOwnable(integer) : "Is Ownable" : 1 : "Whether this door can be owned by players"
+]

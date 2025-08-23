@@ -1,4 +1,3 @@
-
 local PLUGIN = PLUGIN
 
 ix.command.Add("DoorSetUnownable", {
@@ -11,7 +10,7 @@ ix.command.Add("DoorSetUnownable", {
 		local entity = client:GetEyeTrace().Entity
 
 		-- Validate it is a door.
-		if (IsValid(entity) and entity:IsDoor() and !entity:GetNetVar("disabled")) then
+		if (IsValid(entity) and entity:IsDoor() and ! entity:GetNetVar("disabled")) then
 			-- Set it so it is unownable.
 			entity:SetNetVar("ownable", nil)
 
@@ -48,24 +47,8 @@ ix.command.Add("DoorSetOwnable", {
 		local entity = client:GetEyeTrace().Entity
 
 		-- Validate it is a door.
-		if (IsValid(entity) and entity:IsDoor() and !entity:GetNetVar("disabled")) then
-			-- Set it so it is ownable.
-			entity:SetNetVar("ownable", true)
-			entity:SetNetVar("visible", true)
-
-			-- Update the name.
-			if (name:find("%S")) then
-				entity:SetNetVar("name", name)
-			end
-
-			PLUGIN:CallOnDoorChildren(entity, function(child)
-				child:SetNetVar("ownable", true)
-				child:SetNetVar("visible", true)
-
-				if (name:find("%S")) then
-					child:SetNetVar("name", name)
-				end
-			end)
+		if (IsValid(entity) and entity:IsDoor() and ! entity:GetNetVar("disabled")) then
+			PLUGIN:DoorSetOwnable(entity, true, name)
 
 			-- Save the door information.
 			PLUGIN:SaveDoorData()
@@ -87,8 +70,8 @@ ix.command.Add("DoorSetFaction", {
 		local entity = client:GetEyeTrace().Entity
 
 		-- Validate it is a door.
-		if (IsValid(entity) and entity:IsDoor() and !entity:GetNetVar("disabled")) then
-			if (!name or name == "") then
+		if (IsValid(entity) and entity:IsDoor() and ! entity:GetNetVar("disabled")) then
+			if (! name or name == "") then
 				entity.ixFactionID = nil
 				entity:SetNetVar("faction", nil)
 
@@ -126,7 +109,7 @@ ix.command.Add("DoorSetFaction", {
 
 				PLUGIN:SaveDoorData()
 				return "@dSetFaction", L(faction.name, client)
-			-- The faction was not found.
+				-- The faction was not found.
 			else
 				return "@invalidFaction"
 			end
@@ -169,9 +152,9 @@ ix.command.Add("DoorSetTitle", {
 	OnRun = function(self, client, name)
 		-- Get the door infront of the player.
 		local data = {}
-			data.start = client:GetShootPos()
-			data.endpos = data.start + client:GetAimVector() * 96
-			data.filter = client
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
 		local trace = util.TraceLine(data)
 		local entity = trace.Entity
 		entity = entity:GetDoor()
@@ -181,9 +164,9 @@ ix.command.Add("DoorSetTitle", {
 		end
 
 		-- Validate the door.
-		if (IsValid(entity) and entity:IsDoor() and !entity:GetNetVar("disabled")) then
+		if (IsValid(entity) and entity:IsDoor() and ! entity:GetNetVar("disabled")) then
 			-- Make sure the name contains actual characters.
-			if (!name:find("%S")) then
+			if (! name:find("%S")) then
 				return "@invalidArg", 1
 			end
 
@@ -226,7 +209,7 @@ ix.command.Add("DoorSetParent", {
 		local entity = client:GetEyeTrace().Entity
 
 		-- Validate it is a door.
-		if (IsValid(entity) and entity:IsDoor() and !entity:GetNetVar("disabled")) then
+		if (IsValid(entity) and entity:IsDoor() and ! entity:GetNetVar("disabled")) then
 			client.ixDoorParent = entity
 			return "@dSetParentDoor"
 		else
@@ -245,23 +228,19 @@ ix.command.Add("DoorSetChild", {
 		local entity = client:GetEyeTrace().Entity
 
 		-- Validate it is a door.
-		if (IsValid(entity) and entity:IsDoor() and !entity:GetNetVar("disabled")) then
-			if (client.ixDoorParent == entity) then
+		if (IsValid(entity) and entity:IsDoor() and ! entity:GetNetVar("disabled")) then
+			local parent = client.ixDoorParent
+
+			if (parent == entity) then
 				return "@dCanNotSetAsChild"
 			end
 
 			-- Check if the player has set a door as a parent.
-			if (IsValid(client.ixDoorParent)) then
-				-- Add the door to the parent's list of children.
-				client.ixDoorParent.ixChildren = client.ixDoorParent.ixChildren or {}
-				client.ixDoorParent.ixChildren[entity:MapCreationID()] = true
-
-				-- Set the door's parent to the parent.
-				entity.ixParent = client.ixDoorParent
+			if (IsValid(parent)) then
+				PLUGIN:DoorSetParent(entity, parent)
 
 				-- Save the door information.
 				PLUGIN:SaveDoorData()
-				PLUGIN:CopyParentDoor(entity)
 
 				return "@dAddChildDoor"
 			else
@@ -284,7 +263,7 @@ ix.command.Add("DoorRemoveChild", {
 		local entity = client:GetEyeTrace().Entity
 
 		-- Validate it is a door.
-		if (IsValid(entity) and entity:IsDoor() and !entity:GetNetVar("disabled")) then
+		if (IsValid(entity) and entity:IsDoor() and ! entity:GetNetVar("disabled")) then
 			if (client.ixDoorParent == entity) then
 				PLUGIN:CallOnDoorChildren(entity, function(child)
 					child.ixParent = nil
@@ -322,10 +301,10 @@ ix.command.Add("DoorSetHidden", {
 
 		-- Validate it is a door.
 		if (IsValid(entity) and entity:IsDoor()) then
-			entity:SetNetVar("visible", !bHidden)
+			entity:SetNetVar("visible", ! bHidden)
 
 			PLUGIN:CallOnDoorChildren(entity, function(child)
-				child:SetNetVar("visible", !bHidden)
+				child:SetNetVar("visible", ! bHidden)
 			end)
 
 			PLUGIN:SaveDoorData()
@@ -349,8 +328,8 @@ ix.command.Add("DoorSetClass", {
 		local entity = client:GetEyeTrace().Entity
 
 		-- Validate it is a door.
-		if (IsValid(entity) and entity:IsDoor() and !entity:GetNetVar("disabled")) then
-			if (!name or name == "") then
+		if (IsValid(entity) and entity:IsDoor() and ! entity:GetNetVar("disabled")) then
+			if (! name or name == "") then
 				entity:SetNetVar("class", nil)
 
 				PLUGIN:CallOnDoorChildren(entity, function()

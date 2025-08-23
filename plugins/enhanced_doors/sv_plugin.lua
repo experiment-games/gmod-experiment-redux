@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 util.AddNetworkString("expDoorMenu")
 util.AddNetworkString("expDoorPermission")
 util.AddNetworkString("expDoorPickupProtector")
@@ -72,6 +74,38 @@ function PLUGIN:CallOnDoorChildren(entity, callback)
 			end
 		end
 	end
+end
+
+function PLUGIN:DoorSetOwnable(entity, isOwnable, name)
+	name = name or ""
+
+	-- Set it so it is ownable.
+	entity:SetNetVar("ownable", isOwnable)
+	entity:SetNetVar("visible", isOwnable)
+
+	-- Update the name.
+	if (name:find("%S")) then
+		entity:SetNetVar("name", name)
+	end
+
+	self:CallOnDoorChildren(entity, function(child)
+		child:SetNetVar("ownable", isOwnable)
+		child:SetNetVar("visible", isOwnable)
+
+		if (name:find("%S")) then
+			child:SetNetVar("name", name)
+		end
+	end)
+end
+
+function PLUGIN:DoorSetParent(entity, parent)
+	-- Add the door to the parent's list of children.
+	parent.ixChildren = parent.ixChildren or {}
+	parent.ixChildren[entity:MapCreationID()] = true
+
+	-- Set the door's parent to the parent.
+	entity.ixParent = parent
+	self:CopyParentDoor(entity)
 end
 
 function PLUGIN:CopyParentDoor(child)
@@ -286,6 +320,105 @@ function PLUGIN:PlayerDisconnected(client)
 	end
 end
 
+function PLUGIN:EntityKeyValue(entity, key, value)
+	-- When the door in the map spawns use parentDoorTarget to setup the parent door
+	-- Use isOwnable to setup if this door can be owned by players
+	if (entity:GetClass() ~= "prop_door_rotating") then
+		return
+	end
+
+	if (key == "parentDoorTarget") then
+		entity.expParentDoorTarget = value
+
+		return
+	end
+
+	if (key == "isOwnable") then
+		self:DoorSetOwnable(entity, tonumber(value) == 1)
+
+		return
+	end
+
+	if (key == "doorName" and value ~= "") then
+		entity:SetNetVar("name", value)
+
+		self:CallOnDoorChildren(entity, function(child)
+			child:SetNetVar("name", value)
+		end)
+	end
+end
+
+function PLUGIN:InitPostEntity()
+	for _, door in ipairs(ents.FindByClass("prop_door_rotating")) do
+		local parentTarget = door.expParentDoorTarget
+
+		if (parentTarget) then
+			local foundTarget = false
+
+			for _, otherEntity in ipairs(ents.FindByName(parentTarget)) do
+				if (otherEntity.expParentDoorTarget) then
+					-- Try find the door that is the actual parent and not a slave themselves
+					continue
+				end
+
+				if (otherEntity ~= door and otherEntity:GetClass() == "prop_door_rotating") then
+					self:DoorSetParent(door, otherEntity)
+					foundTarget = true
+					break
+				end
+			end
+
+			if (not foundTarget) then
+				ix.util.SchemaErrorNoHalt(
+					"Could not find parent door for " ..
+					tostring(door) ..
+					" (" ..
+					tostring(parentTarget) ..
+					")"
+				)
+			end
+		end
+	end
+
+	-- For all doors that are ownable, but do not have their parent/child set up, find if any have the same targetname and make one a child of the other
+	local allDoors = {}
+
+	for _, door in ipairs(ents.FindByClass("prop_door_rotating")) do
+		local targetName = door:GetName()
+
+		if (door:GetNetVar("ownable") and targetName ~= "") then
+			allDoors[targetName] = allDoors[targetName] or {}
+			table.insert(allDoors[targetName], door)
+		end
+	end
+
+	for targetName, doors in pairs(allDoors) do
+		if (#doors > 1) then
+			local parent
+
+			for _, door in pairs(doors) do
+				if (not door.expParentDoorTarget) then
+					-- Try find the door that is the actual parent and not a slave themselves
+					parent = door
+					break
+				end
+			end
+
+			for _, child in ipairs(doors) do
+				if (child == parent) then
+					continue
+				end
+
+				self:DoorSetParent(child, parent)
+			end
+		end
+	end
+end
+
+--[[
+	Net Messages
+--]]
+
 net.Receive("expDoorPermission", function(length, client)
 	local door = net.ReadEntity()
 	local target = net.ReadEntity()
@@ -320,6 +453,8 @@ end)
 
 net.Receive("expDoorPickupProtector", function(length, client)
 	local door = net.ReadEntity()
+
+	door = IsValid(door.ixParent) and door.ixParent or door
 
 	if (not IsValid(door) or not IsValid(door.expProtector) or door.expProtector.expClient ~= client) then
 		client:NotifyLocalized("pickupProtectorNotAllowed")

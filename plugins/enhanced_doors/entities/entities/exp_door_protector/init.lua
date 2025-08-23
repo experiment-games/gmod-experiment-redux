@@ -19,8 +19,6 @@ function ENT:SetupDoorProtector(client, door, item)
 	self.expItemUniqueID = item.uniqueID
 	door.expProtector = self
 
-	door = IsValid(door.ixParent) and door.ixParent or door
-
 	-- Set the door to be owned by this player.
 	door:SetDTEntity(0, client)
 	door.ixAccess = {

@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 ACCESS_LABELS = {}
 ACCESS_LABELS[DOOR_OWNER] = "owner"
 ACCESS_LABELS[DOOR_TENANT] = "tenant"
@@ -9,19 +11,19 @@ net.Receive("expDoorMenu", function(length)
 		return ix.gui.door:Remove()
 	end
 
-    if (length == 0) then
+	if (length == 0) then
 		return
 	end
 
-    local door = net.ReadEntity()
+	local door = net.ReadEntity()
 	local access = net.ReadTable()
 	local entity = net.ReadEntity()
 
-    if (not IsValid(door)) then
-        return
-    end
+	if (not IsValid(door)) then
+		return
+	end
 
-    local doorMenu = hook.Run("GetDoorMenu", door, access, entity)
+	local doorMenu = hook.Run("GetDoorMenu", door, access, entity)
 
 	if (doorMenu) then
 		ix.gui.door = doorMenu
@@ -35,7 +37,7 @@ end)
 net.Receive("expDoorPermission", function()
 	local door = net.ReadEntity()
 
-	if (!IsValid(door)) then
+	if (! IsValid(door)) then
 		return
 	end
 
@@ -61,15 +63,15 @@ end)
 function PLUGIN:DrawDoorInfo(door, width, position, angles, scale, clientPosition)
 	local alpha = math.max((1 - clientPosition:DistToSqr(door:GetPos()) / 65536) * 255, 0)
 
-    if (alpha < 1) then
-        return
-    end
+	if (alpha < 1) then
+		return
+	end
 
 	if (not door:GetNetVar("ownable")) then
 		return
 	end
 
-    local color = ColorAlpha(ix.config.Get("color"), alpha)
+	local color = ColorAlpha(ix.config.Get("color"), alpha)
 	local icon = ix.util.GetMaterial("experiment-redux/electricity.png")
 	local iconSize = 128 * scale
 
@@ -136,12 +138,12 @@ function PLUGIN:PostDrawTranslucentRenderables(bDepth, bSkybox)
 		if (trace.HitNormal:Dot((clientPosition - position):GetNormalized()) < 0) then
 			-- draw front
 			cam.Start3D2D(positionFront, angles, 0.1)
-				self:DrawDoorInfo(nearbyEntity, width * 8, positionFront, angles, 1, clientPosition)
+			self:DrawDoorInfo(nearbyEntity, width * 8, positionFront, angles, 1, clientPosition)
 			cam.End3D2D()
 		else
 			-- draw back
 			cam.Start3D2D(positionOpposite, anglesOpposite, 0.1)
-				self:DrawDoorInfo(nearbyEntity, width * 8, positionOpposite, anglesOpposite, 1, clientPosition)
+			self:DrawDoorInfo(nearbyEntity, width * 8, positionOpposite, anglesOpposite, 1, clientPosition)
 			cam.End3D2D()
 		end
 	end
