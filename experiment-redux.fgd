@@ -140,3 +140,10 @@
     areaID(string) : "Area ID" : "" : "Unique identifier for this area"
     areaName(string) : "Area Name" : "" : "Human-readable name for this area"
 ]
+
+// Trigger that marks an area where resources can be placed
+@SolidClass base(Trigger, Targetname) = exp_resource_area :
+    "Resource area trigger that allows resource placement (like crops)"
+[
+    resourceTypeID(string) : "Resource Type ID" : "" : "The type of resource that can be placed here"
+]
