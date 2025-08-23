@@ -47,39 +47,35 @@ function META:GetAlliance()
 end
 
 if (SERVER) then
-	function META:PruneInvalidObjects()
-		local character = self:GetCharacter()
-
-		if (not character) then
-			return false
-		end
-
-		local limitedObjects = character:GetVar("limitedObjects", {})
-
-		for objectType, objects in pairs(limitedObjects) do
-			for i = #objects, 1, -1 do
-				if (not IsValid(objects[i])) then
-					table.remove(objects, i)
-				end
-			end
-
-			if (#objects == 0) then
-				limitedObjects[objectType] = nil
-			end
-		end
-
-		character:SetVar("limitedObjects", limitedObjects)
-	end
-
 	function META:AddLimitedObject(objectType, object)
-		self:PruneInvalidObjects()
-
 		local character = self:GetCharacter()
 		local limitedObjects = character:GetVar("limitedObjects", {})
 		local objects = limitedObjects[objectType] or {}
 
 		objects[#objects + 1] = object
 		limitedObjects[objectType] = objects
+
+		character:SetVar("limitedObjects", limitedObjects)
+
+		object:CallOnRemove(self:SteamID64() .. "#ltd:" .. object:EntIndex(), function()
+			self:RemoveLimitedObject(objectType, object)
+		end)
+	end
+
+	function META:RemoveLimitedObject(objectType, object)
+		local character = self:GetCharacter()
+		local limitedObjects = character:GetVar("limitedObjects", {})
+		local objects = limitedObjects[objectType] or {}
+
+		for i = #objects, 1, -1 do
+			if (objects[i] == object) then
+				table.remove(objects, i)
+			end
+		end
+
+		if (#objects == 0) then
+			limitedObjects[objectType] = nil
+		end
 
 		character:SetVar("limitedObjects", limitedObjects)
 	end
@@ -90,10 +86,6 @@ function META:IsObjectLimited(objectType, limit)
 
 	if (not character) then
 		return false
-	end
-
-	if (SERVER) then
-		self:PruneInvalidObjects()
 	end
 
 	local limitedObjects = character:GetVar("limitedObjects", {})
