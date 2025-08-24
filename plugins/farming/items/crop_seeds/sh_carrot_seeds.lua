@@ -11,9 +11,9 @@ ITEM.harvestItems = 1
 ITEM.plantingRadius = 10
 ITEM.cropModel = "models/a31/fallout4/props/plants/carrot.mdl"
 ITEM.stageConfig = {
-	[1] = { modelScale = 0.5, bodygroup = nil, skin = 1 },
-	[2] = { modelScale = 0.75, bodygroup = nil, skin = 1 },
-	[3] = { modelScale = 1.0, bodygroup = nil, skin = 1 }
+	[1] = { modelScale = 0.5, bodygroup = nil, skin = 1, rotChance = 0 },
+	[2] = { modelScale = 0.75, bodygroup = nil, skin = 1, rotChance = 5 },
+	[3] = { modelScale = 1.0, bodygroup = nil, skin = 1, rotChance = 10 }
 }
 
 ITEM.generateProductItem = {
@@ -21,4 +21,13 @@ ITEM.generateProductItem = {
 	name = "Carrot",
 	description = "A fresh carrot harvested from your farm.",
 	model = "models/a31/fallout4/props/plants/carrot_item.mdl",
+	skin = 1,
+}
+
+ITEM.generateRottenItem = {
+	uniqueID = "rotten_carrot",
+	name = "Rotten Carrot",
+	description = "A rotten carrot that is no longer usable.",
+	model = "models/a31/fallout4/props/plants/carrot_item.mdl",
+	skin = 0,
 }

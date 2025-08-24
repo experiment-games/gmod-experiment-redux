@@ -16,11 +16,11 @@ ITEM.plantingRadius = 10            -- Minimum distance between crops
 ITEM.cropModel = "models/error.mdl" -- Model used for the growing crop
 
 -- Stage configuration - array of stage definitions
--- Each stage can have: modelScale, bodygroup, skin, model (optional override)
+-- Each stage can have: modelScale, bodygroup, skin, model (optional override), rotChance
 ITEM.stageConfig = {
-	[1] = { modelScale = 0.5, bodygroup = nil, skin = 1 },
-	[2] = { modelScale = 0.75, bodygroup = nil, skin = 1 },
-	[3] = { modelScale = 1.0, bodygroup = nil, skin = 1 }
+	[1] = { modelScale = 0.5, bodygroup = nil, skin = 1, rotChance = 5 }, -- 5% chance to rot
+	[2] = { modelScale = 0.75, bodygroup = nil, skin = 1, rotChance = 10 }, -- 10% chance to rot
+	[3] = { modelScale = 1.0, bodygroup = nil, skin = 1, rotChance = 15 } -- 15% chance to rot
 }
 
 function ITEM:GetCropName()
@@ -34,6 +34,15 @@ end
 
 function ITEM:GetProductItemTable()
 	return ix.item.list[self:GetProductItemID()]
+end
+
+function ITEM:GetRottenItemID()
+	-- This is set in sh_plugin.lua
+	return self.rottenItemID
+end
+
+function ITEM:GetRottenItemTable()
+	return ix.item.list[self:GetRottenItemID()]
 end
 
 function ITEM:GetStages()

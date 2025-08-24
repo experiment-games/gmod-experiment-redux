@@ -7,10 +7,12 @@ ENT.PopulateEntityInfo = true
 local iconHarvest = ix.util.GetMaterial("experiment-redux/icons/harvest.png")
 local iconWater = ix.util.GetMaterial("experiment-redux/icons/water.png")
 local iconFertilizer = ix.util.GetMaterial("experiment-redux/icons/fertilizer.png")
+local iconRotten = ix.util.GetMaterial("experiment-redux/icons/rotten.png")
 
 local iconHarvestAspect = iconHarvest:Width() / iconHarvest:Height()
 local iconWaterAspect = iconWater:Width() / iconWater:Height()
 local iconFertilizerAspect = iconFertilizer:Width() / iconFertilizer:Height()
+local iconRottenAspect = iconRotten:Width() / iconRotten:Height()
 
 function ENT:OnPopulateEntityInfo(tooltip)
 	local seedItem = self:GetItemTable()
@@ -34,7 +36,10 @@ function ENT:OnPopulateEntityInfo(tooltip)
 
 	-- Growth status
 	local statusRow = tooltip:AddRow("status")
-	if (stage >= maxStages) then
+	if (self:GetIsRotten()) then
+		statusRow:SetText("Rotten!")
+		statusRow:SetTextColor(Color(150, 50, 50))
+	elseif (stage >= maxStages) then
 		statusRow:SetText("Ready to Harvest!")
 		statusRow:SetTextColor(Color(100, 255, 100))
 	else
@@ -61,6 +66,16 @@ function ENT:OnPopulateEntityInfo(tooltip)
 		fertRow:SetIcon("experiment-redux/icons/fertilizer.png")
 		fertRow:SizeToContents()
 		fertRow:Dock(BOTTOM)
+	end
+
+	-- Rotten status with icon
+	if (self:GetIsRotten()) then
+		local rottenRow = tooltip:Add("expIconText")
+		rottenRow:SetText("Rotten")
+		rottenRow:SetTextColor(Color(150, 50, 50))
+		rottenRow:SetIcon("experiment-redux/icons/rotten.png")
+		rottenRow:SizeToContents()
+		rottenRow:Dock(BOTTOM)
 	end
 end
 
@@ -89,7 +104,16 @@ function ENT:Draw()
 	local iconsToShow = {}
 	local totalWidth = 0
 
-	if (self:GetCropStage() >= seedItem:GetStages()) then
+	if (self:GetIsRotten()) then
+		-- Rotten icon
+		table.insert(iconsToShow, {
+			material = iconRotten,
+			color = { 150, 50, 50, alpha },
+			width = iconSize * iconRottenAspect,
+			height = iconSize
+		})
+		totalWidth = iconSize * iconRottenAspect
+	elseif (self:GetCropStage() >= seedItem:GetStages()) then
 		-- Ready to harvest icon
 		table.insert(iconsToShow, {
 			material = iconHarvest,
@@ -146,20 +170,32 @@ function ENT:GetEntityMenu()
 	local seedItem = self:GetItemTable()
 	local options = {}
 
-	-- Harvestable if fully grown
-	if (self:GetCropStage() >= seedItem:GetStages()) then
-		options["Harvest"] = function() end
-	else
-		-- If the local player has water or fertilizer, add options
+	if (self:GetIsRotten()) then
+		-- If the local player has rot cure, add option
 		local character = LocalPlayer():GetCharacter()
 		local inventory = character:GetInventory()
 
-		if (not self:GetIsWatered() and inventory:HasItem("water")) then
-			options["Water"] = function() end
+		if (inventory:HasItem("rot_cure")) then
+			options["Cure Rot"] = function() end
 		end
 
-		if (not self:GetIsFertilized() and inventory:HasItem("fertilizer")) then
-			options["Fertilize"] = function() end
+		options["Remove"] = function() end
+	else
+		-- Harvestable if fully grown
+		if (self:GetCropStage() >= seedItem:GetStages()) then
+			options["Harvest"] = function() end
+		else
+			-- If the local player has water or fertilizer, add options
+			local character = LocalPlayer():GetCharacter()
+			local inventory = character:GetInventory()
+
+			if (not self:GetIsWatered() and inventory:HasItem("water")) then
+				options["Water"] = function() end
+			end
+
+			if (not self:GetIsFertilized() and inventory:HasItem("fertilizer")) then
+				options["Fertilize"] = function() end
+			end
 		end
 	end
 

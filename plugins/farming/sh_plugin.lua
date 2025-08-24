@@ -18,6 +18,7 @@ if (SERVER) then
 	ix.util.AddResourceFile("materials/experiment-redux/icons/water.png")
 	ix.util.AddResourceFile("materials/experiment-redux/icons/fertilizer.png")
 	ix.util.AddResourceFile("materials/experiment-redux/icons/harvest.png")
+	ix.util.AddResourceFile("materials/experiment-redux/icons/rotten.png")
 end
 
 --[[
@@ -75,6 +76,7 @@ function PLUGIN:InitializedPlugins()
 	-- Build crop config from crop items
 	for _, item in pairs(items) do
 		local productInfo = item.generateProductItem
+		local rottenInfo = item.generateRottenItem
 
 		if (item.base ~= "base_crop_seeds" or not productInfo) then
 			continue
@@ -104,11 +106,13 @@ function PLUGIN:InitializedPlugins()
 			continue
 		end
 
+		-- Create product item
 		local productItemID = productInfo.uniqueID
 		local productItem = ix.item.Register(productItemID, "base_crops", false, nil, true)
 		productItem.name = productInfo.name
 		productItem.description = productInfo.description
 		productItem.model = productInfo.model
+		productItem.skin = productInfo.skin
 		productItem.width = 1
 		productItem.height = 1
 		productItem.modelScale = productInfo.modelScale
@@ -119,9 +123,70 @@ function PLUGIN:InitializedPlugins()
 			end
 		end
 
-		-- Place a reference to the product item in the seed item and vice versa
+		-- Create rotten item if specified
+		local rottenItemID = nil
+		if (rottenInfo) then
+			if (not rottenInfo.name or not rottenInfo.description or not rottenInfo.model) then
+				local missingRottenFields = {}
+
+				if (not rottenInfo.name) then
+					table.insert(missingRottenFields, "name")
+				end
+
+				if (not rottenInfo.description) then
+					table.insert(missingRottenFields, "description")
+				end
+
+				if (not rottenInfo.model) then
+					table.insert(missingRottenFields, "model")
+				end
+
+				ix.util.SchemaErrorNoHalt(
+					string.format("Farming plugin: Crop seed item '%s' rotten item is missing fields: %s",
+						item.uniqueID,
+						table.concat(missingRottenFields, ", ")
+					)
+				)
+			else
+				rottenItemID = rottenInfo.uniqueID
+				local rottenItem = ix.item.Register(rottenItemID, "base_crops", false, nil, true)
+				rottenItem.name = rottenInfo.name
+				rottenItem.description = rottenInfo.description
+				rottenItem.model = rottenInfo.model
+				rottenItem.skin = rottenInfo.skin
+				rottenItem.width = 1
+				rottenItem.height = 1
+				rottenItem.modelScale = rottenInfo.modelScale
+
+				if (rottenItem.modelScale) then
+					function rottenItem:OnEntityCreated(entity)
+						entity:SetModelScale(self.modelScale)
+						-- Set rotten skin if specified
+						if (rottenInfo.skin ~= nil) then
+							entity:SetSkin(rottenInfo.skin)
+						end
+					end
+				else
+					function rottenItem:OnEntityCreated(entity)
+						-- Set rotten skin if specified
+						if (rottenInfo.skin ~= nil) then
+							entity:SetSkin(rottenInfo.skin)
+						end
+					end
+				end
+
+				-- Place a reference to the seed item in the rotten item
+				rottenItem.seedItemID = item.uniqueID
+			end
+		end
+
+		-- Place references between items
 		item.productItemID = productItem.uniqueID
 		productItem.seedItemID = item.uniqueID
+
+		if (rottenItemID) then
+			item.rottenItemID = rottenItemID
+		end
 
 		-- Track the largest planting radius
 		self.largestPlantingRadius = math.max(self.largestPlantingRadius, item.plantingRadius)
@@ -133,6 +198,10 @@ end
 --]]
 
 function PLUGIN:WaterSpecificCrop(crop)
+	if (crop:GetIsRotten()) then
+		return false, "Cannot water a rotten crop."
+	end
+
 	if (crop:CanHarvest()) then
 		return false, "No need to water a fully grown crop."
 	end
@@ -192,6 +261,10 @@ function PLUGIN:WaterCrop(client, target)
 end
 
 function PLUGIN:FertilizeSpecificCrop(crop)
+	if (crop:GetIsRotten()) then
+		return false, "Cannot fertilize a rotten crop."
+	end
+
 	if (crop:CanHarvest()) then
 		return false, "No need to fertilize a fully grown crop."
 	end
@@ -245,6 +318,106 @@ function PLUGIN:FertilizeCrop(client, target)
 		return success
 	else
 		client:Notify("No crops found nearby to fertilize.")
+		return false
+	end
+end
+
+function PLUGIN:PreventCropRotSpecific(crop)
+	if (crop:GetIsRotten()) then
+		return false, "This crop is already rotten."
+	end
+
+	if (crop.rotPrevented) then
+		return false, "This crop already has rot prevention applied."
+	end
+
+	crop.rotPrevented = true
+
+	-- Create prevention effect
+	local effectData = EffectData()
+	effectData:SetOrigin(crop:GetPos() + Vector(0, 0, 15))
+	effectData:SetScale(0.3)
+	util.Effect("GlassImpact", effectData)
+
+	return true, "You applied rot prevention to the crop. It won't rot anymore!"
+end
+
+function PLUGIN:PreventCropRot(client, target)
+	if (target:DistToSqr(client:GetPos()) > ix.config.Get("maxInteractionDistance") ^ 2) then
+		client:Notify("You're too far away to apply rot prevention.")
+		return false
+	end
+
+	-- Find nearby crops
+	local nearestCrop = nil
+	local nearestDist = math.huge
+
+	for _, ent in pairs(ents.FindInSphere(target, 50)) do
+		if (ent:GetClass() == "exp_crop") then
+			local dist = ent:GetPos():Distance(target)
+			if (dist < nearestDist) then
+				nearestDist = dist
+				nearestCrop = ent
+			end
+		end
+	end
+
+	if (IsValid(nearestCrop)) then
+		local success, message = self:PreventCropRotSpecific(nearestCrop)
+
+		client:Notify(message)
+		return success
+	else
+		client:Notify("No crops found nearby to apply rot prevention.")
+		return false
+	end
+end
+
+function PLUGIN:CureCropRotSpecific(crop)
+	if (not crop:GetIsRotten()) then
+		return false, "This crop is not rotten."
+	end
+
+	if (crop:CureRot()) then
+		-- Create cure effect
+		local effectData = EffectData()
+		effectData:SetOrigin(crop:GetPos() + Vector(0, 0, 15))
+		effectData:SetScale(0.5)
+		util.Effect("Sparks", effectData)
+
+		return true, "You cured the crop's rot! It will continue growing."
+	else
+		return false, "Failed to cure the crop's rot."
+	end
+end
+
+function PLUGIN:CureCropRot(client, target)
+	if (target:DistToSqr(client:GetPos()) > ix.config.Get("maxInteractionDistance") ^ 2) then
+		client:Notify("You're too far away to apply rot cure.")
+		return false
+	end
+
+	-- Find nearby crops
+	local nearestCrop = nil
+	local nearestDist = math.huge
+
+	for _, ent in pairs(ents.FindInSphere(target, 50)) do
+		if (ent:GetClass() == "exp_crop") then
+			local dist = ent:GetPos():Distance(target)
+			if (dist < nearestDist) then
+				nearestDist = dist
+				nearestCrop = ent
+			end
+		end
+	end
+
+	if (IsValid(nearestCrop)) then
+		local success, message = self:CureCropRotSpecific(nearestCrop)
+
+		client:Notify(message)
+		return success
+	else
+		client:Notify("No crops found nearby to cure.")
 		return false
 	end
 end

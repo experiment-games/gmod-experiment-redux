@@ -17,6 +17,7 @@ function ENT:Initialize()
 	self.lastGrowth = CurTime()
 	self:SetIsWatered(false)
 	self:SetIsFertilized(false)
+	self:SetIsRotten(false)
 	self.wateredTime = 0
 
 	self:UpdateCropAppearance()
@@ -44,14 +45,51 @@ function ENT:StartGrowthTimer()
 	self.nextGrowth = CurTime() + modifiedTime
 end
 
+function ENT:CheckRotting()
+	if (self:GetIsRotten() or self.rotPrevented) then
+		return
+	end
+
+	local seedItem = self:GetItemTable()
+	local stageConfig = seedItem:GetStageConfig(self:GetCropStage())
+
+	if (stageConfig and stageConfig.rotChance) then
+		if (math.random(1, 100) <= stageConfig.rotChance) then
+			self:SetRotten()
+		end
+	end
+end
+
+function ENT:SetRotten()
+	self:SetIsRotten(true)
+	self:UpdateCropAppearance()
+	self.nextGrowth = nil -- Stop growing
+end
+
+function ENT:CureRot()
+	if (not self:GetIsRotten()) then
+		return false
+	end
+
+	self:SetIsRotten(false)
+	self:UpdateCropAppearance()
+	self:StartGrowthTimer()
+	return true
+end
+
 function ENT:Think()
-	if (self.nextGrowth and CurTime() >= self.nextGrowth) then
+	if (not self:GetIsRotten() and self.nextGrowth and CurTime() >= self.nextGrowth) then
 		self:GrowStage()
 	end
 
-	-- Reset water status after growth
 	if (self:GetIsWatered() and CurTime() >= (self.wateredTime or 0) + 60) then
 		self:SetIsWatered(false)
+	end
+
+	-- Check for rotting every 30 seconds
+	if (not self.lastRotCheck or CurTime() >= self.lastRotCheck + 30) then
+		self:CheckRotting()
+		self.lastRotCheck = CurTime()
 	end
 
 	self:NextThink(CurTime() + 1)
@@ -94,13 +132,20 @@ function ENT:UpdateCropAppearance()
 		self:SetBodygroup(0, stageConfig.bodygroup)
 	end
 
-	-- Update skin
-	if (stageConfig.skin) then
-		self:SetSkin(stageConfig.skin)
+	-- Update skin based on rotten state
+	if (self:GetIsRotten()) then
+		self:SetSkin(0)          -- Rotten skin
+	elseif (stageConfig.skin) then
+		self:SetSkin(stageConfig.skin) -- Normal skin
 	end
 end
 
 function ENT:Harvest(player)
+	if (self:GetIsRotten()) then
+		player:Notify("This crop is rotten and cannot be harvested.")
+		return
+	end
+
 	if (not self:CanHarvest()) then
 		player:Notify("This crop is not ready for harvest.")
 		return
@@ -135,6 +180,34 @@ function ENT:Harvest(player)
 	self:Remove()
 end
 
+function ENT:HarvestRotten(player)
+	if (not self:GetIsRotten()) then
+		player:Notify("This crop is not rotten.")
+		return
+	end
+
+	local seedItem = self:GetItemTable()
+	local character = player:GetCharacter()
+	local inventory = character:GetInventory()
+
+	if (not inventory) then
+		return
+	end
+
+	-- Give rotten items to player
+	local rottenItem = seedItem:GetRottenItemTable()
+	if (rottenItem) then
+		inventory:Add(rottenItem.uniqueID)
+		player:Notify(string.format("You removed the rotten %s.", rottenItem:GetName()))
+	else
+		player:Notify("You removed the rotten crop.")
+	end
+
+	player:EmitSound("npc/stalker/stalker_footstep_left2.wav", 45, 255)
+
+	self:Remove()
+end
+
 function ENT:OnTakeDamage(dmg)
 	-- Crops can't be damaged
 	return
@@ -153,12 +226,30 @@ end
 
 function ENT:CanHarvest()
 	local seedItem = self:GetItemTable()
-	return self:GetCropStage() >= seedItem:GetStages()
+	return self:GetCropStage() >= seedItem:GetStages() and not self:GetIsRotten()
 end
 
 function ENT:OnOptionSelected(client, option, data)
 	if (option == "Harvest") then
 		self:Harvest(client)
+	elseif (option == "Remove") then
+		self:HarvestRotten(client)
+	elseif (option == "Cure Rot") then
+		local character = client:GetCharacter()
+		local inventory = character:GetInventory()
+
+		local cureItem = inventory:HasItem("rot_cure")
+
+		if (cureItem) then
+			if (self:CureRot()) then
+				cureItem:Remove()
+				client:Notify("You cured the crop's rot! It will continue growing.")
+			else
+				client:Notify("This crop is not rotten.")
+			end
+		else
+			client:Notify("You need rot cure to cure rotten crops.")
+		end
 	elseif (option == "Water") then
 		local character = client:GetCharacter()
 		local inventory = character:GetInventory()

@@ -11,6 +11,7 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Int", "CropStage")
 	self:NetworkVar("Bool", "IsWatered")
 	self:NetworkVar("Bool", "IsFertilized")
+	self:NetworkVar("Bool", "IsRotten")
 	self:NetworkVar("String", "ItemID")
 end
 
