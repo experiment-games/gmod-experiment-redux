@@ -220,14 +220,12 @@
 
     <script>
         let totalFiles = 0;
-        let downloadedFiles = 0;
+        let filesRemaining = 0;
 
         // Called at the start - total number of files the client will have to download
         window.SetFilesTotal = function (total) {
             totalFiles = total;
-            downloadedFiles = 0;
             updateProgress();
-            document.getElementById('fileCount').innerHTML = `Files: ${downloadedFiles} / ${totalFiles}`;
         };
 
         // Called when the client starts downloading a file
@@ -242,18 +240,18 @@
 
         // Called when the number of files remaining for the client to download changes
         window.SetFilesNeeded = function (needed) {
-            if (totalFiles > 0) {
-                downloadedFiles = totalFiles - needed;
-                updateProgress();
-                document.getElementById('fileCount').innerHTML = `Files: ${downloadedFiles} / ${totalFiles}`;
-            }
-            document.getElementById('filesRemaining').innerHTML = `Files remaining: ${needed}`;
+            filesRemaining = needed;
+            updateProgress();
         };
 
         function updateProgress() {
             if (totalFiles > 0) {
+                const downloadedFiles = totalFiles - filesRemaining;
                 const percentage = (downloadedFiles / totalFiles) * 100;
+
                 document.getElementById('progressFill').style.width = percentage + '%';
+                document.getElementById('fileCount').innerHTML = `Files: ${downloadedFiles} / ${totalFiles}`;
+                document.getElementById('filesRemaining').innerHTML = `Files remaining: ${filesRemaining}`;
             }
         }
 
@@ -290,15 +288,15 @@
 
                 setTimeout(() => {
                     SetFilesTotal(testFiles.length);
+                    SetFilesNeeded(testFiles.length); // Initially all files are needed
 
                     let currentFile = 0;
 
                     function downloadNextFile() {
                         if (currentFile < testFiles.length) {
                             DownloadingFile(testFiles[currentFile]);
-                            SetFilesNeeded(testFiles.length - currentFile);
-
                             currentFile++;
+                            SetFilesNeeded(testFiles.length - currentFile); // Update remaining files
 
                             if (currentFile === 3 && currentStatusIndex < statusMessages.length) {
                                 SetStatusChanged(statusMessages[currentStatusIndex++]);
