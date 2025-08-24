@@ -6,6 +6,14 @@ SCENE.cinematicSpawnID = "prologue_gateway"
 function SCENE:OnEnterServer(client)
 	Schema.instance.AddPlayer(client)
 
+	-- Randomize the NPCs a bit so even if they have the same animation they don't look identical
+	for _, entity in ipairs(ents.FindInSphere(client:GetPos(), 1024)) do
+		if (entity:GetClass() == "prop_dynamic" and not entity.expRandomizedCycle) then
+			entity:SetCycle(math.random())
+			entity.expRandomizedCycle = true
+		end
+	end
+
 	timer.Simple(10, function()
 		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, self.uniqueID)) then
 			Schema.cinematics.TransitionPlayerToScene(client, "prologue_riot1")
