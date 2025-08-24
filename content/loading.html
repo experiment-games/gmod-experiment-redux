@@ -14,21 +14,16 @@
         }
 
         @font-face {
-            font-family: "RomanAntique";
-            src: url(./resource/fonts/RomanAntique.woff);
-        }
-
-        @font-face {
-            font-family: "RomanAntique";
-            src: url(./resource/fonts/RomanAntique-Italic.woff);
-            font-style: italic;
+            font-family: "Handserif";
+            src: url(./resource/fonts/HanSrf.woff);
         }
 
         * {
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -39,7 +34,7 @@
             background: black;
             color: white;
             padding: 1em;
-            font-size: 16px;
+            font-size: 1.4em;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
 
             background-image: url('materials/experiment-redux/illustrations/death.png');
@@ -60,8 +55,7 @@
         }
 
         .stylized-font {
-            font-family: "RomanAntique", 'Times New Roman', Times, serif;
-            font-size: 1.4em;
+            font-family: "Handserif", 'Times New Roman', Times, serif;
         }
 
         h1,
@@ -83,208 +77,74 @@
         }
 
         .wrapper {
-            max-width: 512px;
+            max-width: 1024px;
             margin: 0 auto;
         }
 
-        .with-aside {
+        .two-columns {
             display: flex;
-            gap: 1em;
+            gap: 2em;
+            margin-top: 2em;
         }
 
-        .with-aside aside {
+        .column {
             flex: 1;
-        }
-
-        .with-aside main {
-            flex: 3;
         }
 
         .logo {
             max-width: 512px;
+            margin: 0 auto;
+            text-align: center;
         }
 
         img {
-            position: relative;
             width: 100%;
             padding: 0;
             margin: 0;
-        }
-
-        img.max-content {
-            max-width: max-content;
         }
 
         p {
             line-height: 1.5em;
         }
 
-        ul {
-            list-style-type: none;
-            margin: 0.25em 0 0 0;
-            padding: 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        ul li::before {
-            content: "•";
-            color: #A33426;
-            display: inline-block;
-            margin: 0.5em;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .center {
-            text-align: center;
-        }
-
         .my {
             margin-top: 1.5em;
             margin-bottom: 1.5em;
         }
-        .mt-s {
-            margin-top: 1em;
-        }
 
-        a, .highlight {
+        a {
             color: #A33426;
         }
 
-        button {
-            background: #A33426;
-            color: white;
-            border: none;
-            font-size: 1em;
-            padding: .5em 1em;
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #333;
+            border: 1px solid #A33426;
             margin: 0.5em 0;
-            cursor: pointer;
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
-            width: 100%;
         }
 
-        button.huge {
-            font-size: 2em;
-            padding: .8em 1em;
+        .progress-fill {
+            height: 100%;
+            background-color: #A33426;
+            width: 0%;
+            transition: width 0.3s ease;
         }
 
-        button.gray {
-            background: #333;
-        }
-
-        input {
-            width: 100%;
-            padding: .5em;
+        .download-info {
             margin: 0.5em 0;
-            font-size: 1em;
+            color: rgba(255, 255, 255, 0.8);
         }
 
-        .range {
-            display: flex;
-            gap: 1em;
-            align-items: center;
-            flex: 1;
+        .current-file {
+            color: rgba(255, 255, 255, 0.6);
+            word-break: break-all;
+            margin: 0.5em 0;
         }
 
-        .range input[type="range"] {
-            width: 100%;
-        }
-
-        .range input[type="number"] {
-            width: 60px;
-        }
-
-        .bg-gray {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .p {
-            padding: 0.5em 1em;
-        }
-
-        .parameter {
-            display: flex;
-            gap: 1em;
-            font-size: 0.8em;
-            align-items: center;
-        }
-
-        .parameter label {
-            width: 100px;
-        }
-
-        .parameter input:disabled {
-            color: black;
-            font-weight: bold;
-        }
-
-        .flex {
-            display: flex;
-            gap: 1em;
-        }
-
-        .flex-1 {
-            flex: 1;
-        }
-
-        .flex-2 {
-            flex: 2;
-        }
-
-        .w-full {
-            width: 100%;
-        }
-
-        .w-fit {
-            width: fit-content;
-        }
-
-        .discord {
-            height: 0.9em;
-            width: auto;
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1em;
-        }
-
-        .grid.tight {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        }
-
-        .list {
-            display: flex;
-            flex-direction: column;
-            flex-wrap: wrap;
-        }
-
-        .h-300 {
-            max-height: 300px;
-            overflow: auto;
-        }
-
-        .duration {
-            display: flex;
-            flex-direction: column;
-            padding: 1em;
-        }
-
-        .duration span {
-            font-size: 1.5em;
-            flex-grow: 1;
-        }
-
-        .duration span:last-of-type {
-            font-size: 1em;
-            color: rgba(255, 255, 255, 0.3);
-            flex: 0;
+        .status {
+            color: #A33426;
+            margin: 1em 0;
         }
     </style>
 </head>
@@ -292,33 +152,174 @@
 <body class="stylized-font">
     <div class="overlay"></div>
 
-    <div class="wrapper logo">
-        <img src="materials/experiment-redux/logo.png">
+    <div class="wrapper">
+        <div class="logo">
+            <img src="materials/experiment-redux/logo.png"
+                 alt="Experiment Redux Logo">
+        </div>
+
+        <div class="two-columns">
+            <div class="column">
+                <div class="my">
+                    <p>
+                        <strong>Experiment Redux</strong> is an open-source FPS RPG gamemode for Garry's Mod.
+                    </p>
+                </div>
+                <div class="my">
+                    <h2>CURRENTLY BETA TESTING</h2>
+                    <p>
+                        We are hard at work on the gamemode, making sure it's fun, polished and competitive for everyone.
+                    </p>
+                    <p>
+                        We appreciate your patience and support.
+                    </p>
+                    <p>
+                        Join our Discord to stay up to date with the latest news and updates.
+                    </p>
+                </div>
+                <div class="my">
+                    <h2>FIND OUT MORE</h2>
+                    <p>
+                        <strong>Find out more by visiting <a href="#">experiment.games</a></strong>
+                    </p>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="my">
+                    <h2>WHAT IS DOWNLOADING?</h2>
+
+                    <p>
+                        We value your time and have limited the amount of data you need to download to play Experiment Redux.
+                    </p>
+                    <p>
+                        The biggest download will be the custom map, fine-tuned for Experiment.
+                    </p>
+
+                    <div class="status"
+                         id="status">Preparing to download...</div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill"
+                             id="progressFill"></div>
+                    </div>
+
+                    <div class="download-info">
+                        <div id="fileCount">Files: 0 / 0</div>
+                        <div id="filesRemaining">Files remaining: 0</div>
+                    </div>
+
+                    <div class="current-file">
+                        <strong>Current file:</strong><br>
+                        <span id="currentFile">None</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="wrapper my">
-        <p>
-            <strong>Experiment Redux</strong> is an <a href="#"
-                target="_blank">open-source</a> FPS RPG gamemode for Garry's Mod.
-        </p>
-    </div>
-    <div class="wrapper my">
-        <h2>CURRENTLY BETA TESTING</h2>
-        <p>
-            We are hard at work on the gamemode, making sure it's fun, polished and competitive for everyone.
-        </p>
-        <p>
-            We appreciate your patience and support.
-        </p>
-        <p>
-            Join our Discord to stay up to date with the latest news and updates.
-        </p>
-    </div>
-    <div class="wrapper my">
-        <h2>FIND OUT MORE</h2>
-        <p>
-            <strong>Find out more through <a href="#">experiment.games</a></strong>
-        </p>
-    </div>
+
+    <script>
+        let totalFiles = 0;
+        let downloadedFiles = 0;
+
+        // Called at the start - total number of files the client will have to download
+        window.SetFilesTotal = function (total) {
+            totalFiles = total;
+            downloadedFiles = 0;
+            updateProgress();
+            document.getElementById('fileCount').innerHTML = `Files: ${downloadedFiles} / ${totalFiles}`;
+        };
+
+        // Called when the client starts downloading a file
+        window.DownloadingFile = function (fileName) {
+            document.getElementById('currentFile').innerHTML = fileName;
+        };
+
+        // Called when the client's joining status changes
+        window.SetStatusChanged = function (status) {
+            document.getElementById('status').innerHTML = status;
+        };
+
+        // Called when the number of files remaining for the client to download changes
+        window.SetFilesNeeded = function (needed) {
+            if (totalFiles > 0) {
+                downloadedFiles = totalFiles - needed;
+                updateProgress();
+                document.getElementById('fileCount').innerHTML = `Files: ${downloadedFiles} / ${totalFiles}`;
+            }
+            document.getElementById('filesRemaining').innerHTML = `Files remaining: ${needed}`;
+        };
+
+        function updateProgress() {
+            if (totalFiles > 0) {
+                const percentage = (downloadedFiles / totalFiles) * 100;
+                document.getElementById('progressFill').style.width = percentage + '%';
+            }
+        }
+
+        // Check for #testing in URL and simulate download process
+        if (window.location.hash === '#testing') {
+            const testFiles = [
+                'materials/models/weapons/rifle.mdl',
+                'materials/textures/environment/concrete.vtf',
+                'sound/weapons/rifle_fire.wav',
+                'materials/models/player/soldier.mdl',
+                'materials/textures/ui/hud_elements.vtf',
+                'lua/autorun/client/experiment_init.lua',
+                'materials/models/props/crate.mdl',
+                'sound/ambient/factory_noise.wav',
+                'materials/textures/decals/bullet_impact.vtf',
+                'materials/models/weapons/pistol.mdl',
+                'sound/weapons/reload.wav',
+                'materials/textures/environment/metal.vtf'
+            ];
+
+            const statusMessages = [
+                'Retrieving server info...',
+                'Starting Lua...',
+                'Loading resources...',
+                'Downloading content...',
+                'Processing files...',
+                'Finalizing...'
+            ];
+
+            let currentStatusIndex = 0;
+
+            setTimeout(() => {
+                SetStatusChanged(statusMessages[currentStatusIndex++]);
+
+                setTimeout(() => {
+                    SetFilesTotal(testFiles.length);
+
+                    let currentFile = 0;
+
+                    function downloadNextFile() {
+                        if (currentFile < testFiles.length) {
+                            DownloadingFile(testFiles[currentFile]);
+                            SetFilesNeeded(testFiles.length - currentFile);
+
+                            currentFile++;
+
+                            if (currentFile === 3 && currentStatusIndex < statusMessages.length) {
+                                SetStatusChanged(statusMessages[currentStatusIndex++]);
+                            } else if (currentFile === 7 && currentStatusIndex < statusMessages.length) {
+                                SetStatusChanged(statusMessages[currentStatusIndex++]);
+                            }
+
+                            setTimeout(downloadNextFile, Math.random() * 1000 + 500);
+                        } else {
+                            SetStatusChanged('Joining server...');
+                            setTimeout(() => {
+                                SetStatusChanged('Welcome to Experiment Redux!');
+                            }, 1000);
+                        }
+                    }
+
+                    setTimeout(downloadNextFile, 1000);
+                }, 1500);
+            }, 1000);
+        }
+    </script>
 </body>
 
 </html>

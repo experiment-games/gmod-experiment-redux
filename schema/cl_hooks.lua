@@ -212,7 +212,7 @@ function Schema:LoadFonts(headingFont, readableFont)
 		})
 
 		surface.CreateFont("ixBigFontOutlined", {
-			font = headingFont,
+			font = readableFont,
 			size = scaleFont(36),
 			extended = true,
 			weight = 4000,

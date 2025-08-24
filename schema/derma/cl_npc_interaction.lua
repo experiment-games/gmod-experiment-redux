@@ -9,8 +9,8 @@ do
 }
 
 @font-face {
-	font-family: "RomanAntique";
-	src: url(http://fastdl.experiment.games/resource/fonts/RomanAntique.woff);
+	font-family: "Handserif";
+	src: url(http://fastdl.experiment.games/resource/fonts/HanSrf.woff);
 }
 
 * {
@@ -40,7 +40,7 @@ html, body {
     overflow: hidden; /* Prevent double scrollbar */
 	color: white;
 	font-size: 24px;
-	font-family: "RomanAntique";
+	font-family: "Handserif";
 }
 
 h1,

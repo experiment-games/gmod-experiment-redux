@@ -4,9 +4,10 @@ ix.currency.plural = "bolts"
 ix.currency.model = "models/props_lab/box01a.mdl"
 
 if (SERVER) then
-	ix.util.AddResourceFile("resource/fonts/RomanAntique.ttf")
-	ix.util.AddResourceFile("resource/fonts/RomanAntique-Italic.ttf")
+	ix.util.AddResourceFile("resource/fonts/HanSrf.ttf")
+	ix.util.AddResourceFile("resource/fonts/HanSrf.woff")
 	ix.util.AddResourceFile("resource/fonts/lightout.ttf")
+	ix.util.AddResourceFile("resource/fonts/lightout.woff")
 end
 
 -- We probably shouldn't be forcing these configs, but I have yet to look for another way to "recommend" them.
@@ -21,7 +22,7 @@ hook.Add("InitializedConfig", "expInitializedConfigWhyNotSooner", function()
 
 	-- TODO: Check if players find this font hard to read.
 	ix.config.Set("font", "Lights Out BRK")
-	ix.config.Set("genericFont", "Roman Antique")
+	ix.config.Set("genericFont", "Handserif")
 
 	-- We set this to a long time, so it's worth resurrecting someone -- TODO: or getting the perk that speeds up spawn time.
 	ix.config.Set("spawnTime", 60)

@@ -4,13 +4,13 @@
 }
 
 @font-face {
-    font-family: "RomanAntique";
-    src: url(./RomanAntique.woff);
+    font-family: "Handserif";
+    src: url(./HanSrf.woff);
 }
 
 @font-face {
-    font-family: "RomanAntique";
-    src: url(./RomanAntique-Italic.woff);
+    font-family: "Handserif";
+    src: url(./HanSrf.woff);
     font-style: italic;
 }
 
@@ -35,7 +35,7 @@ body {
 }
 
 .stylized-font {
-    font-family: "RomanAntique", 'Times New Roman', Times, serif;
+    font-family: "Handserif", 'Times New Roman', Times, serif;
     font-size: 1.4em;
 }
 

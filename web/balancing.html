@@ -20,22 +20,23 @@
         }
 
         @font-face {
-            font-family: "RomanAntique";
-            src: url('./assets/RomanAntique.woff');
+            font-family: "Handserif";
+            src: url('./assets/HanSrf.woff');
         }
 
         @font-face {
-            font-family: "RomanAntique";
-            src: url('./assets/RomanAntique-Italic.woff');
+            font-family: "Handserif";
+            src: url('./assets/HanSrf.woff');
             font-style: italic;
+        }
+
+        body {
+            font-family: "Handserif", 'Times New Roman', Times, serif;
+            font-size: 1.4em;
         }
 
         .lights-out {
             font-family: "LightsOut", Impact, Arial Black, sans-serif;
-        }
-
-        .roman-antique {
-            font-family: "RomanAntique", Times, serif;
         }
 
         [x-cloak] {
@@ -327,7 +328,7 @@
                 <div class="mb-6">
                     <h2 class="text-brand text-3xl font-black lights-out mb-4">GLOBAL</h2>
                     <div class="grid grid-cols-1 gap-4 mb-6">
-                        <div class="flex gap-4 items-center text-sm">
+                        <div class="flex gap-4 items-center">
                             <label for="epoch-duration"
                                    class="w-24 shrink-0">Epoch Duration (in days)</label>
                             <div class="flex gap-4 items-center flex-1">
@@ -350,7 +351,7 @@
                 <div class="mb-6">
                     <h2 class="text-brand text-3xl font-black lights-out mb-4">INCOME</h2>
                     <div class="grid grid-cols-1 gap-4 mb-6">
-                        <div class="flex gap-4 items-center text-sm">
+                        <div class="flex gap-4 items-center">
                             <label for="generator-output"
                                    class="w-24 shrink-0">Generator Bolts output</label>
                             <div class="flex gap-4 items-center flex-1">
@@ -367,7 +368,7 @@
                                        class="bg-white text-black w-16 p-2">
                             </div>
                         </div>
-                        <div class="flex gap-4 items-center text-sm">
+                        <div class="flex gap-4 items-center">
                             <label for="generator-interval"
                                    class="w-24 shrink-0">Generator Bolts interval (in minutes)</label>
                             <div class="flex gap-4 items-center flex-1">
@@ -429,7 +430,7 @@
                     <div class="grid grid-cols-1 mt-4 gap-4 max-h-128 overflow-auto">
                         <template x-for="(item, index) in items"
                                   :key="index">
-                            <div class="bg-white/10 p-4 flex justify-between items-center text-sm"
+                            <div class="bg-white/10 p-4 flex justify-between items-center"
                                  x-show="itemMatchesFilter(item, itemFilter)">
                                 <div>
                                     <div class="whitespace-nowrap font-bold">
@@ -496,7 +497,7 @@
             <div class="mb-6">
                 <h2 class="text-brand text-3xl font-black lights-out mb-4">SIMULATED PLAYTIME</h2>
                 <div class="grid grid-cols-1 gap-4">
-                    <div class="flex gap-4 items-center text-sm">
+                    <div class="flex gap-4 items-center">
                         <label for="averagePlaytimeInMinutes"
                                class="w-24 shrink-0">Playtime (in average minutes per day)</label>
                         <div class="flex gap-4 items-center flex-1">
@@ -523,19 +524,19 @@
                         <h3 class="text-brand text-lg font-bold lights-out mb-2">Bolt income</h3>
                         <span class="text-2xl flex-grow"
                               x-text="getGeneratorOutputPerHour().toFixed(0)"></span>
-                        <span class="text-sm text-white/70">Every Hour</span>
+                        <span class="text-white/70">Every Hour</span>
                     </div>
                     <div class="bg-white/10 p-4 flex flex-col">
                         <h3 class="text-brand text-lg font-bold lights-out mb-2">Bolt income</h3>
                         <span class="text-2xl flex-grow"
                               x-text="(averagePlaytimeInMinutes / 60 * getGeneratorOutputPerHour()).toFixed(0)"></span>
-                        <span class="text-sm text-white/70">Every Day of playtime</span>
+                        <span class="text-white/70">Every Day of playtime</span>
                     </div>
                     <div class="bg-white/10 p-4 flex flex-col">
                         <h3 class="text-brand text-lg font-bold lights-out mb-2">Bolts in total</h3>
                         <span class="text-2xl flex-grow"
                               x-text="(getGeneratorOutputPerHour() * epochDurationInDays * 24).toFixed(0)"></span>
-                        <span class="text-sm text-white/70">Bolts</span>
+                        <span class="text-white/70">Bolts</span>
                     </div>
                 </div>
 
@@ -544,7 +545,7 @@
                         <h3 class="text-brand text-lg font-bold lights-out mb-2">Cost of selected items</h3>
                         <span class="text-2xl flex-grow"
                               x-text="priceOfAll(selectedItems.map(index => items[index])).toFixed(0)"></span>
-                        <span class="text-sm text-white/70">Bolts</span>
+                        <span class="text-white/70">Bolts</span>
                     </div>
                     <div class="bg-white/10 p-4 flex flex-col cursor-pointer"
                          @click="$tooltip(...getConversionTooltipArgs($refs.timeToBuySelectedItems, 'hours', 'days'))">
@@ -552,7 +553,7 @@
                         <span class="text-2xl flex-grow"
                               x-ref="timeToBuySelectedItems"
                               x-text="(priceOfAll(selectedItems.map(index => items[index])) / getGeneratorOutputPerHour()).toFixed(1)"></span>
-                        <span class="text-sm text-white/70">hours</span>
+                        <span class="text-white/70">hours</span>
                     </div>
                     <div class="bg-white/10 p-4 flex flex-col cursor-pointer"
                          @click="$tooltip(...getConversionTooltipArgs($refs.playtimeToBuySelectedItems, 'days', 'hours'))">
@@ -560,7 +561,7 @@
                         <span class="text-2xl flex-grow"
                               x-ref="playtimeToBuySelectedItems"
                               x-text="(priceOfAll(selectedItems.map(index => items[index])) / getGeneratorOutputPerDay(averagePlaytimeInMinutes / 60)).toFixed(1)"></span>
-                        <span class="text-sm text-white/70">days</span>
+                        <span class="text-white/70">days</span>
                     </div>
                 </div>
             </div>
