@@ -146,6 +146,10 @@
             color: #A33426;
             margin: 1em 0;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 
@@ -204,12 +208,13 @@
                              id="progressFill"></div>
                     </div>
 
-                    <div class="download-info">
+                    <div class="download-info"
+                         id="downloadInfo">
                         <div id="fileCount">Files: 0 / 0</div>
-                        <div id="filesRemaining">Files remaining: 0</div>
                     </div>
 
-                    <div class="current-file">
+                    <div class="current-file"
+                         id="currentFileContainer">
                         <strong>Current file:</strong><br>
                         <span id="currentFile">None</span>
                     </div>
@@ -236,6 +241,11 @@
         // Called when the client's joining status changes
         window.SetStatusChanged = function (status) {
             document.getElementById('status').innerHTML = status;
+
+            // Check for completion status messages and force 100%
+            if (status === "Workshop Complete" || status === "Client info sent!") {
+                forceComplete();
+            }
         };
 
         // Called when the number of files remaining for the client to download changes
@@ -244,6 +254,15 @@
             updateProgress();
         };
 
+        function forceComplete() {
+            filesRemaining = 0;
+            updateProgress();
+
+            // Hide file count and current file when complete
+            document.getElementById('downloadInfo').classList.add('hidden');
+            document.getElementById('currentFileContainer').classList.add('hidden');
+        }
+
         function updateProgress() {
             if (totalFiles > 0) {
                 const downloadedFiles = totalFiles - filesRemaining;
@@ -251,7 +270,6 @@
 
                 document.getElementById('progressFill').style.width = percentage + '%';
                 document.getElementById('fileCount').innerHTML = `Files: ${downloadedFiles} / ${totalFiles}`;
-                document.getElementById('filesRemaining').innerHTML = `Files remaining: ${filesRemaining}`;
             }
         }
 
@@ -263,22 +281,18 @@
                 'sound/weapons/rifle_fire.wav',
                 'materials/models/player/soldier.mdl',
                 'materials/textures/ui/hud_elements.vtf',
-                'lua/autorun/client/experiment_init.lua',
-                'materials/models/props/crate.mdl',
-                'sound/ambient/factory_noise.wav',
-                'materials/textures/decals/bullet_impact.vtf',
-                'materials/models/weapons/pistol.mdl',
-                'sound/weapons/reload.wav',
-                'materials/textures/environment/metal.vtf'
+                'Some Workshop Content',
+                // For some reason gmod shows files to load, but doesn't actually call DownloadingFile or SetFilesNeeded for them
+                '',
+                ''
             ];
 
             const statusMessages = [
                 'Retrieving server info...',
-                'Starting Lua...',
                 'Loading resources...',
-                'Downloading content...',
-                'Processing files...',
-                'Finalizing...'
+                'Workshop Complete',
+                'Client info sent!',
+                'Starting Lua...',
             ];
 
             let currentStatusIndex = 0;
@@ -305,11 +319,6 @@
                             }
 
                             setTimeout(downloadNextFile, Math.random() * 1000 + 500);
-                        } else {
-                            SetStatusChanged('Joining server...');
-                            setTimeout(() => {
-                                SetStatusChanged('Welcome to Experiment Redux!');
-                            }, 1000);
                         }
                     }
 
