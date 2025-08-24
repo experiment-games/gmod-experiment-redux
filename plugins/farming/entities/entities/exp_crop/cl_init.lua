@@ -4,9 +4,17 @@ include("shared.lua")
 
 ENT.PopulateEntityInfo = true
 
+local iconHarvest = ix.util.GetMaterial("experiment-redux/icons/harvest.png")
+local iconWater = ix.util.GetMaterial("experiment-redux/icons/water.png")
+local iconFertilizer = ix.util.GetMaterial("experiment-redux/icons/fertilizer.png")
+
+local iconHarvestAspect = iconHarvest:Width() / iconHarvest:Height()
+local iconWaterAspect = iconWater:Width() / iconWater:Height()
+local iconFertilizerAspect = iconFertilizer:Width() / iconFertilizer:Height()
+
 function ENT:OnPopulateEntityInfo(tooltip)
-	local config = PLUGIN:GetCropConfig(self:GetCropType())
-	local cropName = config and config.name or "Unknown Crop"
+	local seedItem = self:GetItemTable()
+	local cropName = seedItem:GetCropName()
 
 	-- Crop name
 	local name = tooltip:AddRow("name")
@@ -16,10 +24,13 @@ function ENT:OnPopulateEntityInfo(tooltip)
 
 	-- Growth stage
 	local stage = self:GetCropStage()
-	local maxStages = config and config.stages or 3
-	local stageRow = tooltip:AddRow("stage")
-	stageRow:SetText("Stage " .. stage .. "/" .. maxStages)
-	stageRow:SizeToContents()
+	local maxStages = seedItem:GetStages()
+
+	local stageBar = tooltip:Add("expProgressBar")
+	stageBar:SetValue(stage)
+	stageBar:SetMaxValue(maxStages)
+	stageBar:SetPrefix(L("cropStage"))
+	stageBar:Dock(BOTTOM)
 
 	-- Growth status
 	local statusRow = tooltip:AddRow("status")
@@ -37,7 +48,7 @@ function ENT:OnPopulateEntityInfo(tooltip)
 		local waterRow = tooltip:Add("expIconText")
 		waterRow:SetText("Watered")
 		waterRow:SetTextColor(Color(100, 150, 255))
-		waterRow:SetIcon("icon16/water.png")
+		waterRow:SetIcon("experiment-redux/icons/water.png")
 		waterRow:SizeToContents()
 		waterRow:Dock(BOTTOM)
 	end
@@ -47,7 +58,7 @@ function ENT:OnPopulateEntityInfo(tooltip)
 		local fertRow = tooltip:Add("expIconText")
 		fertRow:SetText("Fertilized")
 		fertRow:SetTextColor(Color(100, 255, 100))
-		fertRow:SetIcon("icon16/arrow_refresh.png")
+		fertRow:SetIcon("experiment-redux/icons/fertilizer.png")
 		fertRow:SizeToContents()
 		fertRow:Dock(BOTTOM)
 	end
@@ -64,51 +75,79 @@ function ENT:Draw()
 		return
 	end
 
-	local maxAlpha = 50
+	local iconSize = 32
+	local iconPadding = 8
+	local maxAlpha = 80
+
 	local alpha = math.max(0, maxAlpha - (distance / 200) * maxAlpha)
 
 	cam.Start3D2D(pos, Angle(0, LocalPlayer():EyeAngles().y - 90, 90), 0.25)
-	local xOffset = 0
 
-	-- Ready to harvest icon
-	local config = PLUGIN:GetCropConfig(self:GetCropType())
+	local seedItem = self:GetItemTable()
 
-	if (config and self:GetCropStage() >= config.stages) then
-		surface.SetDrawColor(255, 200, 100, alpha)
-		surface.SetMaterial(Material("icon16/basket.png"))
-		surface.DrawTexturedRect(xOffset, 0, 16, 16)
+	-- Determine which icons to show and calculate total width
+	local iconsToShow = {}
+	local totalWidth = 0
+
+	if (self:GetCropStage() >= seedItem:GetStages()) then
+		-- Ready to harvest icon
+		table.insert(iconsToShow, {
+			material = iconHarvest,
+			color = { 255, 200, 100, alpha },
+			width = iconSize * iconHarvestAspect,
+			height = iconSize
+		})
+		totalWidth = iconSize * iconHarvestAspect
 	else
 		-- Water icon
 		if (self:GetIsWatered()) then
-			surface.SetDrawColor(100, 150, 255, alpha)
-			surface.SetMaterial(Material("icon16/water.png"))
-			surface.DrawTexturedRect(xOffset, 0, 16, 16)
-			xOffset = xOffset + 20
+			table.insert(iconsToShow, {
+				material = iconWater,
+				color = { 100, 150, 255, alpha },
+				width = iconSize * iconWaterAspect,
+				height = iconSize
+			})
+			totalWidth = totalWidth + iconSize * iconWaterAspect
 		end
 
 		-- Fertilizer icon
 		if (self:GetIsFertilized()) then
-			surface.SetDrawColor(100, 255, 100, alpha)
-			surface.SetMaterial(Material("icon16/arrow_refresh.png"))
-			surface.DrawTexturedRect(xOffset, 0, 16, 16)
-			xOffset = xOffset + 20
+			table.insert(iconsToShow, {
+				material = iconFertilizer,
+				color = { 100, 255, 100, alpha },
+				width = iconSize * iconFertilizerAspect,
+				height = iconSize
+			})
+
+			if totalWidth > 0 then
+				totalWidth = totalWidth + iconPadding
+			end
+
+			totalWidth = totalWidth + iconSize * iconFertilizerAspect
 		end
+	end
+
+	-- Calculate starting X position to center all icons
+	local startX = -totalWidth / 2
+	local xOffset = startX
+
+	-- Draw all icons
+	for i, icon in ipairs(iconsToShow) do
+		surface.SetDrawColor(icon.color[1], icon.color[2], icon.color[3], icon.color[4])
+		surface.SetMaterial(icon.material)
+		surface.DrawTexturedRect(xOffset, 0, icon.width, icon.height)
+		xOffset = xOffset + icon.width + iconPadding
 	end
 
 	cam.End3D2D()
 end
 
 function ENT:GetEntityMenu()
-	local config = PLUGIN:GetCropConfig(self:GetCropType())
-
+	local seedItem = self:GetItemTable()
 	local options = {}
 
-	if (not config) then
-		return options
-	end
-
 	-- Harvestable if fully grown
-	if (self:GetCropStage() >= config.stages) then
+	if (self:GetCropStage() >= seedItem:GetStages()) then
 		options["Harvest"] = function() end
 	else
 		-- If the local player has water or fertilizer, add options

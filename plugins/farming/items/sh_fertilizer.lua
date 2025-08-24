@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local ITEM = ITEM
 
 ITEM.name = "Fertilizer"
@@ -7,6 +8,7 @@ ITEM.model = "models/props/cs_militia/fertilizer.mdl"
 ITEM.modelScale = 0.5
 ITEM.width = 1
 ITEM.height = 2
+ITEM.price = 100
 
 function ITEM:OnEntityCreated(entity)
 	entity:SetModelScale(self.modelScale)
@@ -25,7 +27,7 @@ end
 ITEM.functions.Fertilize = {
 	name = "Fertilize",
 	tip = "Apply fertilizer to nearby crops.",
-	icon = "icon16/arrow_refresh.png",
+	icon = "experiment-redux/icons/silk_fertilize.png",
 	OnRun = function(item)
 		local client = item.player
 		local trace = client:GetEyeTrace()

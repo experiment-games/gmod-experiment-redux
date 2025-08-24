@@ -8,12 +8,11 @@ function ENT:Initialize()
 	self:SetModel(self.cropModel or "models/a31/fallout4/props/plants/carrot.mdl")
 
 	self:SetMoveType(MOVETYPE_NONE)
-	self:PhysicsInit(SOLID_NONE)
+	self:PhysicsInit(SOLID_OBB)
 	self:SetUseType(SIMPLE_USE)
-	self:SetSolid(SOLID_VPHYSICS)
+	self:SetSolid(SOLID_OBB)
+	self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 
-	self.cropType = self.cropType or "carrot"
-	self:SetCropType(self.cropType)
 	self:SetCropStage(1)
 	self.lastGrowth = CurTime()
 	self:SetIsWatered(false)
@@ -29,12 +28,8 @@ function ENT:StartGrowthTimer()
 		return
 	end
 
-	local config = PLUGIN:GetCropConfig(self.cropType)
-	if (not config) then
-		return
-	end
-
-	local baseGrowthTime = config.growthTime
+	local seedItem = self:GetItemTable()
+	local baseGrowthTime = seedItem:GetGrowthTime()
 	local modifiedTime = baseGrowthTime
 
 	-- Apply modifiers
@@ -65,12 +60,9 @@ function ENT:Think()
 end
 
 function ENT:GrowStage()
-	local config = PLUGIN:GetCropConfig(self.cropType)
-	if (not config) then
-		return
-	end
+	local seedItem = self:GetItemTable()
 
-	if (self:GetCropStage() < config.stages) then
+	if (self:GetCropStage() < seedItem:GetStages()) then
 		self:SetCropStage(self:GetCropStage() + 1)
 		self:UpdateCropAppearance()
 		self:StartGrowthTimer()
@@ -78,65 +70,67 @@ function ENT:GrowStage()
 end
 
 function ENT:UpdateCropAppearance()
-	local config = PLUGIN:GetCropConfig(self.cropType)
-	if (not config or not config.stageConfig[self:GetCropStage()]) then
+	local seedItem = self:GetItemTable()
+	local stageConfig = seedItem:GetStageConfig(self:GetCropStage())
+
+	if (not stageConfig) then
 		return
 	end
 
-	local stageData = config.stageConfig[self:GetCropStage()]
-
 	-- Update model if specified
-	if (stageData.model) then
-		self:SetModel(stageData.model)
+	if (stageConfig.model) then
+		self:SetModel(stageConfig.model)
 	else
-		self:SetModel(config.cropModel)
+		self:SetModel(seedItem:GetCropModel())
 	end
 
 	-- Update scale
-	if (stageData.modelScale) then
-		self:SetModelScale(stageData.modelScale)
+	if (stageConfig.modelScale) then
+		self:SetModelScale(stageConfig.modelScale)
 	end
 
 	-- Update bodygroup
-	if (stageData.bodygroup) then
-		self:SetBodygroup(0, stageData.bodygroup)
+	if (stageConfig.bodygroup) then
+		self:SetBodygroup(0, stageConfig.bodygroup)
 	end
 
 	-- Update skin
-	if (stageData.skin) then
-		self:SetSkin(stageData.skin)
+	if (stageConfig.skin) then
+		self:SetSkin(stageConfig.skin)
 	end
 end
 
 function ENT:Harvest(player)
-	local config = PLUGIN:GetCropConfig(self.cropType)
-	if (not config) then
+	if (not self:CanHarvest()) then
+		player:Notify("This crop is not ready for harvest.")
 		return
 	end
 
+	local seedItem = self:GetItemTable()
 	local character = player:GetCharacter()
-	if (not character) then
-		return
-	end
-
 	local inventory = character:GetInventory()
+
 	if (not inventory) then
 		return
 	end
 
 	-- Call hook for crop output modification
-	local harvestAmount = hook.Run("GetCropOutput", player, self.cropType, config.harvestItems) or config.harvestItems
+	local productItem = seedItem:GetProductItemTable()
+	local harvestItems = seedItem:GetHarvestItems()
+	local harvestAmount = hook.Run("GetCropOutput", player, seedItem, productItem, harvestItems)
+		or harvestItems
 
 	-- Give items to player
 	for i = 1, harvestAmount do
-		inventory:Add(self.cropType)
+		inventory:Add(productItem.uniqueID)
 	end
 
 	player:Notify(
-		string.format("You harvested %d %s(s)!", harvestAmount, config.name)
+		string.format("You harvested %d %s%s!", harvestAmount, productItem:GetName(), harvestAmount ~= 1 and "s" or "")
 	)
 
-	self:EmitSound("physics/body/body_medium_break2.wav", 40, 255)
+	player:EmitSound("npc/stalker/stalker_footstep_left2.wav", 45, 255)
+	player:EmitSound("npc/stalker/stalker_footstep_right2.wav", 45, 255)
 
 	self:Remove()
 end
@@ -155,6 +149,11 @@ end
 
 function ENT:SetFertilized(fertilized)
 	self:SetIsFertilized(fertilized)
+end
+
+function ENT:CanHarvest()
+	local seedItem = self:GetItemTable()
+	return self:GetCropStage() >= seedItem:GetStages()
 end
 
 function ENT:OnOptionSelected(client, option, data)

@@ -11,5 +11,9 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Int", "CropStage")
 	self:NetworkVar("Bool", "IsWatered")
 	self:NetworkVar("Bool", "IsFertilized")
-	self:NetworkVar("String", "CropType")
+	self:NetworkVar("String", "ItemID")
+end
+
+function ENT:GetItemTable()
+	return ix.item.list[self:GetItemID()]
 end

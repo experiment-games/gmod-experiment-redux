@@ -4,9 +4,20 @@ PLUGIN.name = "Farming"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Adds crops and farming mechanics."
 
+PLUGIN.largestPlantingRadius = 0
+
+ix.lang.AddTable("english", {
+	cropStage = "Stage: ",
+})
+
 if (SERVER) then
 	-- Fallout 4: Crop Plants (https://steamcommunity.com/sharedfiles/filedetails/?id=1864310649)
 	resource.AddWorkshop("1864310649")
+
+	ix.util.AddResourceFile("materials/experiment-redux/icons/plant.png")
+	ix.util.AddResourceFile("materials/experiment-redux/icons/water.png")
+	ix.util.AddResourceFile("materials/experiment-redux/icons/fertilizer.png")
+	ix.util.AddResourceFile("materials/experiment-redux/icons/harvest.png")
 end
 
 --[[
@@ -55,88 +66,66 @@ end
 --]]
 
 --[[
-	Crop configuration
+	Auto-generate seed items for all crop items
 --]]
 
-PLUGIN.cropConfig = {
-	carrot = {
-		name = "Carrot",
-		stages = 3,
-		growthTime = 120, -- seconds per stage
-		harvestItems = 1,
-		plantingRadius = 10,
-		cropModel = "models/a31/fallout4/props/plants/carrot.mdl",
-		itemModel = "models/a31/fallout4/props/plants/carrot_item.mdl",
-		stageConfig = {
-			[1] = { modelScale = 0.5, bodygroup = nil, skin = 1 },
-			[2] = { modelScale = 0.75, bodygroup = nil, skin = 1 },
-			[3] = { modelScale = 1.0, bodygroup = nil, skin = 1 }
-		}
-	},
-	corn = {
-		name = "Corn",
-		stages = 4,
-		growthTime = 180,
-		harvestItems = 3,
-		plantingRadius = 60,
-		cropModel = "models/a31/fallout4/props/plants/corn_stalk01.mdl",
-		itemModel = "models/a31/fallout4/props/plants/corn_item.mdl",
-		stageConfig = {
-			[1] = { modelScale = 0.6, bodygroup = 2, skin = 1 },
-			[2] = { modelScale = 0.8, bodygroup = 2, skin = 1 },
-			[3] = { modelScale = 1.0, bodygroup = 1, skin = 1 },
-			[4] = { modelScale = 1.0, bodygroup = 0, skin = 1 }
-		}
-	},
-	melon = {
-		name = "Melon",
-		stages = 4,
-		growthTime = 150,
-		harvestItems = 2,
-		plantingRadius = 60,
-		cropModel = "models/a31/fallout4/props/plants/melon_vine.mdl",
-		itemModel = "models/a31/fallout4/props/plants/melon_item.mdl",
-		stageConfig = {
-			[1] = { modelScale = 1.0, bodygroup = 1, skin = 1 },
-			[2] = { modelScale = 1.0, bodygroup = 1, skin = 1 },
-			[3] = { modelScale = 1.0, bodygroup = 0, skin = 1 },
-			[4] = { modelScale = 1.0, bodygroup = 0, skin = 1, model = "models/a31/fallout4/props/plants/melon_vinefull.mdl" }
-		}
-	},
-	tomato = {
-		name = "Tomato",
-		stages = 3,
-		growthTime = 100,
-		harvestItems = 2,
-		plantingRadius = 30,
-		cropModel = "models/a31/fallout4/props/plants/tatoplant01.mdl",
-		itemModel = "models/a31/fallout4/props/plants/tato_item.mdl",
-		stageConfig = {
-			[1] = { modelScale = 1.0, bodygroup = 1, skin = 1 },
-			[2] = { modelScale = 1.0, bodygroup = 0, skin = 1 },
-			[3] = { modelScale = 1.0, bodygroup = 0, skin = 1 }
-		}
-	},
-	grain = {
-		name = "Grain",
-		stages = 4,
-		growthTime = 200,
-		harvestItems = 4,
-		plantingRadius = 100,
-		cropModel = "models/a31/fallout4/props/plants/razorgrain_pile.mdl",
-		itemModel = "models/props/de_dust/grainbasket01b.mdl",
-		itemModelScale = 0.5,
-		stageConfig = {
-			[1] = { modelScale = 1.0, bodygroup = 3, skin = 1 },
-			[2] = { modelScale = 1.0, bodygroup = 2, skin = 1 },
-			[3] = { modelScale = 1.0, bodygroup = 1, skin = 1 },
-			[4] = { modelScale = 1.0, bodygroup = 0, skin = 1 }
-		}
-	}
-}
+function PLUGIN:InitializedPlugins()
+	local items = ix.item.list
 
-function PLUGIN:GetCropConfig(cropType)
-	return self.cropConfig[cropType]
+	-- Build crop config from crop items
+	for _, item in pairs(items) do
+		local productInfo = item.generateProductItem
+
+		if (item.base ~= "base_crop_seeds" or not productInfo) then
+			continue
+		end
+
+		if (not productInfo.name or not productInfo.description or not productInfo.model) then
+			local missingFields = {}
+
+			if (not productInfo.name) then
+				table.insert(missingFields, "name")
+			end
+
+			if (not productInfo.description) then
+				table.insert(missingFields, "description")
+			end
+
+			if (not productInfo.model) then
+				table.insert(missingFields, "model")
+			end
+
+			ix.util.SchemaErrorNoHalt(
+				string.format("Farming plugin: Crop seed item '%s' is missing fields: %s",
+					item.uniqueID,
+					table.concat(missingFields, ", ")
+				)
+			)
+			continue
+		end
+
+		local productItemID = productInfo.uniqueID
+		local productItem = ix.item.Register(productItemID, "base_crops", false, nil, true)
+		productItem.name = productInfo.name
+		productItem.description = productInfo.description
+		productItem.model = productInfo.model
+		productItem.width = 1
+		productItem.height = 1
+		productItem.modelScale = productInfo.modelScale
+
+		if (productItem.modelScale) then
+			function productItem:OnEntityCreated(entity)
+				entity:SetModelScale(self.modelScale)
+			end
+		end
+
+		-- Place a reference to the product item in the seed item and vice versa
+		item.productItemID = productItem.uniqueID
+		productItem.seedItemID = item.uniqueID
+
+		-- Track the largest planting radius
+		self.largestPlantingRadius = math.max(self.largestPlantingRadius, item.plantingRadius)
+	end
 end
 
 --[[
@@ -144,6 +133,10 @@ end
 --]]
 
 function PLUGIN:WaterSpecificCrop(crop)
+	if (crop:CanHarvest()) then
+		return false, "No need to water a fully grown crop."
+	end
+
 	if (crop:GetIsWatered()) then
 		return false, "This crop has already been watered."
 	end
@@ -199,6 +192,10 @@ function PLUGIN:WaterCrop(client, target)
 end
 
 function PLUGIN:FertilizeSpecificCrop(crop)
+	if (crop:CanHarvest()) then
+		return false, "No need to fertilize a fully grown crop."
+	end
+
 	if (crop:GetIsFertilized()) then
 		return false, "This crop has already been fertilized."
 	end
@@ -252,39 +249,7 @@ function PLUGIN:FertilizeCrop(client, target)
 	end
 end
 
---[[
-	Items
---]]
-
--- Create seed items
-for cropType, config in pairs(PLUGIN.cropConfig) do
-	local ITEM = ix.item.Register("seeds_" .. cropType, "base_crop_seed", false, nil, true)
-	ITEM.name = config.name .. " Seeds"
-	ITEM.description = "Seeds for growing " .. config.name .. "s. Plant these on designated farming areas."
-	ITEM.model = "models/props_lab/jar01b.mdl"
-	ITEM.width = 1
-	ITEM.height = 1
-	ITEM.cropType = cropType
-end
-
--- Create crop items (harvestable products)
-for cropType, config in pairs(PLUGIN.cropConfig) do
-	local ITEM = ix.item.Register(cropType, nil, false, nil, true)
-	ITEM.name = config.name
-	ITEM.description = "A fresh " .. string.lower(config.name) .. " harvested from your farm."
-	ITEM.category = "Farming"
-	ITEM.model = config.itemModel
-	ITEM.width = 1
-	ITEM.height = 1
-
-	if (config.itemModelScale) then
-		function ITEM:OnEntityCreated(entity)
-			entity:SetModelScale(config.itemModelScale)
-		end
-	end
-end
-
-function PLUGIN:CheckValidGround(position, resourceTypeID)
+function PLUGIN:IsValidCropSoil(position, resourceTypeID)
 	local triggers = ents.FindInSphere(position, 512)
 
 	resourceTypeID = resourceTypeID or "crops"

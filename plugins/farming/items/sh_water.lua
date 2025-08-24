@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local ITEM = ITEM
 
 ITEM.name = "Water Bottle"
@@ -6,6 +7,8 @@ ITEM.category = "Farming"
 ITEM.model = "models/props/cs_office/water_bottle.mdl"
 ITEM.width = 1
 ITEM.height = 1
+ITEM.price = 15
+ITEM.shipmentSize = 6
 
 ITEM.functions.Water = {
 	name = "Water",

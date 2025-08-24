@@ -20,7 +20,8 @@ end
 function PANEL:SetIcon(path)
 	if (path and path ~= "") then
 		self.iconPath = path
-		self.iconMaterial = Material(path)
+		self.iconMaterial = ix.util.GetMaterial(path)
+		self.iconAspectRatio = self.iconMaterial:Width() / self.iconMaterial:Height()
 	else
 		self.iconPath = nil
 		self.iconMaterial = nil
@@ -45,8 +46,8 @@ function PANEL:Paint(w, h)
 	if (iconMaterial) then
 		surface.SetMaterial(iconMaterial)
 		surface.SetDrawColor(color_white)
-		surface.DrawTexturedRect(xPos, (h - iconSize) * 0.5, iconSize, iconSize)
-		xPos = xPos + iconSize + spacing
+		surface.DrawTexturedRect(xPos, (h - iconSize) * 0.5, iconSize * self.iconAspectRatio, iconSize)
+		xPos = xPos + (iconSize * self.iconAspectRatio) + spacing
 	end
 
 	-- Draw text
@@ -72,7 +73,7 @@ function PANEL:SizeToContents()
 	local width = 8 -- Padding
 
 	if (self:GetIconMaterial()) then
-		width = width + iconSize + spacing
+		width = width + (iconSize * self.iconAspectRatio) + spacing
 	end
 
 	if (text and text ~= "") then
