@@ -58,13 +58,8 @@ function BUFF:OnShouldExpire(client, buff)
 	end
 end
 
-function BUFF.hooks:PostPlayerLoadout(client)
+function BUFF.hooks:PlayerSpawnedAtSpawnPoint(client)
 	if (Schema.buff.GetActive(client, self.index)) then
-		return
-	end
-
-	-- Not if the player is being resurrected.
-	if (client.expIsResurrecting) then
 		return
 	end
 
