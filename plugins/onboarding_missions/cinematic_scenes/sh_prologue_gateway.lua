@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_gateway"
@@ -20,8 +21,8 @@ end
 if (CLIENT) then
 	function SCENE:OnEnterLocalPlayer()
 		Schema.cinematics.ShowCinematicText({
-			{ text = "The Guardian Testing Facility.", delay = 0, duration = 5, horizontalAlignment = TEXT_ALIGN_CENTER, verticalAlignment = TEXT_ALIGN_CENTER },
-			{ text = "A place they told us was safe.", delay = 2, duration = 5, horizontalAlignment = TEXT_ALIGN_CENTER, verticalAlignment = TEXT_ALIGN_CENTER },
+			{ text = "The Guardian Corp. Research Facility.", delay = 0, duration = 5, horizontalAlignment = TEXT_ALIGN_CENTER, verticalAlignment = TEXT_ALIGN_CENTER },
+			{ text = "A place they told us was safe.",        delay = 2, duration = 5, horizontalAlignment = TEXT_ALIGN_CENTER, verticalAlignment = TEXT_ALIGN_CENTER },
 		})
 
 		Schema.cinematics.SetFogData(50, 750, color_black, 1)

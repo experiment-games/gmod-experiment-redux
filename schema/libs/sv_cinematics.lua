@@ -26,7 +26,7 @@ end
 
 --- @param client Player
 --- @param sceneID string
---- @param fadeIn boolean|number
+--- @param fadeIn? boolean|number
 --- @return boolean
 function Schema.cinematics.PutPlayerInScene(client, sceneID, fadeIn)
 	local scene = Schema.cinematics.Find(sceneID)

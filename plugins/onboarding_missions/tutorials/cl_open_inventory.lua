@@ -1,4 +1,4 @@
-local SCENE = SCENE
+local PLUGIN = PLUGIN
 local TUTORIAL = TUTORIAL
 
 TUTORIAL.uniqueID = "prologue_riot3_open_inventory"
@@ -13,8 +13,8 @@ function TUTORIAL:OnActivate()
 			return
 		end
 
-		local glockEquipped = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_EQUIPPED, true)
-		local ammoLoaded = Schema.progression.Check("prologue", SCENE.PROGRESSION_AMMO_LOADED, true)
+		local glockEquipped = Schema.progression.Check("prologue", PLUGIN.PROGRESSION_GLOCK_EQUIPPED, true)
+		local ammoLoaded = Schema.progression.Check("prologue", PLUGIN.PROGRESSION_AMMO_LOADED, true)
 
 		-- If the glock is equipped and ammo is loaded, deactivate this tutorial
 		if (glockEquipped and ammoLoaded) then

@@ -1,9 +1,7 @@
+local PLUGIN = PLUGIN
 local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_riot2"
-
--- Must match SCENE.PROGRESSION_INTRO_COMPLETED in mission_tracker
-SCENE.PROGRESSION_INTRO_COMPLETED = "intro_tutorial_completed"
 
 function SCENE:OnEnterServer(client)
 	Schema.instance.AddPlayer(client)
@@ -20,7 +18,7 @@ function SCENE:OnLeaveServer(client)
 	local instanceID = Schema.instance.GetPlayerInstance(client)
 	Schema.instance.DestroyInstance(instanceID, "end_of_scene")
 
-	Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_INTRO_COMPLETED, true)
+	Schema.progression.Change(client, "prologue", PLUGIN.PROGRESSION_INTRO_COMPLETED, true)
 
 	client:GetCharacter():SetData("prologue_finished", true)
 

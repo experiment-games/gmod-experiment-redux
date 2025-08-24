@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_gateway"
@@ -53,7 +54,16 @@ if (SERVER) then
 			-- being in a different instance
 			timer.Simple(0, function()
 				if (IsValid(client)) then
-					Schema.cinematics.PutPlayerInScene(client, "prologue_start")
+					local scene = "prologue_start"
+
+					if (PLUGIN.INTRO_TUTORIAL_TRACKER:IsInProgress(client)) then
+						scene = "prologue_riot3"
+					end
+
+					-- ShouldShowSpawnSelection might be called twice from PostPlayerLoadout
+					if (not Schema.cinematics.IsPlayerInScene(client, scene)) then
+						Schema.cinematics.PutPlayerInScene(client, scene)
+					end
 				end
 			end)
 

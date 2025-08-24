@@ -1,4 +1,4 @@
-local SCENE = SCENE
+local PLUGIN = PLUGIN
 local TUTORIAL = TUTORIAL
 
 TUTORIAL.uniqueID = "prologue_riot3_raise_weapon"

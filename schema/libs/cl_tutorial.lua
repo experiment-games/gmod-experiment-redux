@@ -114,7 +114,7 @@ function Schema.tutorial.ShowTutorial(tutorialID, ...)
 
 	-- If a tutorial is currently active, queue this one
 	if (Schema.tutorial.currentTutorial) then
-		-- TODO: Queuing is glitchy since it might open a tutorial in an unexpected place
+		-- TODO: Queuing by default is glitchy since it might open a tutorial in an unexpected place
 		-- -- Don't queue if its already queued
 		-- if (Schema.tutorial.IsTutorialQueued(tutorialID)) then
 		-- 	return
@@ -130,6 +130,23 @@ function Schema.tutorial.ShowTutorial(tutorialID, ...)
 
 	-- Show the tutorial immediately
 	Schema.tutorial.SetCurrentTutorial(tutorial, ...)
+end
+
+function Schema.tutorial.QueueTutorial(tutorialID, ...)
+	if (Schema.tutorial.isDisabled) then
+		return
+	end
+
+	local tutorial = Schema.tutorial.Find(tutorialID)
+
+	if (not tutorial) then
+		return
+	end
+
+	table.insert(Schema.tutorial.tutorialQueue, {
+		tutorial = tutorial,
+		args = { ... }
+	})
 end
 
 function Schema.tutorial.HideTutorial(tutorialID)

@@ -1,9 +1,7 @@
+local PLUGIN = PLUGIN
 local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_riot2"
-
-ix.util.Include("prologue_riot3/sh_mission_tracker.lua", "shared")
-Schema.tutorial.IncludeDirectory(Schema.folder .. "/schema/cinematic_scenes/prologue_riot3/tutorials")
 
 if (SERVER) then
 	local function findItemSpawnPoint(sequenceID, itemSpawnID)
@@ -55,7 +53,7 @@ if (SERVER) then
 	function SCENE:OnEnterServer(client)
 		Schema.instance.AddPlayer(client)
 
-		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_INTRO_STARTED, true)
+		PLUGIN.INTRO_TUTORIAL_TRACKER:Start(client)
 
 		local weaponItemTable = ix.item.Get("ex_glock")
 		local ammo = Schema.ammo.ConvertToAmmo(weaponItemTable.forcedWeaponCalibre)
@@ -182,12 +180,12 @@ if (SERVER) then
 
 		if (weaponToPickup and weaponToPickup == item) then
 			-- Player picked up the weapon
-			Schema.progression.Change(inventoryOwner, "prologue", SCENE.PROGRESSION_GLOCK_PICKED_UP, true)
+			Schema.progression.Change(inventoryOwner, "prologue", PLUGIN.PROGRESSION_GLOCK_PICKED_UP, true)
 		end
 
 		if (ammoToPickup and ammoToPickup == item) then
 			-- Player picked up the ammo
-			Schema.progression.Change(inventoryOwner, "prologue", SCENE.PROGRESSION_AMMO_PICKED_UP, true)
+			Schema.progression.Change(inventoryOwner, "prologue", PLUGIN.PROGRESSION_AMMO_PICKED_UP, true)
 		end
 	end)
 
@@ -205,8 +203,8 @@ if (SERVER) then
 
 		client.expPrologueRiot3Items["ammo"] = nil
 
-		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_AMMO_PICKED_UP, true)
-		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_AMMO_LOADED, true)
+		Schema.progression.Change(client, "prologue", PLUGIN.PROGRESSION_AMMO_PICKED_UP, true)
+		Schema.progression.Change(client, "prologue", PLUGIN.PROGRESSION_AMMO_LOADED, true)
 	end)
 
 	-- Track if the player equipped the Glock
@@ -219,7 +217,7 @@ if (SERVER) then
 			return
 		end
 
-		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_GLOCK_EQUIPPED, true)
+		Schema.progression.Change(client, "prologue", PLUGIN.PROGRESSION_GLOCK_EQUIPPED, true)
 	end)
 
 	-- Track if the player switched to the Glock
@@ -232,7 +230,7 @@ if (SERVER) then
 			return
 		end
 
-		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_GLOCK_ACTIVE, true)
+		Schema.progression.Change(client, "prologue", PLUGIN.PROGRESSION_GLOCK_ACTIVE, true)
 	end)
 
 	-- Track if the player raised the Glock
@@ -245,7 +243,7 @@ if (SERVER) then
 			return
 		end
 
-		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_GLOCK_RAISED, true)
+		Schema.progression.Change(client, "prologue", PLUGIN.PROGRESSION_GLOCK_RAISED, true)
 	end)
 
 	-- Based on the player's progression, we spawn the manhacks
@@ -255,7 +253,7 @@ if (SERVER) then
 		end
 
 		if (client.expPrologueRiot3ManhacksSpawned) then
-			if (key == SCENE.PROGRESSION_MANHACKS_KILLED_COUNT and value >= SCENE.REQUIRED_MANHACKS) then
+			if (key == PLUGIN.PROGRESSION_MANHACKS_KILLED_COUNT and value >= PLUGIN.REQUIRED_MANHACKS) then
 				-- They've defeated all manhacks, go to the final fade out scene
 				Schema.cinematics.TransitionPlayerToScene(client, "prologue_end")
 			end
@@ -264,9 +262,9 @@ if (SERVER) then
 		end
 
 		-- Check if all items have been picked up, equipped and raised
-		local weaponEquipped = Schema.progression.Check(client, "prologue", SCENE.PROGRESSION_GLOCK_EQUIPPED, true)
-		local ammoLoaded = Schema.progression.Check(client, "prologue", SCENE.PROGRESSION_AMMO_LOADED, true)
-		local glockRaised = Schema.progression.Check(client, "prologue", SCENE.PROGRESSION_GLOCK_RAISED, true)
+		local weaponEquipped = Schema.progression.Check(client, "prologue", PLUGIN.PROGRESSION_GLOCK_EQUIPPED, true)
+		local ammoLoaded = Schema.progression.Check(client, "prologue", PLUGIN.PROGRESSION_AMMO_LOADED, true)
+		local glockRaised = Schema.progression.Check(client, "prologue", PLUGIN.PROGRESSION_GLOCK_RAISED, true)
 
 		if (not weaponEquipped or not ammoLoaded or not glockRaised) then
 			return
@@ -283,8 +281,7 @@ if (SERVER) then
 
 		client.expPrologueRiot3ManhacksSpawned = true
 
-		for i = 0, SCENE.REQUIRED_MANHACKS - 1 do
-			print("Spawning manhack #" .. (i + 1) .. " for client ", client)
+		for i = 0, PLUGIN.REQUIRED_MANHACKS - 1 do
 			timer.Simple(i * spawnIntervalSeconds, function()
 				spawnManhack(spawnPoint:GetPos(), client)
 			end)
@@ -301,7 +298,7 @@ if (SERVER) then
 			return
 		end
 
-		Schema.progression.Change(client, "prologue", SCENE.PROGRESSION_MANHACKS_KILLED_COUNT, function(value)
+		Schema.progression.Change(client, "prologue", PLUGIN.PROGRESSION_MANHACKS_KILLED_COUNT, function(value)
 			return (value or 0) + 1
 		end)
 	end)
@@ -318,33 +315,39 @@ end
 
 if (CLIENT) then
 	local hasStartedOpenInventory = false
+	local hasStartedRaiseWeapon = false
 
 	local function tryStartTutorials()
 		-- If both items are picked up, we can show the inventory hint
-		local glockPickedUp = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_PICKED_UP, true)
-		local ammoPickedUp = Schema.progression.Check("prologue", SCENE.PROGRESSION_AMMO_PICKED_UP, true)
-		local glockEquipped = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_EQUIPPED, true)
-		local ammoLoaded = Schema.progression.Check("prologue", SCENE.PROGRESSION_AMMO_LOADED, true)
+		local glockPickedUp = Schema.progression.Check("prologue", PLUGIN.PROGRESSION_GLOCK_PICKED_UP, true)
+		local ammoPickedUp = Schema.progression.Check("prologue", PLUGIN.PROGRESSION_AMMO_PICKED_UP, true)
+		local glockEquipped = Schema.progression.Check("prologue", PLUGIN.PROGRESSION_GLOCK_EQUIPPED, true)
+		local ammoLoaded = Schema.progression.Check("prologue", PLUGIN.PROGRESSION_AMMO_LOADED, true)
 
-		if (glockPickedUp and ammoPickedUp and (not glockEquipped or not ammoLoaded)) then
-			if (not hasStartedOpenInventory) then
-				Schema.tutorial.ShowTutorial("prologue_riot3_open_inventory")
-				hasStartedOpenInventory = true
-			end
-		else
+		if (not (glockPickedUp and ammoPickedUp)) then
 			return
 		end
 
-		-- Immediately queue the tutorial on how the inventory works, and how to raise weapons
 		if (not glockEquipped or not ammoLoaded) then
-			Schema.tutorial.ShowTutorial("prologue_riot3_equip_weapon_and_ammo")
+			if (not hasStartedOpenInventory) then
+				Schema.tutorial.ShowTutorial("prologue_riot3_open_inventory")
+				hasStartedOpenInventory = true
+
+				-- Immediately queue the tutorial on how the inventory works, and how to raise weapons
+				Schema.tutorial.QueueTutorial("prologue_riot3_equip_weapon_and_ammo")
+
+				Schema.tutorial.QueueTutorial("prologue_riot3_raise_weapon")
+			end
+
+			return
 		end
 
-		local weaponRaised = Schema.progression.Check("prologue", SCENE.PROGRESSION_GLOCK_RAISED, true)
+		-- local weaponRaised = Schema.progression.Check("prologue", PLUGIN.PROGRESSION_GLOCK_RAISED, true)
 
-		if (not weaponRaised) then
-			Schema.tutorial.ShowTutorial("prologue_riot3_raise_weapon")
-		end
+		-- if (not weaponRaised and not hasStartedRaiseWeapon) then
+		-- 	print("Showing raise weapon tutorial")
+		-- 	hasStartedRaiseWeapon = true
+		-- end
 	end
 
 	function SCENE:OnThink()

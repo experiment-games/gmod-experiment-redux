@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_riot2"
