@@ -29,7 +29,7 @@ if (SERVER) then
 			return
 		end
 
-		if (not IsValid(entity) or entity:GetPos():Distance(client:GetPos()) > ix.config.Get("maxInteractionDistance")) then
+		if (not IsValid(entity) or entity:GetPos():DistToSqr(client:GetPos()) > ix.config.Get("maxInteractionDistance") ^ 2) then
 			client:Notify("You are too far away from the business vendor to buy this item.")
 			return
 		end

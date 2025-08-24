@@ -1,0 +1,15 @@
+local PLUGIN = PLUGIN
+
+ENT.Type = "anim"
+ENT.Base = "base_gmodentity"
+ENT.Category = "Farming"
+ENT.PrintName = "Crop"
+ENT.Spawnable = false
+ENT.AdminSpawnable = false
+
+function ENT:SetupDataTables()
+	self:NetworkVar("Int", "CropStage")
+	self:NetworkVar("Bool", "IsWatered")
+	self:NetworkVar("Bool", "IsFertilized")
+	self:NetworkVar("String", "CropType")
+end
