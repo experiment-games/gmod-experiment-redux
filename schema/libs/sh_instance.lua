@@ -504,6 +504,7 @@ if (SERVER) then
 		elseif (not parentInstance and childInstance) then
 			-- If parent is not instanced but child is, remove child from instance
 			Schema.instance.RemoveEntity(child, false)
+
 			hook.Run("EntityRemovedFromParentInstance", child, parent, childInstance)
 		end
 	end)
@@ -562,6 +563,10 @@ if (SERVER) then
 
 	-- Handle entity spawning - ensure proper transmission
 	hook.Add("OnEntityCreated", "expInstanceTransmission", function(entity)
+		if (hook.Run("ShouldEntityBeInstanced", entity) == false) then
+			return
+		end
+
 		Schema.instance.UpdateEntityTransmission(entity)
 	end)
 

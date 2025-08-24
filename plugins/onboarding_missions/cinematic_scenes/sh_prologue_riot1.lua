@@ -3,27 +3,42 @@ local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_riot1"
 
-function SCENE:OnEnterServer(client)
-	Schema.instance.AddPlayer(client)
+if (SERVER) then
+	function SCENE:OnEnterServer(client)
+		Schema.instance.AddPlayer(client)
 
-	-- Randomize the NPCs a bit so even if they have the same animation they don't look identical
-	for _, entity in ipairs(ents.FindInSphere(client:GetPos(), 1024)) do
-		if (entity:GetClass() == "prop_dynamic" and not entity.expRandomizedCycle) then
-			entity:SetCycle(math.random())
-			entity.expRandomizedCycle = true
+		-- Randomize the NPCs a bit so even if they have the same animation they don't look identical
+		for _, entity in ipairs(ents.FindInSphere(client:GetPos(), 1024)) do
+			if (entity:GetClass() == "prop_dynamic" and not entity.expRandomizedCycle) then
+				entity:SetCycle(math.random())
+				entity.expRandomizedCycle = true
+			end
 		end
+
+		timer.Simple(15, function()
+			if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, self.uniqueID)) then
+				Schema.cinematics.TransitionPlayerToScene(client, "prologue_riot2")
+			end
+		end)
 	end
 
-	timer.Simple(15, function()
-		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, self.uniqueID)) then
-			Schema.cinematics.TransitionPlayerToScene(client, "prologue_riot2")
+	function SCENE:OnLeaveServer(client)
+		local instanceID = Schema.instance.GetPlayerInstance(client)
+		Schema.instance.DestroyInstance(instanceID, "end_of_scene")
+	end
+
+	-- Seeing how the prologue spawns npc_cscanner, let's not instance that and keep it visible to all players
+	-- regardless of their personal instance
+	hook.Add("ShouldEntityBeInstanced", "expPrologueRiot1Instance", function(entity)
+		if (entity:GetClass() == "npc_cscanner") then
+			return false
+		end
+
+		-- These are also related to the cscanner and should not be instanced either
+		if (entity:GetClass() == "env_sprite" or entity:GetClass() == "spotlight_end" or entity:GetClass() == "beam") then
+			return false
 		end
 	end)
-end
-
-function SCENE:OnLeaveServer(client)
-	local instanceID = Schema.instance.GetPlayerInstance(client)
-	Schema.instance.DestroyInstance(instanceID, "end_of_scene")
 end
 
 if (CLIENT) then
