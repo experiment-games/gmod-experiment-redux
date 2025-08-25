@@ -55,3 +55,26 @@ function ENT:Draw()
 		cam.End3D2D()
 	end
 end
+
+function ENT:GetEntityMenu()
+	local options = {}
+
+	-- Check if station has completed process
+	if (self:GetInUse()) then
+		local startTime = self:GetProcessStartTime()
+		local duration = self:GetProcessDuration()
+		local elapsed = CurTime() - startTime
+
+		if (elapsed >= duration) then
+			options["Retrieve Items"] = function() end
+			return options
+		else
+			-- Process still running
+			return {}
+		end
+	end
+
+	options["Combine Items"] = function() end
+
+	return options
+end

@@ -10,7 +10,8 @@ ITEM.price = 1000
 
 ITEM.craftingCombination = {
 	output = { explosive_compound = 1 },
-	components = { phenolic_acid = 2, ascorbic_acid = 2, poisonous_acid = 1 }
+	components = { phenolic_acid = 1, ascorbic_acid = 1, poisonous_acid = 1 },
+	station = "exp_chemistry_station",
 }
 
 ITEM.craftingTime = 60

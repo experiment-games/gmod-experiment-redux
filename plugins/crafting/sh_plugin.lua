@@ -7,16 +7,6 @@ PLUGIN.description = "Adds crafting mechanics including distillation and combina
 ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
 
-if (SERVER) then
-	-- Fallout: New Vegas - Crafting Station Props (steamcommunity.com/sharedfiles/filedetails/?id=1906251322)
-	resource.AddWorkshop("1906251322")
-
-	ix.util.AddResourceFile("materials/experiment-redux/icons/chemistry.png")
-	ix.util.AddResourceFile("materials/experiment-redux/icons/workbench.png")
-	ix.util.AddResourceFile("materials/experiment-redux/icons/distill.png")
-	ix.util.AddResourceFile("materials/experiment-redux/icons/combine.png")
-end
-
 ix.lang.AddTable("english", {
 	chemistryStation = "Chemistry Station",
 	workbench = "Workbench",
@@ -61,11 +51,11 @@ function PLUGIN:GetCombinationRecipes()
 	return recipes
 end
 
-function PLUGIN:FindValidRecipe(selectedItems)
+function PLUGIN:FindValidRecipe(station, selectedItems)
 	local recipes = self:GetCombinationRecipes()
 
 	for _, recipe in pairs(recipes) do
-		if (self:CanCraftRecipe(recipe, selectedItems)) then
+		if (self:CanCraftRecipe(recipe, selectedItems, station)) then
 			return recipe
 		end
 	end
@@ -73,8 +63,13 @@ function PLUGIN:FindValidRecipe(selectedItems)
 	return nil
 end
 
-function PLUGIN:CanCraftRecipe(recipe, selectedItems)
+function PLUGIN:CanCraftRecipe(recipe, selectedItems, station)
 	local components = recipe.craftingCombination.components
+
+	if (recipe.craftingCombination.station and recipe.craftingCombination.station ~= station:GetClass()) then
+		return false
+	end
+
 	local itemCounts = {}
 
 	-- Count selected items

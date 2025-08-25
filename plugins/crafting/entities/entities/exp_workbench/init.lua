@@ -20,36 +20,28 @@ function ENT:Initialize()
 	self.stationID = self:EntIndex()
 end
 
-function ENT:Use(activator, caller)
-	if (not IsValid(caller) or not caller:IsPlayer()) then
-		return
+function ENT:OnOptionSelected(client, option, data)
+	if (option == "Retrieve Items") then
+		local process = PLUGIN:GetStationProcess(self.stationID)
+
+		if (process and process.completed) then
+			PLUGIN:CompleteStationProcess(self.stationID)
+			self:SetInUse(false)
+			client:Notify("Items retrieved!")
+		else
+			client:Notify("No items to retrieve.")
+		end
+	elseif (option == "Combine Items") then
+		if (PLUGIN:IsStationBusy(self.stationID)) then
+			client:Notify(L("stationInUse", client))
+			return
+		end
+
+		-- Send network message to client to open combination selector
+		net.Start("expOpenCombinationSelector")
+		net.WriteEntity(self)
+		net.Send(client)
 	end
-
-	local character = caller:GetCharacter()
-	if (not character) then
-		return
-	end
-
-	local process = PLUGIN:GetStationProcess(self.stationID)
-
-	if (process and process.completed) then
-		-- Allow retrieval of completed items
-		PLUGIN:CompleteStationProcess(self.stationID)
-		self:SetInUse(false)
-		caller:Notify("Items retrieved!")
-		return
-	elseif (PLUGIN:IsStationBusy(self.stationID)) then
-		caller:Notify(L("stationInUse", caller))
-		return
-	end
-
-	self:OpenCraftingMenu(caller)
-end
-
-function ENT:OpenCraftingMenu(player)
-	net.Start("expWorkbenchMenu")
-	net.WriteEntity(self)
-	net.SendToServer(player)
 end
 
 function ENT:StartCombination(player, selectedItems, recipe)

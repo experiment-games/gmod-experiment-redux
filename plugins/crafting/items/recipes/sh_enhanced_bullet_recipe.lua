@@ -10,7 +10,8 @@ ITEM.price = 400
 
 ITEM.craftingCombination = {
 	output = { ammo_9x19mm_single = 1 },
-	components = { ammo_9x19mm_single = 1, healing_compound = 1 }
+	components = { ammo_9x19mm_single = 1, healing_compound = 1 },
+	station = "exp_workbench",
 }
 
 ITEM.craftingTime = 20

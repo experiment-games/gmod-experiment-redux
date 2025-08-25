@@ -3,19 +3,29 @@ local PANEL = {}
 AccessorFunc(PANEL, "title", "Title", FORCE_STRING)
 
 function PANEL:Init()
-	self:SetTall(500)
+	self:SetSize(600, 600)
 	self:SetTitle("Select Items")
 	self:MakePopup()
 
 	self.selectedItems = {}
 	self.maxItems = 10
-	self.slotSize = 64
+	self.slotSize = 96
+
+	-- Create selected items panel
+	self.selectedPanel = self:Add("EditablePanel")
+	self.selectedPanel:Dock(TOP)
+	self.selectedPanel:SetTall(self.slotSize + 10)
+
+	self.selectedPanel:Receiver("ixInventoryItem", function(pnl, panels, bDropped, menuIndex, x, y)
+		self:ReceiveSlotDrop(panels, bDropped, menuIndex, x, y)
+	end)
 
 	-- Create confirm button
 	self.confirmBtn = self:Add("expButton")
 	self.confirmBtn:SetText("Confirm")
 	self.confirmBtn:SizeToContents()
-	self.confirmBtn:Dock(BOTTOM)
+	self.confirmBtn:Dock(TOP)
+	self.confirmBtn:DockMargin(0, 10, 0, 10)
 	self.confirmBtn.DoClick = function()
 		if (self.onConfirm) then
 			self.onConfirm(self.selectedItems)
@@ -23,32 +33,18 @@ function PANEL:Init()
 		self:Close()
 	end
 
-	self.itemsPanel = self:Add("DSizeToContents")
-	self.itemsPanel:SetSize(500, 500 - self.confirmBtn:GetTall() - 5)
-	self.itemsPanel:SetSizeY(false)
+	self.itemsScrollPanel = self:Add("DScrollPanel")
+	self.itemsScrollPanel:Dock(TOP)
+	self.itemsScrollPanel:SetSize(self:GetWide(),
+		self:GetTall() - self.selectedPanel:GetTall() - self.confirmBtn:GetTall() - 50)
+
+	self.itemsPanel = self.itemsScrollPanel:Add("DSizeToContents")
+	self.itemsPanel:Dock(TOP)
+	self.itemsPanel:SetSizeX(false)
 
 	-- Create inventory panel
 	self.inventory = self.itemsPanel:Add("ixInventory")
-	self.inventory:Dock(LEFT)
 	self.inventory:SetDraggable(false)
-
-	-- Create selected items panel (now with slots)
-	self.selectedPanel = self.itemsPanel:Add("EditablePanel")
-	self.selectedPanel:Dock(LEFT)
-	self.selectedPanel:SetWide(250)
-	self.selectedPanel:Receiver("ixInventoryItem", function(pnl, panels, bDropped, menuIndex, x, y)
-		self:ReceiveSlotDrop(panels, bDropped, menuIndex, x, y)
-	end)
-
-	self.selectedPanel.Paint = function(pnl, w, h)
-		surface.SetDrawColor(40, 40, 40, 200)
-		surface.DrawRect(0, 0, w, h)
-
-		surface.SetDrawColor(60, 60, 60)
-		surface.DrawOutlinedRect(0, 0, w, h)
-
-		draw.SimpleText("Selected Items", "DermaDefault", w / 2, 5, Color(255, 255, 255), TEXT_ALIGN_CENTER)
-	end
 
 	-- Create item slots
 	self.itemSlots = {}
@@ -60,32 +56,57 @@ function PANEL:Init()
 		self:Close()
 	end
 
-	-- Delay centering until next frame when inventory has sized
-	timer.Simple(0, function()
-		if (not IsValid(self)) then
-			return
+	self:Center()
+end
+
+function PANEL:PositionItemSlots()
+	if not self.itemSlots then return end
+
+	-- Calculate space-between positioning
+	local containerWidth = self.selectedPanel:GetWide()
+	local margins = 10 -- 5px on each side
+	local availableWidth = containerWidth - margins
+	local totalSlotWidth = self.maxItems * self.slotSize
+
+	-- Ensure we don't exceed available space
+	if (totalSlotWidth > availableWidth) then
+		-- If slots don't fit, fall back to minimal spacing
+		local spacing = 2
+		for i, slot in pairs(self.itemSlots) do
+			if (IsValid(slot)) then
+				local col = i - 1
+				local xPos = 5 + col * (self.slotSize + spacing)
+				slot:SetPos(xPos, 5)
+			end
 		end
 
-		self:Center()
+		return
+	end
 
-		-- Position the confirm and cancel buttons below it all
-		self.confirmBtn:CenterHorizontal()
-		self.confirmBtn:AlignBottom(-self.confirmBtn:GetTall())
-	end)
+	if (self.maxItems == 1) then
+		-- Center single slot
+		local xPos = (containerWidth - self.slotSize) * .5
+		self.itemSlots[1]:SetPos(xPos, 5)
+	else
+		-- Space-between: first slot at start, last at end, others evenly spaced
+		local totalSpacing = availableWidth - totalSlotWidth
+		local spacing = totalSpacing / (self.maxItems - 1)
+
+		for i, slot in pairs(self.itemSlots) do
+			if (IsValid(slot)) then
+				local col = i - 1
+				local xPos = 5 + col * (self.slotSize + spacing)
+				slot:SetPos(xPos, 5)
+			end
+		end
+	end
 end
 
 function PANEL:CreateItemSlots()
-	local slotsPerRow = math.floor((self.selectedPanel:GetWide() - 10) / (self.slotSize + 2))
-	local rows = math.ceil(self.maxItems / slotsPerRow)
-
 	for i = 1, self.maxItems do
-		local row = math.floor((i - 1) / slotsPerRow)
-		local col = (i - 1) % slotsPerRow
-
 		local slot = self.selectedPanel:Add("EditablePanel")
 		slot:SetSize(self.slotSize, self.slotSize)
 		slot:SetMouseInputEnabled(true)
-		slot:SetPos(5 + col * (self.slotSize + 2), 25 + row * (self.slotSize + 2))
 		slot.slotIndex = i
 		slot.item = nil
 
@@ -113,6 +134,9 @@ function PANEL:CreateItemSlots()
 
 		self.itemSlots[i] = slot
 	end
+
+	-- Position the slots after creation
+	self:PositionItemSlots()
 end
 
 function PANEL:ReceiveSlotDrop(panels, bDropped, menuIndex, x, y)
@@ -183,8 +207,9 @@ function PANEL:AddItemToSlot(item, slotIndex)
 	slot.itemIcon:SetModel(item:GetModel())
 	slot.itemIcon:SetMouseInputEnabled(false)
 
-	-- Set tooltip
-	slot.itemIcon:SetTooltip(item:GetName())
+	slot:SetHelixTooltip(function(tooltip)
+		ix.hud.PopulateItemTooltip(tooltip, item)
+	end)
 
 	-- In the inventory, make the item now disabled from dragging
 	self:SetItemIconEnabled(self.inventory.panels[item.id], false)
@@ -206,6 +231,8 @@ function PANEL:RemoveItemFromSlot(slotIndex)
 
 	self:SetItemIconEnabled(self.inventory.panels[slot.item.id], true)
 
+	slot:SetHelixTooltip(nil)
+
 	-- Clear slot
 	slot.item = nil
 
@@ -217,7 +244,7 @@ end
 function PANEL:SetInventory(inventory, filterFunc)
 	if (not inventory) then return end
 
-	self.inventory:SetInventory(inventory, true)
+	self.inventory:SetInventory(inventory)
 	self.filterFunc = filterFunc
 
 	-- Override the inventory panels to allow dragging
@@ -237,7 +264,7 @@ function PANEL:SetItemIconEnabled(icon, enabled)
 		icon:Droppable("ixInventoryItem")
 		icon:SetMouseInputEnabled(true)
 	else
-		icon:SetAlpha(100)
+		icon:SetAlpha(50)
 		icon:SetMouseInputEnabled(false)
 	end
 end
@@ -265,18 +292,24 @@ function PANEL:GetSelectedItems()
 end
 
 function PANEL:PerformLayout()
-	local totalWidth = self.inventory:GetWide() + self.selectedPanel:GetWide()
+	local scrollBarWidth = 16
+	local desiredWidth = self.inventory:GetWide() + scrollBarWidth
 
-	if (self:GetWide() ~= totalWidth) then
-		self:SetWide(totalWidth)
+	if (self:GetWide() ~= desiredWidth) then
+		self:SetWide(desiredWidth)
 		self:Center()
 	end
 
 	self.btnClose:SetSize(32, 32)
 	self.btnClose:SetPos(self:GetWide() - 28, -4)
+
+	-- Reposition item slots when layout changes
+	self:PositionItemSlots()
 end
 
-function PANEL:Paint(width, height)
+function PANEL:PaintOver(width, height)
+	DisableClipping(true)
+
 	draw.SimpleText(
 		self.title or "",
 		"ixSmallBoldFont",
@@ -286,11 +319,9 @@ function PANEL:Paint(width, height)
 		TEXT_ALIGN_CENTER,
 		TEXT_ALIGN_BOTTOM
 	)
-end
 
-function PANEL:PaintOver(width, height)
-	DisableClipping(true)
 	self.btnClose:PaintManual()
+
 	DisableClipping(false)
 end
 

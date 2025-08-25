@@ -1,10 +1,20 @@
 local PLUGIN = PLUGIN
 
-util.AddNetworkString("expChemistryStationMenu")
+util.AddNetworkString("expOpenDistillationSelector")
+util.AddNetworkString("expOpenCombinationSelector")
 util.AddNetworkString("expChemistryDistill")
-util.AddNetworkString("expChemistryCombine")
-util.AddNetworkString("expWorkbenchMenu")
-util.AddNetworkString("expWorkbenchCombine")
+util.AddNetworkString("expCraftingCombine")
+
+-- Fallout: New Vegas - Crafting Station Props (steamcommunity.com/sharedfiles/filedetails/?id=1906251322)
+resource.AddWorkshop("1906251322")
+
+ix.util.AddResourceFile("materials/experiment-redux/icons/chemistry.png")
+ix.util.AddResourceFile("materials/experiment-redux/icons/workbench.png")
+ix.util.AddResourceFile("materials/experiment-redux/icons/distill.png")
+ix.util.AddResourceFile("materials/experiment-redux/icons/combine.png")
+
+ix.util.AddResourceFile("materials/experiment-redux/illustrations/distillation.png")
+ix.util.AddResourceFile("materials/experiment-redux/illustrations/combination.png")
 
 --[[
 	Hooks
@@ -39,16 +49,13 @@ net.Receive("expChemistryDistill", function(len, player)
 	end
 end)
 
-net.Receive("expChemistryCombine", function(len, player)
+net.Receive("expCraftingCombine", function(len, player)
 	local station = net.ReadEntity()
 	local selectedItemIDs = net.ReadTable()
 
-	if (not IsValid(station) or station:GetClass() ~= "exp_chemistry_station") then
-		return
-	end
-
 	-- Convert table to actual item instances
 	local items = {}
+
 	for _, itemID in ipairs(selectedItemIDs) do
 		local item = ix.item.instances[itemID]
 		if (item) then
@@ -56,41 +63,13 @@ net.Receive("expChemistryCombine", function(len, player)
 		end
 	end
 
-	local recipe = PLUGIN:FindValidRecipe(items)
+	local recipe = PLUGIN:FindValidRecipe(station, items)
+
 	if (recipe) then
 		if (station:StartCombination(player, items, recipe)) then
-			player:Notify("Combination started!")
+			player:Notify("Successfully started brewing!")
 		else
 			player:Notify("Cannot start combination.")
-		end
-	else
-		player:Notify(L("invalidRecipe", player))
-	end
-end)
-
-net.Receive("expWorkbenchCombine", function(len, player)
-	local station = net.ReadEntity()
-	local selectedItems = net.ReadTable()
-
-	if (not IsValid(station) or station:GetClass() ~= "exp_workbench") then
-		return
-	end
-
-	-- Convert table to actual item instances
-	local items = {}
-	for _, itemData in pairs(selectedItems) do
-		local item = ix.item.instances[itemData.id]
-		if (item) then
-			table.insert(items, item)
-		end
-	end
-
-	local recipe = PLUGIN:FindValidRecipe(items)
-	if (recipe) then
-		if (station:StartCombination(player, items, recipe)) then
-			player:Notify("Crafting started!")
-		else
-			player:Notify("Cannot start crafting.")
 		end
 	else
 		player:Notify(L("invalidRecipe", player))

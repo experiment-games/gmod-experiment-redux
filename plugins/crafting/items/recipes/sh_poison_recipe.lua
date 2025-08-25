@@ -10,7 +10,8 @@ ITEM.price = 750
 
 ITEM.craftingCombination = {
 	output = { poisonous_acid = 1 },
-	components = { phenolic_acid = 3, ascorbic_acid = 1 }
+	components = { phenolic_acid = 2, ascorbic_acid = 1 },
+	station = "exp_chemistry_station",
 }
 
 ITEM.craftingTime = 45

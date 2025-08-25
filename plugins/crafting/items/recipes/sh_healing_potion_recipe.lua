@@ -10,7 +10,8 @@ ITEM.price = 300
 
 ITEM.craftingCombination = {
 	output = { healing_compound = 2 },
-	components = { phenolic_acid = 2, ascorbic_acid = 3 }
+	components = { phenolic_acid = 1, ascorbic_acid = 2 },
+	station = "exp_chemistry_station",
 }
 
 ITEM.craftingTime = 30
