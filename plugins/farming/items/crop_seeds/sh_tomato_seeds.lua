@@ -21,6 +21,15 @@ ITEM.generateProductItem = {
 	name = "Tomato",
 	description = "A ripe tomato harvested from your farm.",
 	model = "models/a31/fallout4/props/plants/tato_item.mdl",
+
+	-- Distillation configuration
+	craftingDistillation = {
+		time = 90,           -- 90 seconds to distill
+		output = {
+			ascorbic_acid = { 1, 3 }, -- Random 1-3 ascorbic acid
+			phenolic_acid = 1 -- Always 1 phenolic acid
+		}
+	}
 }
 
 ITEM.generateRottenItem = {

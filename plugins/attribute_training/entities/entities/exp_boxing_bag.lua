@@ -5,7 +5,7 @@ DEFINE_BASECLASS("base_gmodentity")
 
 ENT.Type = "anim"
 ENT.PrintName = "Boxing Bag"
-ENT.Category = "Equipment"
+ENT.Category = "Experiment Redux"
 ENT.Spawnable = false
 ENT.AdminOnly = false
 

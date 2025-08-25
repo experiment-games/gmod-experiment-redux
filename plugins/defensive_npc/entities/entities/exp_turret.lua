@@ -5,7 +5,7 @@ AddCSLuaFile()
 ENT.Type = "anim"
 ENT.Base = "base_anim"
 ENT.PrintName = "Experiment Turret"
-ENT.Category = "Defensive NPCs"
+ENT.Category = "Experiment Redux"
 ENT.Spawnable = false
 ENT.AdminSpawnable = false
 

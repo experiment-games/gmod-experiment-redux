@@ -2,7 +2,7 @@ local PLUGIN = PLUGIN
 
 ENT.Type = "anim"
 ENT.Base = "base_gmodentity"
-ENT.Category = "Farming"
+ENT.Category = "Experiment Redux"
 ENT.PrintName = "Crop"
 ENT.Spawnable = false
 ENT.AdminSpawnable = false

@@ -14,6 +14,9 @@ if (SERVER) then
 	-- Fallout 4: Crop Plants (https://steamcommunity.com/sharedfiles/filedetails/?id=1864310649)
 	resource.AddWorkshop("1864310649")
 
+	ix.util.AddResourceFile("materials/experiment-redux/icons/silk_plant.png")
+	ix.util.AddResourceFile("materials/experiment-redux/icons/silk_fertilize.png")
+
 	ix.util.AddResourceFile("materials/experiment-redux/icons/plant.png")
 	ix.util.AddResourceFile("materials/experiment-redux/icons/water.png")
 	ix.util.AddResourceFile("materials/experiment-redux/icons/fertilizer.png")
@@ -125,7 +128,10 @@ function PLUGIN:InitializedPlugins()
 		productItem.skin = productInfo.skin
 		productItem.width = 1
 		productItem.height = 1
-		productItem.modelScale = productInfo.modelScale
+
+		for k, v in pairs(productInfo) do
+			productItem[k] = v
+		end
 
 		if (productItem.modelScale) then
 			function productItem:OnEntityCreated(entity)
@@ -166,7 +172,10 @@ function PLUGIN:InitializedPlugins()
 				rottenItem.skin = rottenInfo.skin
 				rottenItem.width = 1
 				rottenItem.height = 1
-				rottenItem.modelScale = rottenInfo.modelScale
+
+				for k, v in pairs(rottenInfo) do
+					rottenItem[k] = v
+				end
 
 				if (rottenItem.modelScale) then
 					function rottenItem:OnEntityCreated(entity)

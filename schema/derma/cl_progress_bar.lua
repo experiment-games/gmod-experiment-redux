@@ -1,5 +1,7 @@
 local PANEL = {}
 
+AccessorFunc(PANEL, "drawValueText", "DrawValueText", FORCE_BOOL)
+
 function PANEL:Init()
 	self:SetTall(26)
 	self:SetMouseInputEnabled(true)
@@ -7,6 +9,7 @@ function PANEL:Init()
 	self.value = 0
 	self.maxValue = 0
 	self.prefix = "Value: "
+	self:SetDrawValueText(true)
 
 	-- Default color thresholds
 	self.progressColors = {
@@ -22,6 +25,14 @@ end
 
 function PANEL:SetMaxValue(maxValue)
 	self.maxValue = maxValue
+end
+
+function PANEL:GetValue()
+	if (isfunction(self.value)) then
+		return self.value()
+	end
+
+	return self.value
 end
 
 function PANEL:SetPrefix(prefix)
@@ -40,7 +51,7 @@ function PANEL:SetProgressColors(colorTable)
 end
 
 function PANEL:GetColorForValue()
-	local valueFraction = self.value / self.maxValue
+	local valueFraction = self:GetValue() / self.maxValue
 
 	-- Find the appropriate color based on the current value fraction
 	for i, colorData in ipairs(self.progressColors) do
@@ -54,7 +65,7 @@ function PANEL:GetColorForValue()
 end
 
 function PANEL:Paint(w, h)
-	local value = self.value
+	local value = self:GetValue()
 	local maxValue = self.maxValue
 	local prefix = self.prefix
 	local valueFraction = value / maxValue
@@ -67,6 +78,10 @@ function PANEL:Paint(w, h)
 		local pulse = math.abs(math.sin(RealTime() * 2) * 50)
 		surface.SetDrawColor(valueColor.r, valueColor.g, valueColor.b, pulse)
 		surface.DrawRect(0, 0, w, h)
+	end
+
+	if (not self:GetDrawValueText()) then
+		return
 	end
 
 	draw.SimpleTextOutlined(

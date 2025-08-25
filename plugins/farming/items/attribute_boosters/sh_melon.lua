@@ -18,6 +18,15 @@ ITEM.attributeBoosts = {
 	},
 }
 
+-- Distillation configuration
+ITEM.craftingDistillation = {
+	time = 180, -- 3 minutes to distill
+	output = {
+		phenolic_acid = { 1, 3 },
+		ascorbic_acid = { 0, 2 } -- Sometimes gives ascorbic acid
+	}
+}
+
 function ITEM:OnRegistered()
 	self.functions.Consume.name = "Eat"
 end
