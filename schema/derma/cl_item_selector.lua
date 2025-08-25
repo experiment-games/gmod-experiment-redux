@@ -253,7 +253,13 @@ function PANEL:SetInventory(inventory, filterFunc)
 			local item = panel:GetItemTable()
 
 			-- Only allow single stacks to be dragged on it
-			if (item:IsBasedOn("base_stackable") and item:GetData("stacks", 1) > 1) then
+			local canSelect = not item:IsBasedOn("base_stackable") or item:GetData("stacks", 1) == 1
+
+			if (item.noDrop) then
+				canSelect = false
+			end
+
+			if (not canSelect) then
 				self:SetItemIconEnabled(panel, false)
 				continue
 			end

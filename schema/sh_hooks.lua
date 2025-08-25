@@ -594,4 +594,137 @@ function Schema:AdjustMaterialSources(materialSources)
 			["material_plastic"] = 2,
 		}
 	})
+
+	--[[
+		Glass props
+	--]]
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle1",
+		name = "Empty Glass Bottle",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle001a.mdl",
+		scrapMaterials = {
+			["material_glass"] = 2,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle2",
+		name = "Empty Glass Bottle",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle002a.mdl",
+		scrapMaterials = {
+			["material_glass"] = 2,
+			-- ["material_paper"] = 1, (we don't have this material yet and no use for it)
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle3",
+		name = "Empty Glass Bottle",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle003a.mdl",
+		scrapMaterials = {
+			["material_glass"] = 2,
+		}
+	})
+
+
+	-- Chunk props
+
+	-- models/props_junk/glassbottle01a_chunk01a.mdl
+	-- models/props_junk/glassbottle01a_chunk02a.mdl
+	-- models/props_junk/garbage_glassbottle003a_chunk01.mdl
+	-- ... models/props_junk/garbage_glassbottle003a_chunk03.mdl
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle1_chunk1",
+		name = "Glass Bottle Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle001a_chunk01.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle1_chunk2",
+		name = "Glass Bottle Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle001a_chunk02.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle1_chunk3",
+		name = "Glass Bottle Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle001a_chunk03.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle1_chunk4",
+		name = "Glass Bottle Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle001a_chunk04.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle2_chunk1",
+		name = "Glass Bottle Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle002a_chunk01.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_bottle2_chunk2",
+		name = "Glass Bottle Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/garbage_glassbottle002a_chunk02.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_jug_chunk1",
+		name = "Glass Jug Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/glassjug01_chunk01.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_jug_chunk2",
+		name = "Glass Jug Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/glassjug01_chunk02.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
+
+	materialSources:Add({
+		uniqueID = "source_glass_jug_chunk3",
+		name = "Glass Jug Chunk",
+		chanceToScavenge = Schema.RARITY_COMMON,
+		model = "models/props_junk/glassjug01_chunk03.mdl",
+		scrapMaterials = {
+			["material_glass"] = 1,
+		}
+	})
 end

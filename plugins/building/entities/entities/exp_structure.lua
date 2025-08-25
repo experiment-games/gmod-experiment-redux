@@ -1,7 +1,7 @@
 local PLUGIN = PLUGIN
 
 if (SERVER) then
-    AddCSLuaFile()
+	AddCSLuaFile()
 end
 
 ENT.Type = "anim"
@@ -18,7 +18,7 @@ AccessorFunc(ENT, "expIsLocked", "IsLocked")
 
 function ENT:SetupDataTables()
 	self:NetworkVar("String", "ItemID")
-    self:NetworkVar("Bool", "UnderConstruction")
+	self:NetworkVar("Bool", "UnderConstruction")
 	self:NetworkVar("Int", "GroundLevel")
 end
 
@@ -27,44 +27,44 @@ function ENT:GetItemTable()
 end
 
 function ENT:Draw()
-    -- Don't draw the entity
+	-- Don't draw the entity
 	-- self:DrawModel()
 end
 
 function ENT:OnPopulateEntityInfo(tooltip)
-    if (not self:GetUnderConstruction()) then
-        return
-    end
+	if (not self:GetUnderConstruction()) then
+		return
+	end
 
-    local itemTable = self:GetItemTable()
+	local itemTable = self:GetItemTable()
 
 	if (not itemTable) then
 		return
 	end
 
-    local name = tooltip:AddRow("name")
-    name:SetImportant()
-    -- name:SetText(L("propHealth", self:Health(), self:GetMaxHealth()))
+	local name = tooltip:AddRow("name")
+	name:SetImportant()
+	-- name:SetText(L("propHealth", self:Health(), self:GetMaxHealth()))
 	name:SetText(L("propMaterialsRequired"))
-    name:SizeToContents()
+	name:SizeToContents()
 
-    local structureMaterials = self:GetNetVar("structureMaterials", {})
+	local structureMaterials = self:GetNetVar("structureMaterials", {})
 	local anyMaterialsRemaining = false
 
-    for materialItem, amount in pairs(itemTable:GetConstructionMaterials()) do
-        local amountRemaining = amount - (structureMaterials[materialItem] or 0)
+	for materialItem, amount in pairs(itemTable:GetConstructionMaterials()) do
+		local amountRemaining = amount - (structureMaterials[materialItem] or 0)
 
-        if (amountRemaining <= 0) then
-            continue
-        end
+		if (amountRemaining <= 0) then
+			continue
+		end
 
-        anyMaterialsRemaining = true
+		anyMaterialsRemaining = true
 
-        local item = ix.item.list[materialItem]
-        local row = tooltip:AddRowAfter("name", "material_" .. materialItem)
-        row:SetText(L("propMaterial", item.name, amountRemaining))
-        row:SizeToContents()
-    end
+		local item = ix.item.list[materialItem]
+		local row = tooltip:AddRowAfter("name", "material_" .. materialItem)
+		row:SetText(L("propMaterial", item.name, amountRemaining))
+		row:SizeToContents()
+	end
 
 	if (not anyMaterialsRemaining) then
 		local row = tooltip:AddRowAfter("name", "readyToFinishConstruction")
@@ -74,37 +74,37 @@ function ENT:OnPopulateEntityInfo(tooltip)
 end
 
 function ENT:GetEntityMenu(client)
-    if (not self:GetUnderConstruction()) then
-        return
-    end
+	if (not self:GetUnderConstruction()) then
+		return
+	end
 
-    local itemTable = self:GetItemTable()
+	local itemTable = self:GetItemTable()
 
-    if (not itemTable) then
-        return false
-    end
+	if (not itemTable) then
+		return false
+	end
 
-    local options = {}
+	local options = {}
 
-    options[L("abortConstruction")] = function() end
+	options[L("abortConstruction")] = function() end
 
 	local structureMaterials = self:GetNetVar("structureMaterials", {})
 	local anyMaterialsRemaining = false
 
 	for materialItem, amount in pairs(itemTable:GetConstructionMaterials()) do
-        local item = ix.item.list[materialItem]
-        local itemCount = client:GetCharacter():GetInventory():GetItemCount(materialItem)
+		local item = ix.item.list[materialItem]
+		local itemCount = client:GetCharacter():GetInventory():GetItemCount(materialItem)
 		local amountRemaining = amount - (structureMaterials[materialItem] or 0)
-        local fillCount = math.min(itemCount, amountRemaining)
+		local fillCount = math.min(itemCount, amountRemaining)
 
 		if (amountRemaining <= 0) then
 			continue
 		end
 
-        anyMaterialsRemaining = true
+		anyMaterialsRemaining = true
 
-        if (fillCount <= 0) then
-            continue
+		if (fillCount <= 0) then
+			continue
 		end
 
 		options[L("fillMaterials", item.name, fillCount)] = function()
@@ -118,11 +118,11 @@ function ENT:GetEntityMenu(client)
 		end
 	end
 
-    if (not anyMaterialsRemaining) then
+	if (not anyMaterialsRemaining) then
 		options[L("finishConstruction")] = function() end
-    end
+	end
 
-    return options
+	return options
 end
 
 if (not SERVER) then
@@ -141,11 +141,11 @@ function ENT:Initialize()
 end
 
 function ENT:SetStructure(client, item, position, angles)
-    self.expItem = item
+	self.expItem = item
 
-    self:SetBuilder(client)
-    self:SetBuilderName(client:Name())
-    self:SetBuilderAlliance(client:GetAlliance())
+	self:SetBuilder(client)
+	self:SetBuilderName(client:Name())
+	self:SetBuilderAlliance(client:GetAlliance())
 	self:SetBuilderSteamID64(client:SteamID64())
 
 	client:RegisterEntityToRemoveOnLeave(self)
@@ -162,36 +162,36 @@ function ENT:SetStructure(client, item, position, angles)
 end
 
 function ENT:BuildStructure(client, item)
-    local structure = item:GetStructure(client)
+	local structure = item:GetStructure(client)
 
 	for _, structurePart in ipairs(structure) do
-        local structureEntity = ents.Create("exp_structure_part")
+		local structureEntity = ents.Create("exp_structure_part")
 		structureEntity:SetModel(structurePart.model)
 		structureEntity:SetPos(self:LocalToWorld(structurePart.position))
 		structureEntity:SetAngles(self:LocalToWorldAngles(structurePart.angles))
 		structureEntity:SetParent(self)
 		structureEntity:Spawn()
 		structureEntity:Activate()
-        structureEntity:SetNetVar("disabled", true) -- disables selling, buying and other commands
+		structureEntity:SetNetVar("disabled", true) -- disables selling, buying and other commands
 	end
 end
 
 function ENT:OnOptionSelected(client, option, data)
-    if (option == L("abortConstruction", client)) then
-        local structureMaterials = self:GetNetVar("structureMaterials", {})
-        -- Refund materials and return the blueprint (if they have space)
-        local inventory = client:GetCharacter():GetInventory()
+	if (option == L("abortConstruction", client)) then
+		local structureMaterials = self:GetNetVar("structureMaterials", {})
+		-- Refund materials and return the blueprint (if they have space)
+		local inventory = client:GetCharacter():GetInventory()
 
-        for materialItem, amount in pairs(structureMaterials) do
-            local success, error = inventory:Add(materialItem, amount)
+		for materialItem, amount in pairs(structureMaterials) do
+			local success, error = inventory:Add(materialItem, amount)
 
-            if (not success) then
-                client:Notify(error)
-                return
-            end
-        end
+			if (not success) then
+				client:Notify(error)
+				return
+			end
+		end
 
-        local success, error = inventory:Add(self:GetItemID())
+		local success, error = inventory:Add(self:GetItemID())
 
 		if (not success) then
 			client:Notify(error)
@@ -199,51 +199,51 @@ function ENT:OnOptionSelected(client, option, data)
 		end
 
 		self:RemoveWithEffect()
-    elseif (option == "fillMaterials") then
-        local character = client:GetCharacter()
-        local inventory = character:GetInventory()
+	elseif (option == "fillMaterials") then
+		local character = client:GetCharacter()
+		local inventory = character:GetInventory()
 
-        local structureMaterials = self:GetNetVar("structureMaterials", {})
-        local itemTable = self:GetItemTable()
+		local structureMaterials = self:GetNetVar("structureMaterials", {})
+		local itemTable = self:GetItemTable()
 
-        local amount = math.min(data.amount,
-            itemTable:GetConstructionMaterials()[data.item] - (structureMaterials[data.item] or 0))
+		local amount = math.min(data.amount,
+			itemTable:GetConstructionMaterials()[data.item] - (structureMaterials[data.item] or 0))
 
-        if (amount <= 0) then
-            client:Notify("You have already filled the required materials.")
-            return
-        end
+		if (amount <= 0) then
+			client:Notify("You have already filled the required materials.")
+			return
+		end
 
 		local ownedAmount = inventory:GetItemCount(data.item)
 
-        if (ownedAmount < amount) then
-            client:Notify("You do not have enough materials.")
-            return
-        end
+		if (ownedAmount < amount) then
+			client:Notify("You do not have enough materials.")
+			return
+		end
 
 		inventory:RemoveStackedItem(data.item, amount)
 
-        structureMaterials[data.item] = (structureMaterials[data.item] or 0) + amount
+		structureMaterials[data.item] = (structureMaterials[data.item] or 0) + amount
 
-        self:SetNetVar("structureMaterials", structureMaterials)
+		self:SetNetVar("structureMaterials", structureMaterials)
 
-        self:CheckConstruction(client)
-    elseif (option == L("finishConstruction", client)) then
 		self:CheckConstruction(client)
-    end
+	elseif (option == L("finishConstruction", client)) then
+		self:CheckConstruction(client)
+	end
 end
 
 function ENT:CheckConstruction(client)
-    local itemTable = self:GetItemTable()
-    local structureMaterials = self:GetNetVar("structureMaterials", {})
+	local itemTable = self:GetItemTable()
+	local structureMaterials = self:GetNetVar("structureMaterials", {})
 
-    for materialItem, amount in pairs(itemTable:GetConstructionMaterials()) do
-        if (amount > (structureMaterials[materialItem] or 0)) then
-            return
-        end
-    end
+	for materialItem, amount in pairs(itemTable:GetConstructionMaterials()) do
+		if (amount > (structureMaterials[materialItem] or 0)) then
+			return
+		end
+	end
 
-    self:FinishConstruction(client)
+	self:FinishConstruction(client)
 end
 
 function ENT:ForEachPart(callback)
@@ -257,155 +257,159 @@ function ENT:ForEachPart(callback)
 end
 
 function ENT:CheckSpaceToMakeSolid(callback)
-    self:ForEachPart(function(child)
-        child.expIsTouched = false
-        child:SetTrigger(true)
-    end)
+	self:ForEachPart(function(child)
+		child.expIsTouched = false
+		child:SetTrigger(true)
+	end)
 
-    timer.Simple(0.1, function()
-        if (not IsValid(self)) then
-            return
-        end
+	timer.Simple(0.1, function()
+		if (not IsValid(self)) then
+			return
+		end
 
-        local isTouched = false
+		local isTouched = false
 
 		self:ForEachPart(function(child)
-            child:SetTrigger(false)
+			child:SetTrigger(false)
 
 			if (child.expIsTouched) then
 				isTouched = true
 			end
 
 			child.expIsTouched = nil
-        end)
+		end)
 
-        callback(not isTouched)
-    end)
+		callback(not isTouched)
+	end)
 end
 
 function ENT:FinishConstruction(client)
-    self:CheckSpaceToMakeSolid(function(hasSpaceToMakeSolid)
-        if (not hasSpaceToMakeSolid) then
-            if (IsValid(client)) then
-                client:Notify("You cannot finish the construction while it's intersecting with another object.")
-            end
+	self:CheckSpaceToMakeSolid(function(hasSpaceToMakeSolid)
+		if (not hasSpaceToMakeSolid) then
+			if (IsValid(client)) then
+				client:Notify("You cannot finish the construction while it's intersecting with another object.")
+			end
 
 			return
-        end
+		end
 
-        self:SetUnderConstruction(false)
+		self:SetUnderConstruction(false)
 
-        self:ForEachPart(function(child)
-            child:SetCollisionGroup(COLLISION_GROUP_NONE)
-        end)
+		self:ForEachPart(function(child)
+			child:SetCollisionGroup(COLLISION_GROUP_NONE)
+		end)
 
-        self:SetupDoorAccess(client, DOOR_OWNER)
-    end)
+		self:SetupDoorAccess(client, DOOR_OWNER)
+
+		if (self.expItem.OnFinishConstruction) then
+			self.expItem:OnFinishConstruction(self, client)
+		end
+	end)
 end
 
 function ENT:SetupDoorAccess(client, role)
 	self:ForEachPart(function(child)
-        child.ixAccess = child.ixAccess or {}
+		child.ixAccess = child.ixAccess or {}
 
-        if (not IsValid(client)) then
-            return
-        end
+		if (not IsValid(client)) then
+			return
+		end
 
-        child:SetDTEntity(0, client)
-        child.ixAccess[client] = role or DOOR_GUEST
+		child:SetDTEntity(0, client)
+		child.ixAccess[client] = role or DOOR_GUEST
 	end)
 end
 
 function ENT:Think()
-    local client = self:GetBuilder()
+	local client = self:GetBuilder()
 
-    if (not IsValid(client) or not client:Alive()) then
-        self:Remove()
-        return
-    end
+	if (not IsValid(client) or not client:Alive()) then
+		self:Remove()
+		return
+	end
 end
 
 function ENT:AcceptInput(inputName, activator, caller, data)
-    inputName = inputName:lower()
+	inputName = inputName:lower()
 
-    if (inputName == "lock") then
-        self:SetIsLocked(true)
-        self:MakeUnpassable()
-    elseif (inputName == "unlock") then
-        self:SetIsLocked(false)
-    end
+	if (inputName == "lock") then
+		self:SetIsLocked(true)
+		self:MakeUnpassable()
+	elseif (inputName == "unlock") then
+		self:SetIsLocked(false)
+	end
 end
 
 function ENT:TryUse(client)
-    if (Schema.util.Throttle("StructureUse", 1, self)) then
-        return
-    end
+	if (Schema.util.Throttle("StructureUse", 1, self)) then
+		return
+	end
 
 	if (self:GetUnderConstruction()) then
 		return
 	end
 
-    if (self.expIsDecaying) then
-        return
-    end
+	if (self.expIsDecaying) then
+		return
+	end
 
-    if (self:GetIsLocked()) then
-        return
-    end
+	if (self:GetIsLocked()) then
+		return
+	end
 
-    self:MakePassable(4)
+	self:MakePassable(4)
 end
 
 --- Makes the children of the structure passable for a duration, not reapplying the collision group
 --- until no more players are inside the structure
 function ENT:MakePassable(duration)
-    if (self:GetIsPassable()) then
-        return
-    end
+	if (self:GetIsPassable()) then
+		return
+	end
 
-    self:SetIsPassable(true)
+	self:SetIsPassable(true)
 	self:EmitSound("ambient/energy/zap1.wav", 60, 50)
 
-    local alpha = 160
+	local alpha = 160
 
-    self:ForEachPart(function(child)
-        child:SetCollisionGroup(COLLISION_GROUP_WORLD)
+	self:ForEachPart(function(child)
+		child:SetCollisionGroup(COLLISION_GROUP_WORLD)
 
-        if (child.expColorBefore == nil) then
-            child.expColorBefore = child:GetColor()
-        end
+		if (child.expColorBefore == nil) then
+			child.expColorBefore = child:GetColor()
+		end
 
-        if (child.expRenderModeBefore == nil) then
-            child.expRenderModeBefore = child:GetRenderMode()
-        end
+		if (child.expRenderModeBefore == nil) then
+			child.expRenderModeBefore = child:GetRenderMode()
+		end
 
-        child:SetRenderMode(RENDERMODE_TRANSALPHA)
-        child:SetColor(Color(child.expColorBefore.r, child.expColorBefore.g, child.expColorBefore.b, alpha))
-    end)
+		child:SetRenderMode(RENDERMODE_TRANSALPHA)
+		child:SetColor(Color(child.expColorBefore.r, child.expColorBefore.g, child.expColorBefore.b, alpha))
+	end)
 
-    local name = "expStructureMakeUnpassable" .. self:EntIndex()
+	local name = "expStructureMakeUnpassable" .. self:EntIndex()
 
-    timer.Create(name, duration, 0, function()
-        if (not IsValid(self)) then
-            timer.Remove(name)
-            return
-        end
+	timer.Create(name, duration, 0, function()
+		if (not IsValid(self)) then
+			timer.Remove(name)
+			return
+		end
 
-        self:MakeUnpassable()
-    end)
+		self:MakeUnpassable()
+	end)
 end
 
 function ENT:MakeUnpassable()
-    if (not self:GetIsPassable()) then
-        return
-    end
+	if (not self:GetIsPassable()) then
+		return
+	end
 
-    local name = "expStructureMakeUnpassable" .. self:EntIndex()
+	local name = "expStructureMakeUnpassable" .. self:EntIndex()
 
 	self:CheckSpaceToMakeSolid(function(hasSpaceToMakeSolid)
-        if (not hasSpaceToMakeSolid) then
-            return
-        end
+		if (not hasSpaceToMakeSolid) then
+			return
+		end
 
 		timer.Remove(name)
 
@@ -416,11 +420,11 @@ function ENT:MakeUnpassable()
 		self:ForEachPart(function(child)
 			child:SetCollisionGroup(COLLISION_GROUP_NONE)
 			child:SetColor(child.expColorBefore)
-            child:SetRenderMode(child.expRenderModeBefore)
+			child:SetRenderMode(child.expRenderModeBefore)
 
 			child.expColorBefore = nil
-            child.expRenderModeBefore = nil
-        end)
+			child.expRenderModeBefore = nil
+		end)
 
 		self:SetIsPassable(false)
 		self:EmitSound("ambient/energy/zap8.wav", 60, 50)
@@ -449,15 +453,15 @@ end
 function ENT:HandleSiegeSurgeDamage(damageInfo)
 	local attacker = damageInfo:GetAttacker()
 
-    if (not IsValid(attacker) or not attacker:IsPlayer()) then
-        return
-    end
+	if (not IsValid(attacker) or not attacker:IsPlayer()) then
+		return
+	end
 
 	local buff, buffTable = self:HasSiegeSurgeActive(attacker)
 
-    if (not buff) then
-        return
-    end
+	if (not buff) then
+		return
+	end
 
 	local stacks = buffTable:GetStacks(attacker, buff)
 	damageInfo:ScaleDamage(1 + stacks)
@@ -466,19 +470,19 @@ end
 function ENT:HandleSiegeSurgeStack(client)
 	local buff, buffTable = self:HasSiegeSurgeActive(client)
 
-    if (not buff) then
+	if (not buff) then
 		local victimData = {
-            victimID = self:GetBuilderSteamID64(),
+			victimID = self:GetBuilderSteamID64(),
 			victimName = self:GetBuilderName(),
 		}
 
-        if (self:GetBuilderAlliance()) then
-            victimData.alliance = self:GetBuilderAlliance()
-        end
+		if (self:GetBuilderAlliance()) then
+			victimData.alliance = self:GetBuilderAlliance()
+		end
 
 		Schema.buff.SetActive(client, "siege_surge", nil, victimData)
-        return
-    end
+		return
+	end
 
 	buffTable:Stack(client, buff)
 end
@@ -497,7 +501,7 @@ function ENT:OnTakeDamage(damageInfo)
 	self:SetHealth(self:Health() - damageInfo:GetDamage())
 
 	local damageColor = math.max((self:Health() / self:GetMaxHealth()) * 255, 30)
-    self:ForEachPart(function(child)
+	self:ForEachPart(function(child)
 		local ownAlpha = child:GetColor().a -- Match passable alpha
 		child:SetColor(Color(damageColor, damageColor, damageColor, ownAlpha))
 	end)
@@ -513,7 +517,7 @@ function ENT:OnTakeDamage(damageInfo)
 			end
 		end
 
-        hook.Run("StructureDestroyed", self, attacker)
+		hook.Run("StructureDestroyed", self, attacker)
 
 		self.expIsDecaying = true
 
