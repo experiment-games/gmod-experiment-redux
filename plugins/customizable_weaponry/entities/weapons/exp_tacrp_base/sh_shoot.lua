@@ -536,7 +536,7 @@ function SWEP:AfterShotFunction(tr, dmg, range, penleft, alreadypenned, forced)
 		end
 	end
 
-	self:Penetrate(tr, range, penleft, alreadypenned)
+	-- self:Penetrate(tr, range, penleft, alreadypenned)
 end
 
 function SWEP:GetMinMaxRange(base, static)

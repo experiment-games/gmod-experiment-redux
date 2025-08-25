@@ -524,11 +524,11 @@ hook.Add("PostEntityFireBullets", "BulletCallbackSystem", function(entity, data)
 		return
 	end
 
-	-- Delay to prevent same bullet being counted multiple times
-	-- TODO: Find less hacky way, or rewrite weapon system to only fire 1 bullet per shot
-	if (entity.expLastBulletTime and entity.expLastBulletTime + 0.0001 > CurTime()) then
-		return
-	end
+	-- Commented since TacRP only fired multiple bullets with penetration, which we disabled.
+	-- -- Delay to prevent same bullet being counted multiple times
+	-- if (entity.expLastBulletTime and entity.expLastBulletTime + 0.0001 > CurTime()) then
+	-- 	return
+	-- end
 
 	entity.expLastBulletTime = CurTime()
 

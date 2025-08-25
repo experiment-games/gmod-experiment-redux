@@ -47,12 +47,13 @@ function PLUGIN:PostEntityFireBullets(entity, bulletInfo)
 		return
 	end
 
-	-- Some TacRP weapons fire multiple bullets over multiple frames. This delay
-	-- will ensure we count only once for each bullet fired, hopefully not missing
-	-- any when automatic firing.
-	if (Schema.util.Throttle("shotFiredTracker", 0.001, entity)) then
-		return
-	end
+	-- Commented since TacRP only fired multiple bullets with penetration, which we disabled.
+	-- -- Some TacRP weapons fire multiple bullets over multiple frames. This delay
+	-- -- will ensure we count only once for each bullet fired, hopefully not missing
+	-- -- any when automatic firing.
+	-- if (Schema.util.Throttle("shotFiredTracker", 0.001, entity)) then
+	-- 	return
+	-- end
 
 	self:IncrementPendingStat(entity, "shots_fired", 1)
 end
