@@ -10,6 +10,14 @@ ITEM.description = "A single .32 ACP cartridge"
 ITEM.chanceToScavenge = Schema.RARITY_RARE
 
 if (SERVER) then
-  ix.util.AddResourceFile("models/experiment-redux/ammo/45acp.mdl")
-  ix.util.AddResourceFile("materials/models/experiment-redux/ammo/45acp.vmt")
+	ix.util.AddResourceFile("models/experiment-redux/ammo/45acp.mdl")
+	ix.util.AddResourceFile("materials/models/experiment-redux/ammo/45acp.vmt")
+end
+
+function ITEM:GetName()
+	if (self:GetData("poisoned")) then
+		return "Poisoned " .. self.name
+	end
+
+	return self.name
 end

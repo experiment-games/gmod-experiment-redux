@@ -432,3 +432,240 @@ function META:SetWepRaised(bState, weapon)
 
 	hook.Run("PlayerChangedWeaponRaised", self, weapon, bState)
 end
+
+--[[
+	Bullet Queue system such that ammo can be given with different callbacks that
+	are called when that specific bullet is fired.
+--]]
+
+-- Store original GiveAmmo function
+META.expOriginalGiveAmmo = META.expOriginalGiveAmmo or META.GiveAmmo
+META.expOriginalRemoveAmmo = META.expOriginalRemoveAmmo or META.RemoveAmmo
+META.expOriginalRemoveAllAmmo = META.expOriginalRemoveAllAmmo or META.RemoveAllAmmo
+
+--- Overrides GiveAmmo function such that it supports bullet callbacks
+--- @param amount number The amount of ammo to give
+--- @param ammoType string The type of ammo to give
+--- @param callback? function A function to call when each bullet is fired. This function will be
+function META:GiveAmmo(amount, ammoType, callback)
+	-- Call original function to actually give the ammo
+	local actualAmount = META.expOriginalGiveAmmo(self, amount, ammoType)
+
+	if (not self.expBulletQueues) then
+		self.expBulletQueues = {}
+	end
+
+	ammoType = ammoType:lower()
+
+	if (not self.expBulletQueues[ammoType]) then
+		self.expBulletQueues[ammoType] = {}
+	end
+
+	for i = 1, actualAmount do
+		table.insert(self.expBulletQueues[ammoType], callback or false)
+	end
+
+	return actualAmount
+end
+
+--- Overrides RemoveAmmo to take bullet callbacks away from the end of the queue
+--- @param amount number The amount of ammo to remove
+--- @param ammoType string The type of ammo to remove
+function META:RemoveAmmo(amount, ammoType)
+	-- Call original function to actually remove the ammo
+	META.expOriginalRemoveAmmo(self, amount, ammoType)
+
+	if (not self.expBulletQueues or not self.expBulletQueues[ammoType]) then
+		return
+	end
+
+	local queue = self.expBulletQueues[ammoType]
+
+	for i = 1, amount do
+		table.remove(queue, #queue)
+	end
+end
+
+--- Overrides RemoveAllAmmo to take all bullet callbacks away
+function META:RemoveAllAmmo()
+	-- Call original function to actually remove the ammo
+	META.expOriginalRemoveAllAmmo(self)
+
+	self:ClearBulletQueue()
+end
+
+function META:GetBulletQueueInfo(ammoType)
+	ammoType = ammoType:lower()
+
+	if (not self.expBulletQueues or not self.expBulletQueues[ammoType]) then
+		return {}
+	end
+
+	local queue = self.expBulletQueues[ammoType]
+	local info = {
+		total = #queue,
+		withCallbacks = 0,
+		withoutCallbacks = 0
+	}
+
+	for i = 1, #queue do
+		if (queue[i]) then
+			info.withCallbacks = info.withCallbacks + 1
+		else
+			info.withoutCallbacks = info.withoutCallbacks + 1
+		end
+	end
+
+	return info
+end
+
+hook.Add("PostEntityFireBullets", "BulletCallbackSystem", function(entity, data)
+	if (not IsValid(entity) or not entity:IsPlayer()) then
+		return
+	end
+
+	-- Delay to prevent same bullet being counted multiple times
+	-- TODO: Find less hacky way, or rewrite weapon system to only fire 1 bullet per shot
+	if (entity.expLastBulletTime and entity.expLastBulletTime + 0.0001 > CurTime()) then
+		return
+	end
+
+	entity.expLastBulletTime = CurTime()
+
+	local ammoType = data.AmmoType:lower()
+
+	-- Check if player has bullets in queue for this ammo type
+	if (not entity.expBulletQueues or not entity.expBulletQueues[ammoType] or #entity.expBulletQueues[ammoType] == 0) then
+		return
+	end
+
+	-- Get the next bullet callback from queue
+	local callback = table.remove(entity.expBulletQueues[ammoType], 1)
+
+	-- Execute callback if it exists
+	if (callback and type(callback) == "function") then
+		-- Call the callback with error handling
+		local success, err = pcall(callback, entity, weapon, ammoType, data)
+
+		if (not success) then
+			ix.util.SchemaErrorNoHalt("[BulletCallback] Error executing callback:", err)
+		end
+	end
+end)
+
+--- Utility function to clear bullet queues
+function META:ClearBulletQueue(ammoType)
+	if (not self.expBulletQueues) then
+		return
+	end
+
+	if (ammoType) then
+		self.expBulletQueues[ammoType] = nil
+	else
+		self.expBulletQueues = nil
+	end
+end
+
+-- TODO Test functions and commands, remove when done testing
+--[[
+-- Fire bullet callback
+local function createFireBullet()
+	return function(client, weapon, ammoType, bulletData)
+		local trace = bulletData.Trace
+
+		if (not IsValid(trace.Entity)) then
+			return
+		end
+
+		-- Set target on fire
+		trace.Entity:Ignite(8)
+
+		-- Visual effects
+		local effectdata = EffectData()
+		effectdata:SetOrigin(trace.HitPos)
+		util.Effect("explosion", effectdata)
+
+		-- Sound effect
+		trace.Entity:EmitSound("ambient/fire/ignite.wav")
+	end
+end
+
+-- Explosive bullet callback
+local function createExplosiveBullet()
+	return function(client, weapon, ammoType, bulletData)
+		local trace = bulletData.Trace
+
+		-- Create explosion at hit point
+		local explode = ents.Create("env_explosion")
+		explode:SetPos(trace.HitPos)
+		explode:SetOwner(client)
+		explode:Spawn()
+		explode:SetKeyValue("iMagnitude", "100")
+		explode:Fire("Explode", 0, 0)
+	end
+end
+
+-- Healing bullet callback
+local function createHealBullet()
+	return function(client, weapon, ammoType, bulletData)
+		local trace = bulletData.Trace
+
+		if IsValid(trace.Entity) and trace.Entity:IsPlayer() then
+			trace.Entity:SetHealth(math.min(trace.Entity:GetMaxHealth(), trace.Entity:Health() + 25))
+
+			-- Healing effect
+			local effectdata = EffectData()
+			effectdata:SetOrigin(trace.HitPos)
+			effectdata:SetMagnitude(1)
+			util.Effect("Sparks", effectdata)
+
+			trace.Entity:EmitSound("items/medshot4.wav")
+		end
+	end
+end
+
+-- Console commands for testing
+concommand.Add("give_fire_ammo", function(ply, cmd, args)
+	if not IsValid(ply) then return end
+
+	local count = tonumber(args[1]) or 3
+	ply:GiveAmmo(count, "pistol", createFireBullet())
+	ply:ChatPrint("Given " .. count .. " fire bullets!")
+end)
+
+concommand.Add("give_explosive_ammo", function(ply, cmd, args)
+	if not IsValid(ply) then return end
+
+	local count = tonumber(args[1]) or 3
+	ply:GiveAmmo(count, "pistol", createExplosiveBullet())
+	ply:ChatPrint("Given " .. count .. " explosive bullets!")
+end)
+
+concommand.Add("give_heal_ammo", function(ply, cmd, args)
+	if not IsValid(ply) then return end
+
+	local count = tonumber(args[1]) or 3
+	ply:GiveAmmo(count, "pistol", createHealBullet())
+	ply:ChatPrint("Given " .. count .. " healing bullets!")
+end)
+
+concommand.Add("give_normal_ammo", function(ply, cmd, args)
+	if not IsValid(ply) then return end
+
+	local count = tonumber(args[1]) or 3
+	ply:GiveAmmo(count, "pistol")
+	ply:ChatPrint("Given " .. count .. " normal bullets!")
+end)
+
+concommand.Add("bullet_queue_info", function(ply, cmd, args)
+	if not IsValid(ply) then return end
+
+	local ammoType = args[1] or "pistol"
+	local info = ply:GetBulletQueueInfo(ammoType)
+
+	ply:ChatPrint("Bullet Queue Info for " .. ammoType .. ":")
+	ply:ChatPrint("Total: " .. info.total)
+	ply:ChatPrint("With callbacks: " .. info.withCallbacks)
+	ply:ChatPrint("Without callbacks: " .. info.withoutCallbacks)
+end)
+]]

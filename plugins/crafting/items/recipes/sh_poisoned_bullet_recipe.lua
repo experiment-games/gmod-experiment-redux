@@ -16,9 +16,9 @@ ITEM.craftingCombination = {
 
 ITEM.craftingTime = 15
 
-function ITEM:OnCraftingOutput(outputItem)
-	if (outputItem) then
-		outputItem:SetData("poisoned", true)
-		outputItem:SetData("poisonDamage", 25)
-	end
+function ITEM:GetCraftingOutputData(outputItemID)
+	return {
+		poisoned = true,
+		poisonDamage = 25
+	}
 end

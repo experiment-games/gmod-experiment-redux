@@ -31,7 +31,20 @@ ITEM.functions.use = {
 	OnRun = function(item)
 		local ammoAmount = item:GetData("stacks", 1)
 
-		item.player:GiveAmmo(ammoAmount, item.ammo)
+		local callback
+
+		if (item:GetData("poisoned")) then
+			callback = function(client, weapon, ammoType, bulletData)
+				local target = bulletData.Trace.Entity
+
+				if (IsValid(target)) then
+					-- TODO: Poison instead
+					target:Ignite(4)
+				end
+			end
+		end
+
+		item.player:GiveAmmo(ammoAmount, item.ammo, callback)
 		item.player:EmitSound(item.useSound, 110)
 
 		return true

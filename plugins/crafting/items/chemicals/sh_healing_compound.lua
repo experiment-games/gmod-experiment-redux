@@ -10,7 +10,6 @@ ITEM.height = 1
 ITEM.price = 150
 
 function ITEM:OnEntityCreated(entity)
-	entity:SetMaterial("models/shiny")
 	entity:SetColor(Color(100, 150, 255))
 end
 
@@ -27,7 +26,7 @@ ITEM.functions.Use = {
 		client:SetHealth(newHealth)
 
 		client:Notify("You feel rejuvenated!")
-		client:EmitSound("items/medshot4.wav")
+		client:EmitSound("npc/barnacle/barnacle_gulp" .. math.random(1, 2) .. ".wav")
 
 		return true -- Remove the item after use
 	end,

@@ -10,6 +10,5 @@ ITEM.height = 1
 ITEM.price = 300
 
 function ITEM:OnEntityCreated(entity)
-	entity:SetMaterial("models/shiny")
 	entity:SetColor(Color(255, 100, 100))
 end

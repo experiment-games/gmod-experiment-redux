@@ -10,6 +10,14 @@ ITEM.description = "A single 12 gauge shell"
 ITEM.chanceToScavenge = Schema.RARITY_RARE
 
 if (SERVER) then
-  ix.util.AddResourceFile("models/experiment-redux/ammo/12gauge.mdl")
-  ix.util.AddResourceFile("materials/models/experiment-redux/ammo/12gauge.vmt")
+	ix.util.AddResourceFile("models/experiment-redux/ammo/12gauge.mdl")
+	ix.util.AddResourceFile("materials/models/experiment-redux/ammo/12gauge.vmt")
+end
+
+function ITEM:GetName()
+	if (self:GetData("poisoned")) then
+		return "Poisoned " .. self.name
+	end
+
+	return self.name
 end

@@ -10,6 +10,14 @@ ITEM.description = "A single 9x19mm cartridge"
 ITEM.chanceToScavenge = Schema.RARITY_RARE
 
 if (SERVER) then
-  ix.util.AddResourceFile("models/experiment-redux/ammo/9mm.mdl")
-  ix.util.AddResourceFile("materials/models/experiment-redux/ammo/9mm.vmt")
+	ix.util.AddResourceFile("models/experiment-redux/ammo/9mm.mdl")
+	ix.util.AddResourceFile("materials/models/experiment-redux/ammo/9mm.vmt")
+end
+
+function ITEM:GetName()
+	if (self:GetData("poisoned")) then
+		return "Poisoned " .. self.name
+	end
+
+	return self.name
 end

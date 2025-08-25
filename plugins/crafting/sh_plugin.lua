@@ -138,31 +138,6 @@ function PLUGIN:CompleteDistillation(stationID)
 		return
 	end
 
-	local character = player:GetCharacter()
-	local inventory = character:GetInventory()
-
-	if (not inventory) then
-		self.activeProcesses[stationID] = nil
-
-		return
-	end
-
-	-- Give output items
-	for outputID, amount in pairs(process.output) do
-		local count = amount
-
-		-- Handle random amounts
-		if (type(amount) == "table") then
-			count = math.random(amount[1], amount[2])
-		end
-
-		for i = 1, count do
-			inventory:Add(outputID)
-		end
-	end
-
-	player:Notify(L("distillationComplete", player))
-
 	-- Mark process as complete for retrieval
 	process.completed = true
 end
@@ -218,23 +193,6 @@ function PLUGIN:CompleteCombination(stationID)
 
 		return
 	end
-
-	local recipe = process.recipe
-	local output = recipe.craftingCombination.output
-
-	-- Create output items
-	for outputID, amount in pairs(output) do
-		for i = 1, amount do
-			local item = inventory:Add(outputID)
-
-			-- Call recipe's output function if it exists
-			if (recipe.OnCraftingOutput and item) then
-				recipe:OnCraftingOutput(item)
-			end
-		end
-	end
-
-	player:Notify(L("combinationComplete", player))
 
 	-- Mark process as complete for retrieval
 	process.completed = true

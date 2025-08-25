@@ -47,6 +47,18 @@ function ITEM:CanStackWith(otherItem)
 		return false, "These items can't be stacked any further."
 	end
 
+	-- Ensure the items have exactly the same data (except for stacks)
+	local bothKeys = table.Add(
+		table.GetKeys(self.data or {}),
+		table.GetKeys(otherItem.data or {})
+	)
+
+	for _, key in pairs(bothKeys) do
+		if (key ~= "stacks" and self:GetData(key) ~= otherItem:GetData(key)) then
+			return false, "These items have different properties and can't be stacked."
+		end
+	end
+
 	return true
 end
 

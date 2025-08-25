@@ -25,9 +25,27 @@ function ENT:OnOptionSelected(client, option, data)
 		local process = PLUGIN:GetStationProcess(self.stationID)
 
 		if (process and process.completed) then
+			local character = client:GetCharacter()
+			local inventory = character:GetInventory()
+
+			-- Give output items
+			for outputID, amount in pairs(process.output) do
+				local count = amount
+
+				-- Handle random amounts
+				if (type(amount) == "table") then
+					count = math.random(amount[1], amount[2])
+				end
+
+				for i = 1, count do
+					inventory:Add(outputID)
+				end
+			end
+
+			client:Notify(L("distillationComplete", client))
+
 			PLUGIN:CompleteStationProcess(self.stationID)
 			self:SetInUse(false)
-			client:Notify("Items retrieved!")
 		else
 			client:Notify("No items to retrieve.")
 		end

@@ -16,9 +16,9 @@ ITEM.craftingCombination = {
 
 ITEM.craftingTime = 20
 
-function ITEM:OnCraftingOutput(outputItem)
-	if (outputItem) then
-		outputItem:SetData("enhanced", true)
-		outputItem:SetData("damage_multiplier", 1.5)
-	end
+function ITEM:GetCraftingOutputData(outputItemID)
+	return {
+		enhanced = true,
+		damage_multiplier = 1.5
+	}
 end

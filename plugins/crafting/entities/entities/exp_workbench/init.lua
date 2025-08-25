@@ -25,9 +25,31 @@ function ENT:OnOptionSelected(client, option, data)
 		local process = PLUGIN:GetStationProcess(self.stationID)
 
 		if (process and process.completed) then
+			local character = client:GetCharacter()
+			local inventory = character:GetInventory()
+			local recipe = process.recipe
+			local output = recipe.craftingCombination.output
+
+			-- Create output items
+			for outputID, amount in pairs(output) do
+				for i = 1, amount do
+					local data
+
+					-- Call recipe's output function if it exists
+					if (recipe.GetCraftingOutputData) then
+						data = recipe:GetCraftingOutputData(outputID)
+					end
+
+					PrintTable(data)
+
+					inventory:Add(outputID, 1, data)
+				end
+			end
+
+			client:Notify(L("combinationComplete", client))
+
 			PLUGIN:CompleteStationProcess(self.stationID)
 			self:SetInUse(false)
-			client:Notify("Items retrieved!")
 		else
 			client:Notify("No items to retrieve.")
 		end

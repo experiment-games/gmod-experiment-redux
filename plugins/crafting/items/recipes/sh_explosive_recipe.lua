@@ -16,9 +16,9 @@ ITEM.craftingCombination = {
 
 ITEM.craftingTime = 60
 
-function ITEM:OnCraftingOutput(outputItem)
-	if (outputItem) then
-		outputItem:SetData("explosive_power", 150)
-		outputItem:SetData("blast_radius", 200)
-	end
+function ITEM:GetCraftingOutputData(outputItemID)
+	return {
+		explosive_power = 150,
+		blast_radius = 200
+	}
 end
