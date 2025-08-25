@@ -30,7 +30,6 @@ function PANEL:Init()
 	-- Create inventory panel
 	self.inventory = self.itemsPanel:Add("ixInventory")
 	self.inventory:Dock(LEFT)
-	self.inventory:ViewOnly()
 	self.inventory:SetDraggable(false)
 
 	-- Create selected items panel (now with slots)
@@ -83,31 +82,32 @@ function PANEL:CreateItemSlots()
 		local row = math.floor((i - 1) / slotsPerRow)
 		local col = (i - 1) % slotsPerRow
 
-		local slot = self.selectedPanel:Add("DPanel")
+		local slot = self.selectedPanel:Add("EditablePanel")
 		slot:SetSize(self.slotSize, self.slotSize)
+		slot:SetMouseInputEnabled(true)
 		slot:SetPos(5 + col * (self.slotSize + 2), 25 + row * (self.slotSize + 2))
 		slot.slotIndex = i
 		slot.item = nil
 
 		slot.Paint = function(pnl, w, h)
-			-- Draw slot background
 			surface.SetDrawColor(20, 20, 20, 150)
 			surface.DrawRect(0, 0, w, h)
 
-			-- Draw slot border
 			local borderColor = Color(80, 80, 80)
+
 			if (slot.item) then
-				borderColor = Color(100, 255, 100)
+				borderColor = Color(255, 255, 255)
 			end
 
 			surface.SetDrawColor(borderColor)
 			surface.DrawOutlinedRect(0, 0, w, h)
 		end
 
-		-- Right click to remove item
-		slot.DoRightClick = function()
-			if (slot.item) then
-				self:RemoveItemFromSlot(i)
+		slot.OnMouseReleased = function(_, mouseButton)
+			if (mouseButton == MOUSE_FIRST) then
+				if (slot.item) then
+					self:RemoveItemFromSlot(i)
+				end
 			end
 		end
 
@@ -185,6 +185,9 @@ function PANEL:AddItemToSlot(item, slotIndex)
 
 	-- Set tooltip
 	slot.itemIcon:SetTooltip(item:GetName())
+
+	-- In the inventory, make the item now disabled from dragging
+	self:SetItemIconEnabled(self.inventory.panels[item.id], false)
 end
 
 function PANEL:RemoveItemFromSlot(slotIndex)
@@ -200,6 +203,8 @@ function PANEL:RemoveItemFromSlot(slotIndex)
 			break
 		end
 	end
+
+	self:SetItemIconEnabled(self.inventory.panels[slot.item.id], true)
 
 	-- Clear slot
 	slot.item = nil
@@ -220,16 +225,20 @@ function PANEL:SetInventory(inventory, filterFunc)
 		if (IsValid(panel)) then
 			local item = panel:GetItemTable()
 
-			if (not filterFunc or filterFunc(item)) then
-				panel:SetCursor("hand")
-				-- Enable dragging for this panel
-				panel:Droppable("ixInventoryItem")
-			else
-				panel:SetAlpha(100)
-				-- Disable dragging for filtered items
-				panel:SetMouseInputEnabled(false)
-			end
+			self:SetItemIconEnabled(panel, not filterFunc or filterFunc(item))
 		end
+	end
+end
+
+function PANEL:SetItemIconEnabled(icon, enabled)
+	if (enabled) then
+		icon:SetAlpha(255)
+		icon:SetCursor("hand")
+		icon:Droppable("ixInventoryItem")
+		icon:SetMouseInputEnabled(true)
+	else
+		icon:SetAlpha(100)
+		icon:SetMouseInputEnabled(false)
 	end
 end
 
