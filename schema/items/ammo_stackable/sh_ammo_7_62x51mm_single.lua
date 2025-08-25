@@ -13,11 +13,3 @@ if (SERVER) then
 	ix.util.AddResourceFile("models/experiment-redux/ammo/7_62x51.mdl")
 	ix.util.AddResourceFile("materials/models/experiment-redux/ammo/7_62x51.vmt")
 end
-
-function ITEM:GetName()
-	if (self:GetData("poisoned")) then
-		return "Poisoned " .. self.name
-	end
-
-	return self.name
-end

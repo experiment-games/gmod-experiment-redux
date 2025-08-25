@@ -544,7 +544,7 @@ hook.Add("PostEntityFireBullets", "BulletCallbackSystem", function(entity, data)
 
 	-- Execute callback if it exists
 	if (callback and type(callback) == "function") then
-		-- Call the callback with error handling
+		local weapon = entity:GetActiveWeapon()
 		local success, err = pcall(callback, entity, weapon, ammoType, data)
 
 		if (not success) then

@@ -6,7 +6,7 @@ ITEM.model = "models/props_lab/clipboard.mdl"
 ITEM.category = "Recipes"
 ITEM.width = 1
 ITEM.height = 1
-ITEM.price = 750
+ITEM.noBusiness = true
 
 ITEM.craftingCombination = {
 	output = { poisonous_acid = 1 },

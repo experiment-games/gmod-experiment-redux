@@ -6,7 +6,7 @@ ITEM.model = "models/props_lab/clipboard.mdl"
 ITEM.category = "Recipes"
 ITEM.width = 1
 ITEM.height = 1
-ITEM.price = 500
+ITEM.noBusiness = true
 
 ITEM.craftingCombination = {
 	output = { ammo_9x19mm_single = 1 },
@@ -19,6 +19,7 @@ ITEM.craftingTime = 15
 function ITEM:GetCraftingOutputData(outputItemID)
 	return {
 		poisoned = true,
-		poisonDamage = 25
+		poisonDamage = 5,
+		poisonDuration = 10,
 	}
 end

@@ -23,6 +23,16 @@ function ITEM:GetDescription()
 	return Format(self.description, ammoAmount)
 end
 
+function ITEM:GetName()
+	if (self:GetData("poisoned")) then
+		return "Poisoned " .. self.name
+	elseif (self:GetData("explosive")) then
+		return "Explosive " .. self.name
+	end
+
+	return self.name
+end
+
 -- On player uneqipped the item, Removes a weapon from the player and keep the ammo in the item.
 ITEM.functions.use = {
 	name = "Load",
@@ -34,13 +44,50 @@ ITEM.functions.use = {
 		local callback
 
 		if (item:GetData("poisoned")) then
+			local poisonDamage = item:GetData("poisonDamage") or 5
+			local poisonDuration = item:GetData("poisonDuration") or 10
+
 			callback = function(client, weapon, ammoType, bulletData)
 				local target = bulletData.Trace.Entity
 
 				if (IsValid(target)) then
-					-- TODO: Poison instead
-					target:Ignite(4)
+					-- TODO: Apply poison nano debuff instead of this manual application
+					local timerName = "PoisonDamage_" .. target:EntIndex() .. "#" .. client:EntIndex()
+
+					timer.Create(timerName, 1, poisonDuration, function()
+						if (IsValid(target) and target:Health() > 0) then
+							local dmgInfo = DamageInfo()
+							dmgInfo:SetDamage(poisonDamage)
+							dmgInfo:SetAttacker(client)
+
+							if (IsValid(weapon)) then
+								dmgInfo:SetInflictor(weapon)
+							end
+
+							dmgInfo:SetDamageType(DMG_NERVEGAS)
+
+							target:TakeDamageInfo(dmgInfo)
+						else
+							timer.Remove(timerName)
+						end
+					end)
 				end
+			end
+		elseif (item:GetData("explosive")) then
+			local blastRadius = item:GetData("blastRadius") or 200
+			local blastDamage = item:GetData("blastDamage") or 50
+
+			callback = function(client, weapon, ammoType, bulletData)
+				local trace = bulletData.Trace
+
+				local explode = ents.Create("env_explosion")
+				explode:SetPos(trace.HitPos)
+				explode:SetOwner(client)
+				explode:Spawn()
+				explode:SetKeyValue("iMagnitude", blastDamage)
+				explode:Fire("Explode")
+
+				util.BlastDamage(explode, client, trace.HitPos, blastRadius, blastDamage)
 			end
 		end
 

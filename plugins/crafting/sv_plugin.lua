@@ -49,7 +49,7 @@ net.Receive("expChemistryDistill", function(len, player)
 	end
 end)
 
-net.Receive("expCraftingCombine", function(len, player)
+net.Receive("expCraftingCombine", function(len, client)
 	local station = net.ReadEntity()
 	local selectedItemIDs = net.ReadTable()
 
@@ -66,12 +66,13 @@ net.Receive("expCraftingCombine", function(len, player)
 	local recipe = PLUGIN:FindValidRecipe(station, items)
 
 	if (recipe) then
-		if (station:StartCombination(player, items, recipe)) then
-			player:Notify("Successfully started brewing!")
+		if (station:StartCombination(client, items, recipe)) then
+			client:Notify("Successfully started brewing!")
+			Schema.PlayerClearEntityInfoTooltip(client, station)
 		else
-			player:Notify("Cannot start combination.")
+			client:Notify("Cannot start combination.")
 		end
 	else
-		player:Notify(L("invalidRecipe", player))
+		client:Notify(L("invalidRecipe", client))
 	end
 end)
