@@ -1,20 +1,19 @@
 local ITEM = ITEM
 
 ITEM.name = "Melon"
-ITEM.price = 15
-ITEM.shipmentSize = 10
-ITEM.model = "models/props_junk/watermelon01.mdl"
+ITEM.noBusiness = true
+ITEM.model = "models/a31/fallout4/props/plants/melon_item.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Consumables"
 ITEM.description = "A fresh green fruit, it'll energize you and make you feel more agile."
 ITEM.attributeBoosts = {
 	["acrobatics"] = {
-		amount = 2,
+		amount = 3,
 		duration = 600,
 	},
 	["agility"] = {
-		amount = 2,
+		amount = 3,
 		duration = 600,
 	},
 }

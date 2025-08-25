@@ -79,6 +79,16 @@ function PLUGIN:InitializedPlugins()
 		local rottenInfo = item.generateRottenItem
 
 		if (item.base ~= "base_crop_seeds" or not productInfo) then
+			local productItemID = item.productItemID
+
+			if (productItemID) then
+				local productItem = ix.item.list[productItemID]
+
+				if (productItem) then
+					productItem.seedItemID = item.uniqueID
+				end
+			end
+
 			continue
 		end
 

@@ -6,7 +6,7 @@ ITEM.price = 50
 
 ITEM.cropName = "Melon Vine"
 ITEM.stages = 4
-ITEM.growthTime = 150
+ITEM.growthTime = 60 --150
 ITEM.harvestItems = 2
 ITEM.plantingRadius = 60
 ITEM.cropModel = "models/a31/fallout4/props/plants/melon_vine.mdl"
@@ -17,13 +17,7 @@ ITEM.stageConfig = {
 	[4] = { modelScale = 1.0, bodygroup = 0, skin = 1, model = "models/a31/fallout4/props/plants/melon_vinefull.mdl", rotChance = 20 }
 }
 
-ITEM.generateProductItem = {
-	uniqueID = "melon",
-	name = "Melon",
-	description = "A juicy melon harvested from your farm.",
-	model = "models/a31/fallout4/props/plants/melon_item.mdl",
-	skin = 1,
-}
+ITEM.productItemID = "melon"
 
 ITEM.generateRottenItem = {
 	uniqueID = "rotten_melon",
