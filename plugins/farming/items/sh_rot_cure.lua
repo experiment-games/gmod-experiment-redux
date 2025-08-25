@@ -7,7 +7,7 @@ ITEM.category = "Farming"
 ITEM.model = "models/props_junk/garbage_plasticbottle002a.mdl"
 ITEM.width = 1
 ITEM.height = 2
-ITEM.price = 200
+ITEM.price = 500
 
 ITEM.functions.CureRot = {
 	name = "Cure Rot",

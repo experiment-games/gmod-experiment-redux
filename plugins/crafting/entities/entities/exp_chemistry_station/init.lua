@@ -27,9 +27,11 @@ function ENT:OnOptionSelected(client, option, data)
 		if (process and process.completed) then
 			local character = client:GetCharacter()
 			local inventory = character:GetInventory()
+			local recipe = process.recipe
+			local output = recipe.craftingCombination.output
 
 			-- Give output items
-			for outputID, amount in pairs(process.output) do
+			for outputID, amount in pairs(output) do
 				local count = amount
 
 				-- Handle random amounts
