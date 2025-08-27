@@ -65,6 +65,21 @@ else
 			return LocalPlayer():GetEyeTraceNoCursor()
 		end
 	end
+
+	local frameInstance
+
+	concommand.Add("exp_profiler", function()
+		if (not FProfiler) then
+			print("FProfiler is not installed.")
+			return
+		end
+
+		frameInstance = frameInstance or vgui.Create("FProfileFrame")
+		frameInstance:SetSkin("Default")
+		frameInstance:SetVisible(true)
+
+		FProfiler.UI.updateModel("frameVisible", true)
+	end, nil, "Starts FProfiler")
 end
 
 do

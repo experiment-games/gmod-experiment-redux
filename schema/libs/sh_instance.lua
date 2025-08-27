@@ -524,6 +524,10 @@ if (SERVER) then
 		end
 	end
 
+	--[[
+		Server hooks
+	--]]
+
 	-- Clean up when entities are removed
 	hook.Add("EntityRemoved", "expInstanceCleanup", function(entity)
 		if (not IsValid(entity)) then
@@ -755,69 +759,67 @@ if (SERVER) then
 			end
 
 			return text -- Allow the message to be sent normally
-		end)
-end
+		end
+	)
+else
+	--- Client-side function to get a player's instance using networked data
+	--- @param client Player
+	--- @return string|nil
+	function Schema.instance.GetPlayerInstance(client)
+		if (not IsValid(client)) then
+			return nil
+		end
 
--- Shared functions for client-side prediction
---- Client-side function to get a player's instance using networked data
---- @param client Player
---- @return string|nil
-function Schema.instance.GetPlayerInstance(client)
-	if (not IsValid(client)) then
-		return nil
+		local instanceID = client:GetNWString("InstanceID", "")
+		return instanceID ~= "" and instanceID or nil
 	end
 
-	local instanceID = client:GetNWString("InstanceID", "")
-	return instanceID ~= "" and instanceID or nil
-end
+	--- Client-side function to get an entity's instance using networked data
+	--- @param entity Entity
+	--- @return string|nil
+	function Schema.instance.GetEntityInstance(entity)
+		if (not IsValid(entity)) then
+			return nil
+		end
 
---- Client-side function to get an entity's instance using networked data
---- @param entity Entity
---- @return string|nil
-function Schema.instance.GetEntityInstance(entity)
-	if (not IsValid(entity)) then
-		return nil
+		local instanceID = entity:GetNWString("InstanceID", "")
+		return instanceID ~= "" and instanceID or nil
 	end
 
-	local instanceID = entity:GetNWString("InstanceID", "")
-	return instanceID ~= "" and instanceID or nil
-end
+	--- Shared function to check if a player can see an entity based on instancing
+	--- @param client Player
+	--- @param entity Entity
+	--- @return boolean
+	function Schema.instance.CanPlayerSeeEntity(client, entity)
+		local playerInstance = Schema.instance.GetPlayerInstance(client)
+		local entityInstance = Schema.instance.GetEntityInstance(entity)
 
---- Shared function to check if a player can see an entity based on instancing
---- @param client Player
---- @param entity Entity
---- @return boolean
-function Schema.instance.CanPlayerSeeEntity(client, entity)
-	local playerInstance = Schema.instance.GetPlayerInstance(client)
-	local entityInstance = Schema.instance.GetEntityInstance(entity)
+		-- If neither are in an instance, they can see each other
+		if (not playerInstance and not entityInstance) then
+			return true
+		end
 
-	-- If neither are in an instance, they can see each other
-	if (not playerInstance and not entityInstance) then
-		return true
+		-- If they're in the same instance, they can see each other
+		return playerInstance == entityInstance
 	end
 
-	-- If they're in the same instance, they can see each other
-	return playerInstance == entityInstance
-end
+	--- Shared function to check if a player can see another player based on instancing
+	--- @param viewer Player
+	--- @param target Player
+	--- @return boolean
+	function Schema.instance.CanPlayerSeePlayer(viewer, target)
+		local viewerInstance = Schema.instance.GetPlayerInstance(viewer)
+		local targetInstance = Schema.instance.GetPlayerInstance(target)
 
---- Shared function to check if a player can see another player based on instancing
---- @param viewer Player
---- @param target Player
---- @return boolean
-function Schema.instance.CanPlayerSeePlayer(viewer, target)
-	local viewerInstance = Schema.instance.GetPlayerInstance(viewer)
-	local targetInstance = Schema.instance.GetPlayerInstance(target)
+		-- If neither are in an instance, they can see each other
+		if (not viewerInstance and not targetInstance) then
+			return true
+		end
 
-	-- If neither are in an instance, they can see each other
-	if (not viewerInstance and not targetInstance) then
-		return true
+		-- If they're in the same instance, they can see each other
+		return viewerInstance == targetInstance
 	end
 
-	-- If they're in the same instance, they can see each other
-	return viewerInstance == targetInstance
-end
-
-if (CLIENT) then
 	--- Client-side function to check if the local player can see another player
 	--- @param target Player
 	--- @return boolean
@@ -841,6 +843,10 @@ if (CLIENT) then
 
 		return Schema.instance.CanPlayerSeeEntity(localPlayer, entity)
 	end
+
+	--[[
+		Client hooks
+	--]]
 
 	-- Hide players that are in different instances
 	hook.Add("PrePlayerDraw", "expInstancePlayerVisibility", function(client)
@@ -907,10 +913,17 @@ if (CLIENT) then
 	end)
 end
 
--- Shared collision prevention across instances
+--[[
+	Shared hooks
+--]]
+
+-- Micro-optimize lookup (ShouldCollide hook is called very often)
+local getEntityInstance = Schema.instance.GetEntityInstance
+
+-- Collision prevention across instances
 hook.Add("ShouldCollide", "expInstanceShouldCollide", function(ent1, ent2)
-	local inst1 = Schema.instance.GetEntityInstance(ent1)
-	local inst2 = Schema.instance.GetEntityInstance(ent2)
+	local inst1 = getEntityInstance(ent1)
+	local inst2 = getEntityInstance(ent2)
 
 	-- If one is the world, return to have default behaviour
 	if (not IsValid(ent1) or not IsValid(ent2)) then
@@ -939,6 +952,10 @@ hook.Add("PlayerTraceAttack", "expInstanceTraceAttack", function(client, damagei
 		end
 	end
 end)
+
+--[[
+	Commands
+--]]
 
 do
 	local COMMAND = {}
