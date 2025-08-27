@@ -250,3 +250,32 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		structureOffset = Vector(0, 0, 1),
 	})
 end
+
+--[[
+    Commands
+--]]
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Removes structures near where you look."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client)
+		local trace = client:GetEyeTraceNoCursor()
+		local range = 128
+
+		local structuresRemoved = 0
+
+		for _, ent in ipairs(ents.FindInSphere(trace.HitPos, range)) do
+			if (IsValid(ent) and ent.IsStructure) then
+				ent:Remove()
+				structuresRemoved = structuresRemoved + 1
+			end
+		end
+
+		client:Notify("Removed " .. structuresRemoved .. " structures.")
+	end
+
+	ix.command.Add("StructuresRemove", COMMAND)
+end

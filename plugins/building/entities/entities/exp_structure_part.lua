@@ -53,7 +53,7 @@ if (SERVER) then
 	function ENT:Initialize()
 		self:SetMoveType(MOVETYPE_NONE)
 
-		self:SetSolid(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_BBOX)
 
 		-- Start off with no collision, we'll be attached to the player until we're fully constructed
 		self:SetCollisionGroup(COLLISION_GROUP_WORLD)

@@ -140,16 +140,24 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 			placeError = otherStructureOrError
 		else
 			local boundsMin, boundsMax = structure.entity:GetCollisionBounds()
-			local cube = Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, structure.entity:GetPos(),
-				structure.entity:GetAngles())
+			local cube = weapon.ixItem.GetBoundsCube
+				and weapon.ixItem:GetBoundsCube(structure.entity, boundsMin, boundsMax)
+				or Schema.util.ExpandBoundsToCube(
+					boundsMin,
+					boundsMax,
+					structure.entity:GetPos(),
+					structure.entity:GetAngles()
+				)
 			local canPlace = not Schema.util.TracePointsHit(cube, function(e)
 				return not (e.IsStructure or e.IsStructurePart)
 			end)
 
 			if (not canPlace) then
 				placeError = "You cannot build here."
+				print(placeError, 1)
 			elseif (weapon.ixItem.OnCanBuild and not weapon.ixItem:OnCanBuild(client, position, angles)) then
 				placeError = "You cannot build here."
+				print(placeError, 2)
 			end
 		end
 

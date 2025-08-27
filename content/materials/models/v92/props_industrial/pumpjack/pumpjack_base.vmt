@@ -1,0 +1,16 @@
+vertexlitgeneric
+{
+
+	$basetexture models/v92/props_industrial/pumpjack/pumpjack_base
+	$bumpmap models/v92/props_industrial/pumpjack/pumpjack_normal
+
+	$halflambert 1
+	$ambientocclusion 1
+	$ambientoccltexture models/v92/props_industrial/pumpjack/pumpjack_ao
+
+	$detail models/v92/props_industrial/pumpjack/pumpjack_detail
+	$detailscale 1
+	$detailblendfactor 1
+	$detailblendmode 0
+
+}
