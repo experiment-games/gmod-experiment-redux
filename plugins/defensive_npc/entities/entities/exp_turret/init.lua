@@ -8,9 +8,6 @@ local CEILING_TURRET_EFFICIENT = 16
 local FLOOR_TURRET_FAST_RETIRE = 128
 local FLOOR_TURRET_CITIZEN_MODIFIED_FRIENDLY = 512
 
--- Network the mode change
-util.AddNetworkString("ixTurretChangeMode")
-
 function ENT:Initialize()
 	self:SetModel("models/hunter/blocks/cube025x025x025.mdl")
 	self:SetNoDraw(true)
@@ -452,71 +449,67 @@ function ENT:OnOptionSelected(client, option, data)
 
 		-- TODO: Have this cost something?
 		self:RespawnTurret()
+	elseif (option == "changeTurretMode") then
+		local newMode = data
+
+		if (not IsValid(self) or self:GetClass() ~= "exp_turret") then
+			return
+		end
+
+		-- Verify client is the owner
+		if (not self:IsOwner(client)) then
+			client:Notify("You are not the owner of this turret.")
+			return
+		end
+
+		local modeIsValid = false
+
+		-- Check if mode is valid
+		for k, v in pairs(PLUGIN.TURRET_MODES) do
+			if (v == newMode) then
+				modeIsValid = true
+				break
+			end
+		end
+
+		if (not modeIsValid) then
+			return
+		end
+
+		-- Check if alliance modes are available
+		if ((newMode == PLUGIN.TURRET_MODES.DEFEND_ALLIANCE or
+					newMode == PLUGIN.TURRET_MODES.DEFEND_AREA_ALLIANCE) and
+				not client:GetAlliance()) then
+			client:Notify("You must be in an alliance to use alliance defense modes.")
+			return
+		end
+
+		local isDisabled = newMode == PLUGIN.TURRET_MODES.DISABLED
+
+		self:SetPlayerDisabled(isDisabled)
+
+		if (isDisabled) then
+			if (IsValid(self.turretNPC)) then
+				self.turretNPC:Fire("Disable")
+			end
+
+			client:Notify("Turret disabled.")
+
+			return
+		end
+
+		-- Set the new mode
+		self:SetTurretMode(newMode)
+
+		-- Clear existing targets when changing modes
+		self.hostileTargets = {}
+		self.lastHostileTime = {}
+		self.areaTargets = {}
+		if (IsValid(self.currentTarget) and IsValid(self.turretNPC)) then
+			self.turretNPC:AddEntityRelationship(self.currentTarget, D_NU)
+		end
+		self.currentTarget = nil
+
+		client:Notify("Turret mode changed to: " .. self:GetModeDisplayName(client))
 	end
 end
-
--- Handle mode change network message
-net.Receive("ixTurretChangeMode", function(len, client)
-	local turret = net.ReadEntity()
-	local newMode = net.ReadUInt(8)
-
-	if (not IsValid(turret) or turret:GetClass() ~= "exp_turret") then
-		return
-	end
-
-	-- Verify client is the owner
-	if (not turret:IsOwner(client)) then
-		client:Notify("You are not the owner of this turret.")
-		return
-	end
-
-	local modeIsValid = false
-
-	-- Check if mode is valid
-	for k, v in pairs(PLUGIN.TURRET_MODES) do
-		if (v == newMode) then
-			modeIsValid = true
-			break
-		end
-	end
-
-	if (not modeIsValid) then
-		return
-	end
-
-	-- Check if alliance modes are available
-	if ((newMode == PLUGIN.TURRET_MODES.DEFEND_ALLIANCE or
-				newMode == PLUGIN.TURRET_MODES.DEFEND_AREA_ALLIANCE) and
-			not client:GetAlliance()) then
-		client:Notify("You must be in an alliance to use alliance defense modes.")
-		return
-	end
-
-	local isDisabled = newMode == PLUGIN.TURRET_MODES.DISABLED
-
-	turret:SetPlayerDisabled(isDisabled)
-
-	if (isDisabled) then
-		if (IsValid(turret.turretNPC)) then
-			turret.turretNPC:Fire("Disable")
-		end
-
-		client:Notify("Turret disabled.")
-
-		return
-	end
-
-	-- Set the new mode
-	turret:SetTurretMode(newMode)
-
-	-- Clear existing targets when changing modes
-	turret.hostileTargets = {}
-	turret.lastHostileTime = {}
-	turret.areaTargets = {}
-	if (IsValid(turret.currentTarget) and IsValid(turret.turretNPC)) then
-		turret.turretNPC:AddEntityRelationship(turret.currentTarget, D_NU)
-	end
-	turret.currentTarget = nil
-
-	client:Notify("Turret mode changed to: " .. turret:GetModeDisplayName(client))
-end)

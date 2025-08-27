@@ -15,7 +15,7 @@ ITEM.constructionMaterials = {
 	["material_metal"] = 8,
 	["logic_board"] = 1,
 }
-ITEM.structureOffset = Vector(0, 0, 1)
+ITEM.structureOffset = Vector(0, 0, -1)
 ITEM.structureMaximum = 1 -- Only one oil pump per player
 ITEM.requiresOilPerk = true
 ITEM.iconCam = {
@@ -47,7 +47,6 @@ end
 
 function ITEM:OnCanBuild(client, position, angles)
 	if (not PLUGIN:IsValidOilField(position)) then
-		client:Notify("Oil pumps can only be constructed in oil fields.")
 		return false
 	end
 
@@ -55,15 +54,13 @@ function ITEM:OnCanBuild(client, position, angles)
 	local trace = client:GetEyeTraceNoCursor()
 
 	if (not PLUGIN:CanSpawnOilPump(trace)) then
-		client:Notify("Cannot construct oil pump here. Need flat ground in an oil field.")
 		return false
 	end
 
 	-- Check for nearby oil pumps
-	local nearbyPumps = ents.FindInSphere(position, 500)
+	local nearbyPumps = ents.FindInSphere(position, 200)
 	for _, ent in pairs(nearbyPumps) do
 		if (IsValid(ent) and ent:GetClass() == "exp_oil_pump") then
-			client:Notify("Cannot construct oil pump too close to another oil pump.")
 			return false
 		end
 	end
@@ -80,9 +77,6 @@ function ITEM:OnFinishConstruction(structure, client)
 	structure:Remove()
 
 	local pump = PLUGIN:SpawnOilPump(position, angles, ownerID)
-
-	-- Give it some initial scrap
-	pump:SetScrapAmount(5)
 
 	return pump
 end

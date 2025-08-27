@@ -154,10 +154,8 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 
 			if (not canPlace) then
 				placeError = "You cannot build here."
-				print(placeError, 1)
 			elseif (weapon.ixItem.OnCanBuild and not weapon.ixItem:OnCanBuild(client, position, angles)) then
 				placeError = "You cannot build here."
-				print(placeError, 2)
 			end
 		end
 

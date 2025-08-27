@@ -13,58 +13,131 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
 
-	-- Initialize networked variables
-	self:SetOwnerID(-1)
-	self:SetOilAmount(0)
-	self:SetScrapAmount(0)
-	self:SetIsBroken(false)
-	self:SetIsRunning(false)
+	self:SetOwnerID(self:GetOwnerID() or -1)
+	self:SetOilAmount(self:GetOilAmount() or 0)
+	self:SetScrapAmount(self:GetScrapAmount() or 0)
+	self:SetIsBroken(self:GetIsBroken() or false)
+	self:SetIsRunning(self:GetIsRunning() or false)
 
 	self:SetMaxHealth(1000)
 	self:SetHealth(1000)
 
-	-- Pump state
 	self.lastCycle = CurTime()
 	self.nextCycle = CurTime() + PLUGIN.pumpCycleTime
 
-	-- Set up physics
 	local phys = self:GetPhysicsObject()
 	if (IsValid(phys)) then
 		phys:EnableMotion(false)
 		phys:SetMass(1000)
 	end
 
-	-- Set initial animation speed to 0 (stopped)
-	self:SetPlaybackRate(0)
+	self:SetupAnimatedProp()
+end
+
+function ENT:SetupAnimatedProp()
+	local pos = self:GetPos()
+	local ang = self:GetAngles()
+
+	self.animatedProp = ents.Create("prop_dynamic")
+	self:SetAnimatedProp(self.animatedProp)
+
+	self.animatedProp:SetModel(self:GetModel())
+	self.animatedProp:SetPos(pos)
+	self.animatedProp:SetAngles(ang)
+	self.animatedProp:SetSolid(SOLID_VPHYSICS)
+	self.animatedProp:Spawn()
+	self.animatedProp:Activate()
+	self.animatedProp:ResetSequence("idle")
+	self.animatedProp:SetPlaybackRate(0)
+
+	self.animatedProp:SetCollisionGroup(COLLISION_GROUP_NONE)
+	self.animatedProp:SetParent(self)
+
+	self.animatedProp:CallOnRemove("removeParent", function(entity)
+		if (IsValid(self)) then
+			self:Remove()
+		end
+	end)
+
+	-- Hide original entity since we're using the animated prop for visuals
+	self:SetNoDraw(true)
+	self:SetNotSolid(true)
+
+	-- Initialize easing variables
+	self.targetPlaybackRate = 0
+	self.currentPlaybackRate = 0
+	self.easeStartTime = 0
+	self.easeStartRate = 0
+	self.easeDuration = 4.0
 end
 
 function ENT:Think()
 	local curTime = CurTime()
 
-	-- Handle extraction cycle
-	if (not self:GetIsBroken() and self:GetScrapAmount() > 0 and curTime >= self.nextCycle) then
+	if (
+			not self:GetIsBroken()
+			and not self:GetIsDisabled()
+			and self:GetScrapAmount() > 0
+			and curTime >= self.nextCycle
+		) then
 		self:PerformExtractionCycle()
 		self.nextCycle = curTime + PLUGIN.pumpCycleTime
 	end
 
-	-- Update running status
-	local shouldBeRunning = not self:GetIsBroken() and self:GetScrapAmount() > 0 and
-		self:GetOilAmount() < PLUGIN.pumpMaxCapacity
+	local shouldBeRunning = not self:GetIsBroken()
+		and self:GetScrapAmount() > 0
+		and self:GetOilAmount() < PLUGIN.pumpMaxCapacity
+		and not self:GetIsDisabled()
 
 	if (shouldBeRunning ~= self:GetIsRunning()) then
 		self:SetIsRunning(shouldBeRunning)
-		self:UpdateAnimation()
+		self:UpdatePumpAnimation()
 	end
+
+	-- Handle playback rate easing
+	self:UpdatePlaybackRateEasing()
 end
 
-function ENT:UpdateAnimation()
-	if (self:GetIsRunning()) then
-		-- Set animation speed to normal when running
-		self:SetPlaybackRate(1)
-		self:ResetSequence("idle")
+function ENT:TransitionPlaybackRate(targetRate)
+	if (not IsValid(self.animatedProp)) then
+		return
+	end
+
+	self.targetPlaybackRate = targetRate
+	self.easeStartTime = CurTime()
+	self.easeStartRate = self.currentPlaybackRate
+end
+
+function ENT:UpdatePlaybackRateEasing()
+	if (not IsValid(self.animatedProp)) then
+		return
+	end
+
+	-- Check if we need to ease
+	if (math.abs(self.currentPlaybackRate - self.targetPlaybackRate) < 0.01) then
+		return
+	end
+
+	local curTime = CurTime()
+	local elapsed = curTime - self.easeStartTime
+	local progress = math.min(elapsed / self.easeDuration, 1.0)
+
+	-- Ramp-up easing function (starts slow, accelerates toward target)
+	local easedProgress = progress * progress
+
+	self.currentPlaybackRate = Lerp(easedProgress, self.easeStartRate, self.targetPlaybackRate)
+	self.animatedProp:SetPlaybackRate(self.currentPlaybackRate)
+end
+
+function ENT:UpdatePumpAnimation()
+	if (not IsValid(self.animatedProp)) then
+		return
+	end
+
+	if (self:GetIsRunning() and not self:GetIsBroken()) then
+		self:TransitionPlaybackRate(1.0)
 	else
-		-- Stop animation when not running or broken
-		self:SetPlaybackRate(0)
+		self:TransitionPlaybackRate(0.0)
 	end
 end
 
@@ -76,25 +149,25 @@ function ENT:PerformExtractionCycle()
 	local currentOil = self:GetOilAmount()
 	local currentScrap = self:GetScrapAmount()
 
-	-- Check if we can extract more oil
 	if (currentOil >= PLUGIN.pumpMaxCapacity) then
-		return -- Pump is full
+		return
 	end
 
-	-- Consume scrap
 	self:SetScrapAmount(math.max(0, currentScrap - PLUGIN.scrapConsumption))
 
-	-- Extract oil
 	local extractedAmount = math.min(PLUGIN.pumpExtractionRate, PLUGIN.pumpMaxCapacity - currentOil)
 	self:SetOilAmount(currentOil + extractedAmount)
 
-	-- Create pumping effect
+	local effectPos = self:GetPos()
+	if (IsValid(self.animatedProp)) then
+		effectPos = self.animatedProp:GetPos()
+	end
+
 	local effectData = EffectData()
-	effectData:SetOrigin(self:GetPos())
+	effectData:SetOrigin(effectPos)
 	effectData:SetScale(1)
 	util.Effect("ThumperDust", effectData)
 
-	-- Play pumping sound
 	self:EmitSound("ambient/machines/thumper_hit.wav", 75, 100)
 end
 
@@ -107,7 +180,6 @@ function ENT:OnTakeDamage(dmgInfo)
 	local newHealth = math.max(0, self:Health() - damage)
 	self:SetHealth(newHealth)
 
-	-- Break if health reaches 0
 	if (newHealth <= 0) then
 		self:Break()
 	end
@@ -123,17 +195,21 @@ function ENT:Break()
 	self:SetIsBroken(true)
 	self:SetIsRunning(false)
 
-	-- Stop the animation
-	self:UpdateAnimation()
+	local effectPos = self:GetPos()
+	if (IsValid(self.animatedProp)) then
+		effectPos = self.animatedProp:GetPos()
+	end
 
-	-- Create break effect
 	local explosion = EffectData()
-	explosion:SetOrigin(self:GetPos())
+	explosion:SetOrigin(effectPos)
 	explosion:SetMagnitude(1)
 	explosion:SetScale(0.5)
 	util.Effect("Explosion", explosion)
 
 	self:EmitSound("ambient/explosions/explode_4.wav", 100, 150)
+
+	-- Smoothly transition to stopped state
+	self:TransitionPlaybackRate(0.0)
 end
 
 function ENT:Repair()
@@ -144,32 +220,53 @@ function ENT:Repair()
 	self:SetIsBroken(false)
 	self:SetHealth(self:GetMaxHealth())
 
-	-- Update animation based on current state
-	self:UpdateAnimation()
+	local effectPos = self:GetPos()
+	if (IsValid(self.animatedProp)) then
+		effectPos = self.animatedProp:GetPos()
+	end
 
-	-- Create repair effect
 	local effect = EffectData()
-	effect:SetOrigin(self:GetPos())
+	effect:SetOrigin(effectPos)
 	effect:SetMagnitude(1)
 	util.Effect("TeleportSplash", effect)
 
 	self:EmitSound("ambient/machines/combine_terminal_idle4.wav", 75, 120)
+
+	self:UpdatePumpAnimation()
 
 	return true
 end
 
 function ENT:AddScrap(amount)
 	local currentScrap = self:GetScrapAmount()
-	self:SetScrapAmount(currentScrap + amount)
+	local newScrapAmount = math.min(PLUGIN.maxScrap, currentScrap + amount)
+	local added = newScrapAmount - currentScrap
 
-	-- Update animation in case we just added scrap to start the pump
-	self:UpdateAnimation()
+	self:SetScrapAmount(newScrapAmount)
 
-	-- Create refuel effect
+	-- Reset cycle timing if pump was empty and we just added scrap, otherwise
+	-- it may be immediately consumed.
+	if (currentScrap == 0 and added > 0) then
+		self.nextCycle = CurTime() + PLUGIN.pumpCycleTime
+	end
+
+	local effectPos = self:GetPos() + Vector(0, 0, 30)
+	if (IsValid(self.animatedProp)) then
+		effectPos = self.animatedProp:GetPos() + Vector(0, 0, 30)
+	end
+
 	local effectData = EffectData()
-	effectData:SetOrigin(self:GetPos() + Vector(0, 0, 30))
+	effectData:SetOrigin(effectPos)
 	effectData:SetScale(0.5)
 	util.Effect("Sparks", effectData)
+
+	return added
+end
+
+function ENT:OnRemove()
+	if (IsValid(self.animatedProp)) then
+		self.animatedProp:Remove()
+	end
 end
 
 function ENT:OnOptionSelected(client, option, data)
@@ -179,7 +276,6 @@ function ENT:OnOptionSelected(client, option, data)
 			return
 		end
 
-		-- TODO: Add repair cost/requirements
 		if (self:Repair()) then
 			client:Notify("Oil pump repaired!")
 		else
@@ -188,11 +284,11 @@ function ENT:OnOptionSelected(client, option, data)
 	elseif (option == L("oilPumpAddScrap", client)) then
 		local character = client:GetCharacter()
 		local inventory = character:GetInventory()
+		local ownedAmount = inventory:GetItemCount("scrap")
 
-		local scrapItem = inventory:HasItem("scrap")
-		if (scrapItem) then
-			scrapItem:Remove()
-			self:AddScrap(1)
+		if (ownedAmount > 0) then
+			inventory:RemoveStackedItem("scrap", self:AddScrap(ownedAmount))
+
 			client:Notify("Added scrap to the oil pump.")
 		else
 			client:Notify("You don't have any scrap.")
@@ -200,10 +296,11 @@ function ENT:OnOptionSelected(client, option, data)
 	elseif (option == L("oilPumpExtractOilDrum", client)) then
 		local character = client:GetCharacter()
 		local inventory = character:GetInventory()
-
 		local emptyDrum = inventory:HasItem("oil_drum_empty")
+
 		if (emptyDrum) then
 			local success, message = PLUGIN:ExtractOilFromPump(client, self, 500)
+
 			if (success) then
 				emptyDrum:Remove()
 				inventory:Add("oil_drum_full")
@@ -217,10 +314,11 @@ function ENT:OnOptionSelected(client, option, data)
 	elseif (option == L("oilPumpExtractGasCan", client)) then
 		local character = client:GetCharacter()
 		local inventory = character:GetInventory()
-
 		local emptyCan = inventory:HasItem("gas_can_empty")
+
 		if (emptyCan) then
 			local success, message = PLUGIN:ExtractOilFromPump(client, self, 50)
+
 			if (success) then
 				emptyCan:Remove()
 				inventory:Add("gas_can_full")
@@ -231,5 +329,12 @@ function ENT:OnOptionSelected(client, option, data)
 		else
 			client:Notify("You need an empty gas can.")
 		end
+	elseif (option == L("oilPumpDisable", client)) then
+		self:SetIsDisabled(true)
+		client:Notify("Oil pump disabled.")
+	elseif (option == L("oilPumpEnable", client)) then
+		self.nextCycle = CurTime() + PLUGIN.pumpCycleTime
+		self:SetIsDisabled(false)
+		client:Notify("Oil pump enabled.")
 	end
 end

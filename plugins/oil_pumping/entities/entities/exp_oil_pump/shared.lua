@@ -17,6 +17,8 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Int", "ScrapAmount")
 	self:NetworkVar("Bool", "IsBroken")
 	self:NetworkVar("Bool", "IsRunning")
+	self:NetworkVar("Bool", "IsDisabled")
+	self:NetworkVar("Entity", "AnimatedProp")
 end
 
 function ENT:GetOwnerName(client)

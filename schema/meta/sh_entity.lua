@@ -1,8 +1,9 @@
 local META = FindMetaTable("Entity")
 
 if (SERVER) then
-	util.AddNetworkString("PlayerBodyGroupChanged")
-	util.AddNetworkString("PlayerBodyGroupsChanged")
+	util.AddNetworkString("expPlayerBodyGroupChanged")
+	util.AddNetworkString("expPlayerBodyGroupsChanged")
+	util.AddNetworkString("expLongRangeInteraction") -- TODO: Remove after resolving NebulousCloud/helix#483
 	util.AddNetworkString("expRemoveDecals")
 
 	META.expSetBodygroup = META.expSetBodygroup or META.SetBodygroup
@@ -17,10 +18,6 @@ if (SERVER) then
 		self:expSetParent(parent)
 	end
 
-	--[[
-		Override the bodygroup functions to call hooks
-	--]]
-
 	--- @param index number
 	--- @param value number
 	function META:SetBodygroup(index, value)
@@ -28,7 +25,7 @@ if (SERVER) then
 			local oldValue = self:GetBodygroup(index)
 			hook.Run("PlayerBodyGroupChanged", self, index, value, oldValue)
 
-			net.Start("PlayerBodyGroupChanged")
+			net.Start("expPlayerBodyGroupChanged")
 			net.WriteEntity(self)
 			net.WriteUInt(index, 32)
 			net.WriteUInt(value, 32)
@@ -57,7 +54,7 @@ if (SERVER) then
 
 			hook.Run("PlayerBodyGroupsChanged", self, bodygroups, oldBodygroups)
 
-			net.Start("PlayerBodyGroupsChanged")
+			net.Start("expPlayerBodyGroupsChanged")
 			net.WriteEntity(self)
 			net.WriteString(bodygroups)
 			net.WriteString(oldBodygroups)
@@ -72,52 +69,7 @@ if (SERVER) then
 		net.WriteEntity(self)
 		net.Broadcast()
 	end
-else
-	net.Receive("PlayerBodyGroupChanged", function()
-		local player = net.ReadEntity()
-		local index = net.ReadUInt(32)
-		local value = net.ReadUInt(32)
-		local oldValue = net.ReadUInt(32)
 
-		hook.Run("PlayerBodyGroupChanged", player, index, value, oldValue)
-	end)
-
-	net.Receive("PlayerBodyGroupsChanged", function()
-		local player = net.ReadEntity()
-		local bodygroups = net.ReadString()
-		local oldBodygroups = net.ReadString()
-
-		hook.Run("PlayerBodyGroupsChanged", player, bodygroups, oldBodygroups)
-	end)
-
-	net.Receive("expRemoveDecals", function()
-		local entity = net.ReadEntity()
-
-		if (IsValid(entity)) then
-			entity:RemoveAllDecals()
-		end
-	end)
-end
-
--- Override the default IsDoor logic to not include entities that are not doors. We call a hook to check.
-function META:IsDoor()
-	local class = self:GetClass()
-	local pluginIsDoor = hook.Run("EntityIsDoor", self)
-
-	if (pluginIsDoor == true) then
-		return true
-	end
-
-	local baseIsDoor = (class and class:find("door") ~= nil)
-
-	if (not baseIsDoor) then
-		return false
-	end
-
-	return pluginIsDoor ~= false
-end
-
-if (SERVER) then
 	function META:RemoveWithEffect()
 		Schema.ImpactEffect(self:GetPos(), 8, true)
 		self:Remove()
@@ -194,4 +146,91 @@ if (SERVER) then
 			end
 		end)
 	end
+
+	--[[
+		Net Messages
+	--]]
+
+	-- TODO: Remove after resolving NebulousCloud/helix#483
+	net.Receive("expLongRangeInteraction", function(len, client)
+		local entity = net.ReadEntity()
+		local option = net.ReadString()
+		local data = net.ReadType()
+
+		if (not IsValid(entity) or not entity.OnOptionSelected) then
+			return
+		end
+
+		-- Ensure the entity is within range
+		local maxRange = 192 ^ 2
+
+		if (entity:GetPos():Distance(client:GetPos()) > maxRange) then
+			return
+		end
+
+		entity:OnOptionSelected(client, option, data)
+	end)
+else
+	--- TODO: Remove after resolving NebulousCloud/helix#483
+	--- Send long range interaction
+	--- @param option string
+	--- @param data any
+	function META:SendLongRangeInteraction(option, data)
+		if (not IsValid(self)) then
+			return
+		end
+
+		net.Start("expLongRangeInteraction")
+		net.WriteEntity(self)
+		net.WriteString(option)
+		net.WriteType(data)
+		net.SendToServer()
+	end
+
+	--[[
+		Net Messages
+	--]]
+
+	net.Receive("expPlayerBodyGroupChanged", function()
+		local player = net.ReadEntity()
+		local index = net.ReadUInt(32)
+		local value = net.ReadUInt(32)
+		local oldValue = net.ReadUInt(32)
+
+		hook.Run("PlayerBodyGroupChanged", player, index, value, oldValue)
+	end)
+
+	net.Receive("expPlayerBodyGroupsChanged", function()
+		local player = net.ReadEntity()
+		local bodygroups = net.ReadString()
+		local oldBodygroups = net.ReadString()
+
+		hook.Run("PlayerBodyGroupsChanged", player, bodygroups, oldBodygroups)
+	end)
+
+	net.Receive("expRemoveDecals", function()
+		local entity = net.ReadEntity()
+
+		if (IsValid(entity)) then
+			entity:RemoveAllDecals()
+		end
+	end)
+end
+
+-- Override the default IsDoor logic to not include entities that are not doors. We call a hook to check.
+function META:IsDoor()
+	local class = self:GetClass()
+	local pluginIsDoor = hook.Run("EntityIsDoor", self)
+
+	if (pluginIsDoor == true) then
+		return true
+	end
+
+	local baseIsDoor = (class and class:find("door") ~= nil)
+
+	if (not baseIsDoor) then
+		return false
+	end
+
+	return pluginIsDoor ~= false
 end

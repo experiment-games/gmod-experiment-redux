@@ -84,10 +84,7 @@ function ENT:GetEntityMenu()
 	-- Add mode options
 	if (not self:GetPlayerDisabled()) then
 		options[L("turretModeDisable")] = function()
-			net.Start("ixTurretChangeMode")
-			net.WriteEntity(self)
-			net.WriteUInt(PLUGIN.TURRET_MODES.DISABLED, 8)
-			net.SendToServer()
+			self:SendLongRangeInteraction("changeTurretMode", PLUGIN.TURRET_MODES.DISABLED)
 
 			return false
 		end
@@ -97,10 +94,7 @@ function ENT:GetEntityMenu()
 
 	if (currentMode ~= PLUGIN.TURRET_MODES.DEFEND_ALL) then
 		options[L("turretModeDefendAll")] = function()
-			net.Start("ixTurretChangeMode")
-			net.WriteEntity(self)
-			net.WriteUInt(PLUGIN.TURRET_MODES.DEFEND_ALL, 8)
-			net.SendToServer()
+			self:SendLongRangeInteraction("changeTurretMode", PLUGIN.TURRET_MODES.DEFEND_ALL)
 
 			return false
 		end
@@ -108,10 +102,7 @@ function ENT:GetEntityMenu()
 
 	if (currentMode ~= PLUGIN.TURRET_MODES.DEFEND_OWNER) then
 		options[L("turretModeDefendOwner")] = function()
-			net.Start("ixTurretChangeMode")
-			net.WriteEntity(self)
-			net.WriteUInt(PLUGIN.TURRET_MODES.DEFEND_OWNER, 8)
-			net.SendToServer()
+			self:SendLongRangeInteraction("changeTurretMode", PLUGIN.TURRET_MODES.DEFEND_OWNER)
 
 			return false
 		end
@@ -121,10 +112,7 @@ function ENT:GetEntityMenu()
 	if (playerAlliance) then
 		if (currentMode ~= PLUGIN.TURRET_MODES.DEFEND_ALLIANCE) then
 			options[L("turretModeDefendAlliance")] = function()
-				net.Start("ixTurretChangeMode")
-				net.WriteEntity(self)
-				net.WriteUInt(PLUGIN.TURRET_MODES.DEFEND_ALLIANCE, 8)
-				net.SendToServer()
+				self:SendLongRangeInteraction("changeTurretMode", PLUGIN.TURRET_MODES.DEFEND_ALLIANCE)
 
 				return false
 			end
@@ -132,10 +120,15 @@ function ENT:GetEntityMenu()
 
 		if (currentMode ~= PLUGIN.TURRET_MODES.DEFEND_AREA_ALLIANCE) then
 			options[L("turretModeDefendAreaAlliance")] = function()
-				net.Start("ixTurretChangeMode")
-				net.WriteEntity(self)
-				net.WriteUInt(PLUGIN.TURRET_MODES.DEFEND_AREA_ALLIANCE, 8)
-				net.SendToServer()
+				self:SendLongRangeInteraction("changeTurretMode", PLUGIN.TURRET_MODES.DEFEND_AREA_ALLIANCE)
+
+				return false
+			end
+		end
+
+		if (currentMode ~= PLUGIN.TURRET_MODES.DEFEND_AREA_ALLIANCE) then
+			options[L("turretModeDefendAreaAlliance")] = function()
+				self:SendLongRangeInteraction("changeTurretMode", PLUGIN.TURRET_MODES.DEFEND_AREA_ALLIANCE)
 
 				return false
 			end
@@ -144,10 +137,7 @@ function ENT:GetEntityMenu()
 
 	if (currentMode ~= PLUGIN.TURRET_MODES.DEFEND_AREA_OWNER) then
 		options[L("turretModeDefendAreaOwner")] = function()
-			net.Start("ixTurretChangeMode")
-			net.WriteEntity(self)
-			net.WriteUInt(PLUGIN.TURRET_MODES.DEFEND_AREA_OWNER, 8)
-			net.SendToServer()
+			self:SendLongRangeInteraction("changeTurretMode", PLUGIN.TURRET_MODES.DEFEND_AREA_OWNER)
 
 			return false
 		end
