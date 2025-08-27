@@ -8,9 +8,9 @@ ix.util.Include("sv_plugin.lua")
 
 ix.config.Add("maxBuildGroundLevel", 2,
 	"The maximum distance from the ground players can build (in structures on top of structures).", nil, {
-	data = { min = 0, max = 100, decimals = 0 },
-	category = "Building"
-})
+		data = { min = 0, max = 100, decimals = 0 },
+		category = "Building"
+	})
 
 function PLUGIN:EntityIsDoor(entity)
 	if (entity.IsStructureOrPart) then
@@ -19,11 +19,13 @@ function PLUGIN:EntityIsDoor(entity)
 end
 
 if (CLIENT) then
-	-- Have the blueprint weapon not show the hazardous environment sheet, but a custom one with blueprints on them
-	Schema.util.ReplaceMaterialTexture(
-		Material("models/props_lab/clipboard_sheet"),
-		Material("experiment-redux/replacements/clipboard")
-	)
+	function PLUGIN:InitPostEntity()
+		-- Have the blueprint weapon not show the hazardous environment sheet, but a custom one with blueprints on them
+		Schema.util.ReplaceMaterialTexture(
+			Material("models/props_lab/clipboard_sheet"),
+			Material("experiment-redux/replacements/clipboard")
+		)
+	end
 
 	function PLUGIN:RequestBuildStructure(position, angles)
 		net.Start("ixBuildingRequestBuildStructure")
