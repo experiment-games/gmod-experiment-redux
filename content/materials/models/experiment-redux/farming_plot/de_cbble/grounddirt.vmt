@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$baseTexture"		"de_cbble/grounddirt"
+	"$bumpmap2"		"de_cbble/grounddirt_normal"
+	"%keywords"		"cstrike"
+	"$model"		"1"
+}

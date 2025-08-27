@@ -169,7 +169,7 @@ function Schema.draw.DrawUndimmedRect(x, y, w, h, a)
 end
 
 --- Shows a spritesheet picker to get the x and y position of a spritesheet part.
-concommand.Add("debug_spritesheet_picker", function(client, command, arguments)
+concommand.Add("exp_spritesheet_picker", function(client, command, arguments)
 	if (not client:IsSuperAdmin()) then
 		return
 	end

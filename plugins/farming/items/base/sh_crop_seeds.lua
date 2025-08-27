@@ -7,6 +7,7 @@ ITEM.category = "Farming"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.description = "A jar filled with seeds."
+ITEM.requiresFarmingPerk = true
 
 -- Crop configuration properties
 ITEM.stages = 3                     -- Number of growth stages
@@ -82,7 +83,7 @@ ITEM.functions.Plant = {
 			return false
 		end
 
-		if (not PLUGIN:IsValidCropSoil(trace.HitPos)) then
+		if (not PLUGIN:IsValidCropSoil(trace)) then
 			client:Notify("You can only plant seeds in farming soils.")
 			return false
 		end
@@ -113,6 +114,6 @@ ITEM.functions.Plant = {
 		client:Notify("You planted " .. item.name .. "!")
 	end,
 	OnCanRun = function(item)
-		return IsValid(item.player) and item.player:Alive()
+		return IsValid(item.player) and item.player:Alive() and Schema.perk.GetOwned("farmhand", item.player)
 	end,
 }

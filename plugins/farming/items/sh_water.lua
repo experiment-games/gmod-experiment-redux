@@ -9,6 +9,7 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.price = 15
 ITEM.shipmentSize = 6
+ITEM.requiresFarmingPerk = true
 
 ITEM.functions.Water = {
 	name = "Water",
@@ -21,6 +22,6 @@ ITEM.functions.Water = {
 		return PLUGIN:WaterCrop(client, trace.HitPos)
 	end,
 	OnCanRun = function(item)
-		return IsValid(item.player) and item.player:Alive()
+		return IsValid(item.player) and item.player:Alive() and Schema.perk.GetOwned("farmhand", item.player)
 	end,
 }

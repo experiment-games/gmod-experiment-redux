@@ -9,6 +9,7 @@ ITEM.modelScale = 0.5
 ITEM.width = 1
 ITEM.height = 2
 ITEM.price = 100
+ITEM.requiresFarmingPerk = true
 
 function ITEM:OnEntityCreated(entity)
 	entity:SetModelScale(self.modelScale)
@@ -35,6 +36,6 @@ ITEM.functions.Fertilize = {
 		return PLUGIN:FertilizeCrop(client, trace.HitPos)
 	end,
 	OnCanRun = function(item)
-		return IsValid(item.player) and item.player:Alive()
+		return IsValid(item.player) and item.player:Alive() and Schema.perk.GetOwned("farmhand", item.player)
 	end,
 }

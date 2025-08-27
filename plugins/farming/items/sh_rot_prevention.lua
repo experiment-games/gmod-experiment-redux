@@ -8,6 +8,7 @@ ITEM.model = "models/props_junk/garbage_plasticbottle001a.mdl"
 ITEM.width = 1
 ITEM.height = 2
 ITEM.price = 100
+ITEM.requiresFarmingPerk = true
 
 ITEM.functions.PreventRot = {
 	name = "Prevent Rot",
@@ -20,6 +21,6 @@ ITEM.functions.PreventRot = {
 		return PLUGIN:PreventCropRot(client, trace.HitPos)
 	end,
 	OnCanRun = function(item)
-		return IsValid(item.player) and item.player:Alive()
+		return IsValid(item.player) and item.player:Alive() and Schema.perk.GetOwned("farmhand", item.player)
 	end,
 }

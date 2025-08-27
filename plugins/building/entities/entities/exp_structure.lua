@@ -13,6 +13,7 @@ ENT.IsStructure = true
 ENT.IsStructureOrPart = true
 ENT.PopulateEntityInfo = true
 
+AccessorFunc(ENT, "expIsDoorLike", "IsDoorLike")
 AccessorFunc(ENT, "expIsPassable", "IsPassable")
 AccessorFunc(ENT, "expIsLocked", "IsLocked")
 
@@ -393,6 +394,7 @@ function ENT:FinishConstruction(client)
 end
 
 function ENT:SetupDoorAccess(client, role)
+	self:SetIsDoorLike(true)
 	self:ForEachPart(function(child)
 		child.ixAccess = child.ixAccess or {}
 
@@ -402,6 +404,14 @@ function ENT:SetupDoorAccess(client, role)
 
 		child:SetDTEntity(0, client)
 		child.ixAccess[client] = role or DOOR_GUEST
+	end)
+end
+
+function ENT:DisableDoorAccess()
+	self:SetIsDoorLike(false)
+	self:ForEachPart(function(child)
+		child.ixAccess = nil
+		child:SetDTEntity(0, nil)
 	end)
 end
 
@@ -435,6 +445,10 @@ function ENT:TryUse(client)
 	end
 
 	if (self.expIsDecaying) then
+		return
+	end
+
+	if (not self:GetIsDoorLike()) then
 		return
 	end
 

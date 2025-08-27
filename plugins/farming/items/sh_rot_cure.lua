@@ -8,6 +8,7 @@ ITEM.model = "models/props_junk/garbage_plasticbottle002a.mdl"
 ITEM.width = 1
 ITEM.height = 2
 ITEM.price = 500
+ITEM.requiresFarmingPerk = true
 
 ITEM.functions.CureRot = {
 	name = "Cure Rot",
@@ -20,6 +21,6 @@ ITEM.functions.CureRot = {
 		return PLUGIN:CureCropRot(client, trace.HitPos)
 	end,
 	OnCanRun = function(item)
-		return IsValid(item.player) and item.player:Alive()
+		return IsValid(item.player) and item.player:Alive() and Schema.perk.GetOwned("farmhand", item.player)
 	end,
 }

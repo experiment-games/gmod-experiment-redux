@@ -70,9 +70,18 @@ end
 --]]
 
 --[[
-	Auto-generate seed items for all crop items
+	Hooks
 --]]
 
+function PLUGIN:CanPlayerUseBusiness(client, uniqueID)
+	local itemTable = ix.item.list[uniqueID]
+
+	if (itemTable.requiresFarmingPerk and not Schema.perk.GetOwned("farmhand", client)) then
+		return false
+	end
+end
+
+-- Auto-generate seed items for all crop items on initialization
 function PLUGIN:InitializedPlugins()
 	local items = ix.item.list
 
@@ -441,7 +450,12 @@ function PLUGIN:CureCropRot(client, target)
 	end
 end
 
-function PLUGIN:IsValidCropSoil(position, resourceTypeID)
+function PLUGIN:IsValidCropSoil(trace, resourceTypeID)
+	if (IsValid(trace.Entity) and trace.Entity.ValidSoilFor == resourceTypeID) then
+		return true
+	end
+
+	local position = trace.HitPos
 	local triggers = ents.FindInSphere(position, 512)
 
 	resourceTypeID = resourceTypeID or "crops"
