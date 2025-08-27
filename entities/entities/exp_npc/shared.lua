@@ -10,6 +10,8 @@ ENT.Editable = true
 ENT.Spawnable = false
 ENT.AdminOnly = true
 
+ENT.IsPassiveNPC = true
+
 function ENT:SetupDataTables()
 	self:NetworkVar("String", "DisplayName")
 	self:NetworkVar("String", "Description")

@@ -22,12 +22,8 @@ end
 function PLUGIN:PostEntityTakeDamage(target, dmgInfo, wasDamageTaken)
 	local attacker = dmgInfo:GetAttacker()
 
-	-- Only care about player vs player or player vs NPC damage
+	-- Only care about player vs player or NPC vs player damage
 	if (not (IsValid(attacker) and IsValid(target))) then
-		return
-	end
-
-	if (not (attacker:IsPlayer() or target:IsPlayer())) then
 		return
 	end
 
@@ -37,6 +33,7 @@ function PLUGIN:PostEntityTakeDamage(target, dmgInfo, wasDamageTaken)
 
 		turret:TakeDamageInfo(dmgInfo)
 	end
+
 
 	local damagePos = target:GetPos()
 	local detectionRangeSquared = self.turretDetectionRange ^ 2
@@ -60,23 +57,30 @@ function PLUGIN:PostEntityTakeDamage(target, dmgInfo, wasDamageTaken)
 		local distance = turret:GetPos():DistToSqr(damagePos)
 
 		if (distance <= detectionRangeSquared) then
-			-- Determine hostile player
+			-- Determine hostile player and victim
 			local hostilePlayer = nil
+			local victim = nil
 
 			if (attacker:IsPlayer() and target:IsPlayer()) then
-				-- Player vs Player - attacker is hostile
+				-- Player vs Player - attacker is hostile, target is victim
 				hostilePlayer = attacker
+				victim = target
 			elseif (attacker:IsPlayer() and not target:IsPlayer()) then
-				-- Player attacking NPC - player is hostile
+				-- Player attacking NPC - player is hostile, NPC is victim
 				hostilePlayer = attacker
+				victim = target
+			elseif (attacker:IsNPC() and target:IsPlayer()) then
+				-- NPC attacking player - NPC is hostile
+				hostilePlayer = attacker
+				victim = target
 			elseif (not attacker:IsPlayer() and target:IsPlayer()) then
 				-- NPC attacking player - we might want to protect the player
-				-- For now, we'll ignore this case
+				-- For now, we'll ignore this case unless it's a turret mode that cares
 				continue
 			end
 
 			if (IsValid(hostilePlayer)) then
-				turret:SetHostileTarget(hostilePlayer)
+				turret:SetHostileTargetForDamage(hostilePlayer, victim)
 			end
 		end
 	end
@@ -112,15 +116,34 @@ function PLUGIN:SaveData()
 			continue
 		end
 
+		-- Let's not save player NPC's for now
+		if (entity:GetOwnerID() ~= -1) then
+			continue
+		end
+
 		table.insert(npcs, {
 			type = entity:GetTurretType(),
 			pos = entity:GetPos(),
 			ang = entity:GetAngles(),
-			owner = entity:GetOwnerID()
+			owner = entity:GetOwnerID(),
+			mode = entity:GetTurretMode()
 		})
 	end
 
 	self:SetData(npcs)
+end
+
+function PLUGIN:LoadData()
+	local npcs = self:GetData() or {}
+
+	for _, npcData in pairs(npcs) do
+		local turret = self:SpawnTurret(npcData.type, npcData.pos, npcData.ang, npcData.owner)
+
+		-- Restore the turret mode if it was saved
+		if (npcData.mode) then
+			turret:SetTurretMode(npcData.mode)
+		end
+	end
 end
 
 -- Utility function to get all turrets in range of a position

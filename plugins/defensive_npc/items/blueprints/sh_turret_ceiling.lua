@@ -10,6 +10,7 @@ ITEM.height = 1
 -- ITEM.price = 5000
 -- TODO: Disabled because we can't interact with the structure somehow. Perhaps the USE trace doesn't hit?
 ITEM.noBusiness = true
+ITEM.requiresDefensivePerk = true
 ITEM.health = 2500
 ITEM.constructionMaterials = {
 	["material_plastic"] = 1,
@@ -17,6 +18,7 @@ ITEM.constructionMaterials = {
 	["logic_board"] = 1,
 }
 ITEM.structureOffset = Vector(0, 0, -40)
+ITEM.structureMaximum = 3
 ITEM.iconCam = {
 	pos = Vector(43.4826, 61.2703, -19.9838),
 	fov = 46.4,
@@ -40,5 +42,7 @@ function ITEM:OnFinishConstruction(structure, client)
 	-- Remove the structure parts and add the entity in its place
 	structure:Remove()
 
-	PLUGIN:SpawnTurret(turretType, position, angles, ownerID)
+	local turret = PLUGIN:SpawnTurret(turretType, position, angles, ownerID)
+
+	return turret
 end

@@ -25,4 +25,6 @@ function ITEM:OnFinishConstruction(structure, client)
 
 	workstation:Spawn()
 	workstation:Activate()
+
+	return workstation
 end

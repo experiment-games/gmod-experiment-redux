@@ -45,12 +45,17 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 		return
 	end
 
-	if (weapon.ixItem.OnCanBuild and not weapon.ixItem:OnCanBuild(client, position, angles)) then
+	if (item.OnCanBuild and not item:OnCanBuild(client, position, angles)) then
 		return
 	end
 
-	if (weapon.ixItem.structureOffset) then
-		position = position + weapon.ixItem.structureOffset
+	if (item.structureMaximum and client:IsObjectLimited(item.uniqueID, item.structureMaximum)) then
+		client:Notify("You can not place this as you have reached the maximum amount of this structure!")
+		return
+	end
+
+	if (item.structureOffset) then
+		position = position + item.structureOffset
 	end
 
 	local structure = PLUGIN:BuildStructure(client, item, position, angles)

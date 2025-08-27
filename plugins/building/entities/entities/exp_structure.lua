@@ -177,6 +177,10 @@ function ENT:SetStructure(client, item, position, angles)
 
 	self:SetUnderConstruction(true)
 	self:BuildStructure(client, item)
+
+	if (item.structureMaximum) then
+		client:AddLimitedObject(item.uniqueID, self)
+	end
 end
 
 function ENT:BuildStructure(client, item)
@@ -257,7 +261,7 @@ function ENT:OnOptionSelected(client, option, data)
 		-- First pass: validate all materials and calculate what we can add
 		for materialItem, requestedAmount in pairs(data.materials) do
 			local maxNeeded = itemTable:GetConstructionMaterials()[materialItem] -
-			(structureMaterials[materialItem] or 0)
+				(structureMaterials[materialItem] or 0)
 			local actualAmount = math.min(requestedAmount, maxNeeded)
 
 			if (actualAmount <= 0) then
@@ -364,7 +368,26 @@ function ENT:FinishConstruction(client)
 		self:SetupDoorAccess(client, DOOR_OWNER)
 
 		if (self.expItem.OnFinishConstruction) then
-			self.expItem:OnFinishConstruction(self, client)
+			local replacement = self.expItem:OnFinishConstruction(self, client)
+			local builder = self:GetBuilder()
+
+			if (IsValid(replacement) and IsValid(builder)) then
+				local itemTable = self:GetItemTable()
+
+				client:RegisterEntityToRemoveOnLeave(replacement)
+
+				-- Since a replacement is added, we should add that as the limited object since self will be removed
+				if (itemTable and itemTable.structureMaximum) then
+					builder:AddLimitedObject(itemTable.uniqueID, replacement)
+
+					replacement:CallOnRemove(
+						string.format("%s#structureMaximum#%s", builder:SteamID(), replacement:EntIndex()),
+						function()
+							builder:RemoveLimitedObject(itemTable.uniqueID, replacement)
+						end
+					)
+				end
+			end
 		end
 	end)
 end
@@ -592,6 +615,14 @@ function ENT:OnTakeDamage(damageInfo)
 end
 
 function ENT:OnRemove()
+	if (self.expItem.structureMaximum) then
+		local client = self:GetBuilder()
+
+		if (IsValid(client)) then
+			client:RemoveLimitedObject(self.expItem.uniqueID, self)
+		end
+	end
+
 	self:ForEachPart(function(child)
 		child:Remove()
 	end)

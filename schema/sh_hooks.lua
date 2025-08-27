@@ -80,7 +80,6 @@ function Schema:CanPlayerUseBusiness(client, uniqueID)
 
 	local requirementKeys = {
 		requiresGunsmith = "gunsmith",
-		requiresExplosives = "explosives",
 		requiresArmadillo = "armadillo",
 	}
 

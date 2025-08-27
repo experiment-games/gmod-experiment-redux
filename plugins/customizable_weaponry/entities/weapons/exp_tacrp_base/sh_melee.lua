@@ -101,7 +101,11 @@ function SWEP:Melee(alt)
 		if tr.Fraction < 1 then
 			PLUGIN.CancelBodyDamage(tr.Entity, dmginfo, tr.HitGroup)
 
-			if IsValid(tr.Entity) and (tr.Entity:IsNPC() or tr.Entity:IsPlayer() or tr.Entity:IsNextBot()) then
+			if (
+					IsValid(tr.Entity)
+					and (tr.Entity:IsNPC() or tr.Entity:IsPlayer() or tr.Entity:IsNextBot())
+					and (tr.Entity:GetClass() ~= "npc_turret_floor" and tr.Entity:GetClass() ~= "npc_turret_ceiling")
+				) then
 				self:EmitSound(
 					self:ChooseSound(self:GetValue("Sound_MeleeHitBody") or self:GetValue("_Sound_MeleeHitBody")), 75,
 					100, 1,

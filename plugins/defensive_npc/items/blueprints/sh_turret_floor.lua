@@ -16,6 +16,8 @@ ITEM.constructionMaterials = {
 	["logic_board"] = 1,
 }
 ITEM.structureOffset = Vector(0, 0, 1)
+ITEM.structureMaximum = 2
+ITEM.requiresDefensivePerk = true
 ITEM.iconCam = {
 	pos = Vector(55.9871, -29.91, 59.9158),
 	fov = 52.8,
@@ -31,5 +33,7 @@ function ITEM:OnFinishConstruction(structure, client)
 	-- Remove the structure parts and add the entity in its place
 	structure:Remove()
 
-	PLUGIN:SpawnTurret(turretType, position, angles, ownerID)
+	local turret = PLUGIN:SpawnTurret(turretType, position, angles, ownerID)
+
+	return turret
 end

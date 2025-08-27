@@ -18,6 +18,21 @@ PLUGIN.turretTypes = {
 	end,
 }
 
+PLUGIN.TURRET_MODES = {
+	-- Turret is disabled
+	DISABLED = 0,
+	-- Default behavior - defend against hostile activity
+	DEFEND_ALL = 1,
+	-- Only defend when owner is attacked
+	DEFEND_OWNER = 2,
+	-- Only defend alliance members
+	DEFEND_ALLIANCE = 3,
+	-- Attack anyone except owner
+	DEFEND_AREA_OWNER = 4,
+	-- Attack anyone not in owner's alliance
+	DEFEND_AREA_ALLIANCE = 5
+}
+
 ix.util.Include("sv_plugin.lua")
 
 ix.lang.AddTable("english", {
@@ -26,6 +41,17 @@ ix.lang.AddTable("english", {
 	turretOwnerTheBusiness = "The Business' Turret",
 
 	turretHealth = "Health: ",
+	turretMode = "Mode: %s",
+
+	turretRepair = "Repair Turret",
+
+	-- Turret mode options
+	turretModeDisable = "Disable Turret",
+	turretModeDefendAll = "Defend All",
+	turretModeDefendOwner = "Defend Owner Only",
+	turretModeDefendAlliance = "Defend Alliance Members",
+	turretModeDefendAreaOwner = "Attack All Except Owner",
+	turretModeDefendAreaAlliance = "Attack All Except Alliance Members",
 })
 
 --- Checks if a turret of this type can be spawned at the given trace
@@ -36,6 +62,18 @@ function PLUGIN:CanSpawnTurret(turretType, trace)
 	local canSpawn = PLUGIN.turretTypes[turretType]
 
 	return canSpawn and canSpawn(trace)
+end
+
+--[[
+	Hooks
+--]]
+
+function PLUGIN:CanPlayerUseBusiness(client, uniqueID)
+	local itemTable = ix.item.list[uniqueID]
+
+	if (itemTable.requiresDefensivePerk and not Schema.perk.GetOwned("fortress_rights", client)) then
+		return false
+	end
 end
 
 --[[
@@ -63,7 +101,9 @@ do
 		end
 
 		local facingAwayFromPlayerUpright = Angle(0, client:EyeAngles().y, 0)
-		local entity = PLUGIN:SpawnTurret(turretType, trace.HitPos, facingAwayFromPlayerUpright)
+		local character = client:GetCharacter()
+		local ownerID = character and character:GetID() or -1
+		local entity = PLUGIN:SpawnTurret(turretType, trace.HitPos, facingAwayFromPlayerUpright, ownerID)
 
 		client:Notify("You have spawned a defensive turret (" .. turretType .. ").")
 	end
@@ -73,8 +113,6 @@ end
 
 do
 	local COMMAND = {}
-
-	COMMAND.description = "Remove a defensive NPC you are looking at."
 
 	COMMAND.description = "Remove a defensive NPC you are looking at or all within a range."
 	COMMAND.arguments = {

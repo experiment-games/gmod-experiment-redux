@@ -29,10 +29,6 @@ function ENT:StartTouch(ent)
 	end
 
 	hook.Run("PlayerEnteredArea", ent, self.areaID, self.areaName, self)
-
-	if (GetConVar("developer"):GetInt() > 0) then
-		print("[Area] Player ", ent, " entered area ", self.areaID, self.areaName)
-	end
 end
 
 -- Called when an entity stops touching the trigger
@@ -42,10 +38,6 @@ function ENT:EndTouch(ent)
 	end
 
 	hook.Run("PlayerExitedArea", ent, self.areaID, self.areaName, self)
-
-	if (GetConVar("developer"):GetInt() > 0) then
-		print("[Area] Player ", ent, " exited area ", self.areaID, self.areaName)
-	end
 end
 
 -- Handle keyvalues from the map
