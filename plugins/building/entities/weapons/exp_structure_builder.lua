@@ -23,53 +23,53 @@ hook.Add("InputMouseApply", "expStructureBuilderHandleInput", function(userComma
 	local client = LocalPlayer()
 	local weapon = client:GetActiveWeapon()
 
-    if (not IsValid(weapon) or weapon:GetClass() ~= "exp_structure_builder") then
-        return
-    end
+	if (not IsValid(weapon) or weapon:GetClass() ~= "exp_structure_builder") then
+		return
+	end
 
 	local isSpeedDown = client:KeyDown(IN_SPEED)
 
-    if (weapon.expRotation and client:KeyDown(IN_ATTACK2)) then
-        userCommand:SetMouseX(0)
-        userCommand:SetMouseY(0)
+	if (weapon.expRotation and client:KeyDown(IN_ATTACK2)) then
+		userCommand:SetMouseX(0)
+		userCommand:SetMouseY(0)
 
-        local rotateY = x * FrameTime() * 10
-        local rotateP = y * FrameTime() * 10
+		local rotateY = x * FrameTime() * 10
+		local rotateP = y * FrameTime() * 10
 
-        weapon.expRotationUnboundedY = (weapon.expRotationUnboundedY or weapon.expRotation.y) + rotateY
-        weapon.expRotationUnboundedP = (weapon.expRotationUnboundedP or weapon.expRotation.p) + rotateP
+		weapon.expRotationUnboundedY = (weapon.expRotationUnboundedY or weapon.expRotation.y) + rotateY
+		weapon.expRotationUnboundedP = (weapon.expRotationUnboundedP or weapon.expRotation.p) + rotateP
 
-        weapon.expRotation.y = weapon.expRotation.y + rotateY
-        weapon.expRotation.p = weapon.expRotation.p + rotateP
+		weapon.expRotation.y = weapon.expRotation.y + rotateY
+		weapon.expRotation.p = weapon.expRotation.p + rotateP
 
-        if (isSpeedDown) then
-            local snapAngleDegrees = 45
+		if (isSpeedDown) then
+			local snapAngleDegrees = 45
 
-            weapon.expRotation.y = math.Round(weapon.expRotationUnboundedY / snapAngleDegrees) * snapAngleDegrees
-            weapon.expRotation.p = math.Round(weapon.expRotationUnboundedP / snapAngleDegrees) * snapAngleDegrees
-        end
+			weapon.expRotation.y = math.Round(weapon.expRotationUnboundedY / snapAngleDegrees) * snapAngleDegrees
+			weapon.expRotation.p = math.Round(weapon.expRotationUnboundedP / snapAngleDegrees) * snapAngleDegrees
+		end
 
-        return true
-    end
+		return true
+	end
 
-    -- if (client:KeyDown(IN_USE)) then
+	-- if (client:KeyDown(IN_USE)) then
 	-- 	userCommand:SetMouseX(0)
 	-- 	userCommand:SetMouseY(0)
 
 	-- 	local moveZ = -y * FrameTime() * 10
-    --     local moveX = x * FrameTime() * 10
+	--     local moveX = x * FrameTime() * 10
 
 	-- 	weapon.expPositionOffset = weapon.expPositionOffset or Vector(0, 0, 0)
 
-    --     weapon.expPositionOffset.z = math.Clamp(weapon.expPositionOffset.z + moveZ, -100, 100)
-    --     weapon.expPositionOffset.x = math.Clamp(weapon.expPositionOffset.x + moveX, -100, 100)
+	--     weapon.expPositionOffset.z = math.Clamp(weapon.expPositionOffset.z + moveZ, -100, 100)
+	--     weapon.expPositionOffset.x = math.Clamp(weapon.expPositionOffset.x + moveX, -100, 100)
 
-    --     if (isSpeedDown) then
+	--     if (isSpeedDown) then
 	-- 		weapon.expPositionSnap = 10
 	-- 	end
 
-    --     return true
-    -- else
+	--     return true
+	-- else
 	-- 	weapon.expPositionSnap = nil
 	-- end
 end)
@@ -87,25 +87,25 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 
 	local weapon = client:GetActiveWeapon()
 
-    if (not IsValid(weapon) or weapon:GetClass() ~= "exp_structure_builder") then
-        return
-    end
+	if (not IsValid(weapon) or weapon:GetClass() ~= "exp_structure_builder") then
+		return
+	end
 
 	if (not weapon.ixItem) then
 		return
 	end
 
-    local position, angles = PLUGIN:GetPlacementTrace(client)
+	local position, angles = PLUGIN:GetPlacementTrace(client)
 	local isPlacementValid, otherStructureOrError = PLUGIN:GetPlacementValid(client, position, angles)
-    weapon.expRotation = weapon.expRotation or angles
+	weapon.expRotation = weapon.expRotation or angles
 
-    -- if (weapon.expPositionOffset) then
+	-- if (weapon.expPositionOffset) then
 	-- 	local aim = client:EyeAngles()
-    --     local offset =
+	--     local offset =
 	-- 		aim:Forward() * weapon.expPositionOffset.x
 	-- 		-- + aim:Up() * weapon.expPositionOffset.z
 
-    -- 	position = position + offset
+	-- 	position = position + offset
 	-- end
 
 	if (weapon.ixItem.structureOffset) then
@@ -118,7 +118,7 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 			structure.part.position,
 			structure.part.angles,
 			position,
-            weapon.expRotation)
+			weapon.expRotation)
 
 		-- if (weapon.expPositionSnap) then
 		-- 	structurePosition = Vector(
@@ -126,30 +126,32 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 		-- 		math.Round(structurePosition.y / weapon.expPositionSnap) * weapon.expPositionSnap,
 		-- 		math.Round(structurePosition.z / weapon.expPositionSnap) * weapon.expPositionSnap
 		-- 	)
-        -- end
+		-- end
 
-        weapon.expLastStructurePosition = structurePosition
+		weapon.expLastStructurePosition = structurePosition
 		weapon.expLastStructureAngles = structureAngles
 
 		structure.entity:SetPos(weapon.expLastStructurePosition)
-        structure.entity:SetAngles(weapon.expLastStructureAngles)
+		structure.entity:SetAngles(weapon.expLastStructureAngles)
 
 		local placeError = nil
 
-        if (not isPlacementValid) then
-            placeError = otherStructureOrError
-        else
-            local boundsMin, boundsMax = structure.entity:GetCollisionBounds()
-            local cube = Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, structure.entity:GetPos(),
-                structure.entity:GetAngles())
-            local canPlace = not Schema.util.TracePointsHit(cube, function(e)
-                return not (e.IsStructure or e.IsStructurePart)
-            end)
+		if (not isPlacementValid) then
+			placeError = otherStructureOrError
+		else
+			local boundsMin, boundsMax = structure.entity:GetCollisionBounds()
+			local cube = Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, structure.entity:GetPos(),
+				structure.entity:GetAngles())
+			local canPlace = not Schema.util.TracePointsHit(cube, function(e)
+				return not (e.IsStructure or e.IsStructurePart)
+			end)
 
-            if (not canPlace) then
-                placeError = "You cannot build here."
-            end
-        end
+			if (not canPlace) then
+				placeError = "You cannot build here."
+			elseif (weapon.ixItem.OnCanBuild and not weapon.ixItem:OnCanBuild(client, position, angles)) then
+				placeError = "You cannot build here."
+			end
+		end
 
 		weapon.expLastCanPlaceError = placeError
 
@@ -197,7 +199,7 @@ function SWEP:BuildStructureIfNotExists(client, itemTable)
 
 	local structure = itemTable:GetStructure(client)
 
-    self.expClientSideModels = self.expClientSideModels or {}
+	self.expClientSideModels = self.expClientSideModels or {}
 	self.ixItem = itemTable
 
 	for _, structurePart in ipairs(structure) do
@@ -230,12 +232,12 @@ function SWEP:Think()
 end
 
 function SWEP:OnRemove()
-    BaseClass.OnRemove(self)
+	BaseClass.OnRemove(self)
 
 	if (CLIENT) then
-        for _, structure in ipairs(self.expClientSideModels or {}) do
-            structure.entity:Remove()
-        end
+		for _, structure in ipairs(self.expClientSideModels or {}) do
+			structure.entity:Remove()
+		end
 
 		self.expClientSideModels = nil
 	end
@@ -251,9 +253,9 @@ function SWEP:PrimaryAttack()
 			return
 		end
 
-        self.Owner:Notify(self.expLastCanPlaceError)
-        return
-    end
+		self.Owner:Notify(self.expLastCanPlaceError)
+		return
+	end
 
 	local position = self.expLastStructurePosition
 

@@ -356,6 +356,21 @@ function PANEL:SetItem(itemTable)
 	else
 		self.shipmentSize:SetText("(Each)")
 	end
+
+	-- For some reason the icon tends to render empty the first time around, so we delay it and render again
+	timer.Simple(0.1, function()
+		if ((itemTable.iconCam and ! ICON_RENDER_QUEUE[itemTable.uniqueID]) or itemTable.forceRender) then
+			if IsValid(self.icon) then
+				local iconCam = itemTable.iconCam
+				iconCam = {
+					cam_pos = iconCam.pos,
+					cam_fov = iconCam.fov,
+					cam_ang = iconCam.ang,
+				}
+				self.icon:RebuildSpawnIconEx(iconCam)
+			end
+		end
+	end)
 end
 
 vgui.Register("expBusinessItem", PANEL, "ixBusinessItem")

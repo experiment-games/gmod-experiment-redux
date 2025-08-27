@@ -4,6 +4,20 @@ PLUGIN.name = "Defensive NPC's"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Let super admins spawn defensive NPC's."
 
+-- Configuration
+PLUGIN.turretDetectionRange = 500 -- Range to detect hostile activity
+PLUGIN.turretTypes = {
+	["ceiling"] = function(trace)
+		-- The hitnormal Z must be around -1 to ensure it's a ceiling turret
+		return trace.Hit and not trace.HitSky and trace.HitNormal.z < -0.9
+	end,
+
+	["floor"] = function(trace)
+		-- Check if the player can spawn a floor turret here
+		return trace.Hit and not trace.HitSky and trace.HitNormal.z > 0
+	end,
+}
+
 ix.util.Include("sv_plugin.lua")
 
 ix.lang.AddTable("english", {
@@ -13,6 +27,20 @@ ix.lang.AddTable("english", {
 
 	turretHealth = "Health: ",
 })
+
+--- Checks if a turret of this type can be spawned at the given trace
+--- @param turretType string
+--- @param trace TraceResult
+--- @return boolean
+function PLUGIN:CanSpawnTurret(turretType, trace)
+	local canSpawn = PLUGIN.turretTypes[turretType]
+
+	return canSpawn and canSpawn(trace)
+end
+
+--[[
+	Commands
+--]]
 
 do
 	local COMMAND = {}
@@ -27,16 +55,9 @@ do
 	function COMMAND:OnRun(client, turretType)
 		turretType = turretType or "floor"
 
-		if (not PLUGIN.turretTypes[turretType]) then
-			client:Notify("Invalid turret type. Valid types are: " ..
-				table.concat(table.GetKeys(PLUGIN.turretTypes), ", "))
-			return
-		end
-
-		local canSpawn = PLUGIN.turretTypes[turretType]
 		local trace = client:GetEyeTraceNoCursor()
 
-		if (not canSpawn(client, trace)) then
+		if (not PLUGIN:CanSpawnTurret(turretType, trace)) then
 			client:Notify("Cannot spawn a " .. turretType .. " defensive NPC here.")
 			return
 		end

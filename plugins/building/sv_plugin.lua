@@ -45,6 +45,10 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 		return
 	end
 
+	if (weapon.ixItem.OnCanBuild and not weapon.ixItem:OnCanBuild(client, position, angles)) then
+		return
+	end
+
 	if (weapon.ixItem.structureOffset) then
 		position = position + weapon.ixItem.structureOffset
 	end

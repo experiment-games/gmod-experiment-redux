@@ -24,12 +24,12 @@ function ITEM:GetFilters()
 end
 
 function ITEM:GetModel()
-    if (SERVER) then
-        -- Attachments are really small, so to prevent them glitching, show a bigger model when spawning the item on the server
-        return "models/props_lab/clipboard.mdl"
-    end
+	if (SERVER) then
+		-- Attachments are really small, so to prevent them glitching, show a bigger model when spawning the item on the server
+		return "models/props_lab/clipboard.mdl"
+	end
 
-    return self.model
+	return self.model
 end
 
 function ITEM:GetConstructionMaterials()
@@ -45,15 +45,15 @@ function ITEM.PaintOver(icon, item, width, height)
 	if (not icon.expOverridePaint) then
 		icon.expOverridePaint = true
 
-		icon.Paint = function (icon, width, height)
-		  surface.SetDrawColor(255, 255, 255, 100)
-		  surface.SetMaterial(overlayMaterial)
-		  surface.DrawTexturedRect(0, 0, width, height)
+		icon.Paint = function(icon, width, height)
+			surface.SetDrawColor(255, 255, 255, 100)
+			surface.SetMaterial(overlayMaterial)
+			surface.DrawTexturedRect(0, 0, width, height)
 		end
 	end
 
-    surface.SetDrawColor(255, 255, 255, 255)
-    surface.SetMaterial(iconMaterial)
+	surface.SetDrawColor(255, 255, 255, 255)
+	surface.SetMaterial(iconMaterial)
 	surface.DrawTexturedRect(width - iconSize - iconMargin, height - iconSize - iconMargin, iconSize, iconSize)
 end
 

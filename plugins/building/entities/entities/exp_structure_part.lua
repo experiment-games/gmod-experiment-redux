@@ -1,7 +1,7 @@
 local PLUGIN = PLUGIN
 
 if (SERVER) then
-    AddCSLuaFile()
+	AddCSLuaFile()
 end
 
 ENT.Type = "anim"
@@ -14,29 +14,29 @@ ENT.Spawnable = false
 ENT.AdminOnly = true
 
 function ENT:GetUnderConstruction()
-    local parent = self:GetParent()
+	local parent = self:GetParent()
 
-    if (IsValid(parent)) then
-        return parent:GetUnderConstruction()
-    end
+	if (IsValid(parent)) then
+		return parent:GetUnderConstruction()
+	end
 
-    return false
+	return false
 end
 
 function ENT:OnPopulateEntityInfo(tooltip)
-    local parent = self:GetParent()
+	local parent = self:GetParent()
 
-    if (IsValid(parent)) then
+	if (IsValid(parent)) then
 		parent:OnPopulateEntityInfo(tooltip)
-    end
+	end
 end
 
 function ENT:GetEntityMenu(client)
-    local parent = self:GetParent()
+	local parent = self:GetParent()
 
-    if (IsValid(parent)) then
-        return parent:GetEntityMenu(client)
-    end
+	if (IsValid(parent)) then
+		return parent:GetEntityMenu(client)
+	end
 end
 
 function ENT:GetGroundLevel()
@@ -50,51 +50,51 @@ function ENT:GetGroundLevel()
 end
 
 if (SERVER) then
-    function ENT:Initialize()
-        self:SetMoveType(MOVETYPE_NONE)
+	function ENT:Initialize()
+		self:SetMoveType(MOVETYPE_NONE)
 
-        self:SetSolid(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_VPHYSICS)
 
-        -- Start off with no collision, we'll be attached to the player until we're fully constructed
+		-- Start off with no collision, we'll be attached to the player until we're fully constructed
 		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
-    end
+	end
 
-    function ENT:OnTakeDamage(damageInfo)
-        local parent = self:GetParent()
+	function ENT:OnTakeDamage(damageInfo)
+		local parent = self:GetParent()
 
-        if (IsValid(parent)) then
-            parent:TakeDamage(damageInfo:GetDamage(), damageInfo:GetAttacker(), damageInfo:GetInflictor())
-        end
-    end
+		if (IsValid(parent)) then
+			parent:TakeDamage(damageInfo:GetDamage(), damageInfo:GetAttacker(), damageInfo:GetInflictor())
+		end
+	end
 
 	function ENT:OnOptionSelected(client, option, data)
-        local parent = self:GetParent()
+		local parent = self:GetParent()
 
-        if (IsValid(parent)) then
+		if (IsValid(parent)) then
 			parent:OnOptionSelected(client, option, data)
 		end
 	end
 
-    function ENT:Touch(entity)
-        if (self.expIsTouched == nil) then
-            return
-        end
+	function ENT:Touch(entity)
+		if (self.expIsTouched == nil) then
+			return
+		end
 
-        -- Allow parts to only clip eachother
-        if (entity.IsStructure or entity.IsStructurePart) then
-            return
-        end
+		-- Allow parts to only clip eachother
+		if (entity.IsStructure or entity.IsStructurePart) then
+			return
+		end
 
-        self.expIsTouched = true
-    end
+		self.expIsTouched = true
+	end
 
-    function ENT:AcceptInput(inputName, activator, caller, data)
-        local parent = self:GetParent()
+	function ENT:AcceptInput(inputName, activator, caller, data)
+		local parent = self:GetParent()
 
-        if (IsValid(parent)) then
-            parent:AcceptInput(inputName, activator, caller, data)
-        end
-    end
+		if (IsValid(parent)) then
+			parent:AcceptInput(inputName, activator, caller, data)
+		end
+	end
 
 	function ENT:OnRemove()
 		local parent = self:GetParent()

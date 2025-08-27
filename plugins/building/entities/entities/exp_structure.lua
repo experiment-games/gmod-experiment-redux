@@ -90,6 +90,8 @@ function ENT:GetEntityMenu(client)
 
 	local structureMaterials = self:GetNetVar("structureMaterials", {})
 	local anyMaterialsRemaining = false
+	local canFillAllMaterials = true
+	local allMaterialsData = {}
 
 	for materialItem, amount in pairs(itemTable:GetConstructionMaterials()) do
 		local item = ix.item.list[materialItem]
@@ -103,6 +105,13 @@ function ENT:GetEntityMenu(client)
 
 		anyMaterialsRemaining = true
 
+		-- Store data for "fill all materials" option
+		if (fillCount > 0) then
+			allMaterialsData[materialItem] = fillCount
+		else
+			canFillAllMaterials = false
+		end
+
 		if (fillCount <= 0) then
 			continue
 		end
@@ -112,8 +121,17 @@ function ENT:GetEntityMenu(client)
 				amount = fillCount,
 				item = materialItem
 			})
-
 			-- We manually send the amount of materials to fill
+			return false
+		end
+	end
+
+	-- Add "fill all materials" option if player has all required materials
+	if (anyMaterialsRemaining and canFillAllMaterials and table.Count(allMaterialsData) > 0) then
+		options[L("fillAllMaterials")] = function()
+			ix.menu.NetworkChoice(self, "fillAllMaterials", {
+				materials = allMaterialsData
+			})
 			return false
 		end
 	end
@@ -227,6 +245,50 @@ function ENT:OnOptionSelected(client, option, data)
 
 		self:SetNetVar("structureMaterials", structureMaterials)
 
+		self:CheckConstruction(client)
+	elseif (option == "fillAllMaterials") then
+		local character = client:GetCharacter()
+		local inventory = character:GetInventory()
+		local structureMaterials = self:GetNetVar("structureMaterials", {})
+		local itemTable = self:GetItemTable()
+		local materialsToAdd = {}
+		local totalMaterialsAdded = 0
+
+		-- First pass: validate all materials and calculate what we can add
+		for materialItem, requestedAmount in pairs(data.materials) do
+			local maxNeeded = itemTable:GetConstructionMaterials()[materialItem] -
+			(structureMaterials[materialItem] or 0)
+			local actualAmount = math.min(requestedAmount, maxNeeded)
+
+			if (actualAmount <= 0) then
+				continue -- Skip materials that are already filled
+			end
+
+			local ownedAmount = inventory:GetItemCount(materialItem)
+
+			if (ownedAmount < actualAmount) then
+				client:Notify("You do not have enough materials to fill everything.")
+				return
+			end
+
+			materialsToAdd[materialItem] = actualAmount
+			totalMaterialsAdded = totalMaterialsAdded + actualAmount
+		end
+
+		-- Check if we actually have materials to add
+		if (totalMaterialsAdded == 0) then
+			client:Notify("All required materials have already been filled.")
+			return
+		end
+
+		-- Second pass: actually remove items and update structure
+		for materialItem, amount in pairs(materialsToAdd) do
+			inventory:RemoveStackedItem(materialItem, amount)
+			structureMaterials[materialItem] = (structureMaterials[materialItem] or 0) + amount
+		end
+
+		self:SetNetVar("structureMaterials", structureMaterials)
+		client:Notify(string.format("Added %d materials to construction.", totalMaterialsAdded))
 		self:CheckConstruction(client)
 	elseif (option == L("finishConstruction", client)) then
 		self:CheckConstruction(client)

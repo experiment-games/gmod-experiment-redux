@@ -84,6 +84,7 @@ if (not SERVER) then
 		})
 
 		healthBar:Dock(BOTTOM)
+		healthBar:SizeToContents()
 	end
 
 	function ENT:Think()

@@ -1,33 +1,14 @@
 local PLUGIN = PLUGIN
 
--- Configuration
-PLUGIN.turretDetectionRange = 500 -- Range to detect hostile activity
-PLUGIN.turretTypes = {
-	["ceiling"] = function(client, trace)
-		-- The hitnormal Z must be around -1 to ensure it's a ceiling turret
-		return trace.Hit and not trace.HitSky and trace.HitNormal.z < -0.9
-	end,
-
-	["floor"] = function(client, trace)
-		-- Check if the player can spawn a floor turret here
-		return trace.Hit and not trace.HitSky and trace.HitNormal.z > 0
-	end,
-}
-
 -- Store active turrets for efficient lookup
 PLUGIN.activeTurrets = PLUGIN.activeTurrets or {}
 
-function PLUGIN:SpawnTurret(turretType, position, angles)
-	if (not self.turretTypes[turretType]) then
-		ix.util.SchemaErrorNoHalt("Invalid turret type: " .. turretType)
-		return
-	end
-
+function PLUGIN:SpawnTurret(turretType, position, angles, ownerID)
 	local entity = ents.Create("exp_turret")
 	entity:SetPos(position)
 	entity:SetAngles(angles)
 	entity:SetTurretType(turretType)
-	entity:SetOwnerID(-1) -- Belonging to 'The Business'
+	entity:SetOwnerID(ownerID or -1) -- Belonging to 'The Business'
 	entity:Spawn()
 	entity:Activate()
 
@@ -118,7 +99,7 @@ function PLUGIN:LoadData()
 	local npcs = self:GetData() or {}
 
 	for _, npcData in pairs(npcs) do
-		self:SpawnTurret(npcData.type, npcData.pos, npcData.ang)
+		self:SpawnTurret(npcData.type, npcData.pos, npcData.ang, npcData.owner)
 	end
 end
 
@@ -134,7 +115,8 @@ function PLUGIN:SaveData()
 		table.insert(npcs, {
 			type = entity:GetTurretType(),
 			pos = entity:GetPos(),
-			ang = entity:GetAngles()
+			ang = entity:GetAngles(),
+			owner = entity:GetOwnerID()
 		})
 	end
 

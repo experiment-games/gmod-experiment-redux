@@ -64,6 +64,14 @@ function PANEL:GetColorForValue()
 	return self.progressColors[#self.progressColors].color
 end
 
+function PANEL:GetText()
+	local value = self:GetValue()
+	local maxValue = self.maxValue
+	local prefix = self.prefix
+
+	return prefix .. value .. " / " .. maxValue
+end
+
 function PANEL:Paint(w, h)
 	local value = self:GetValue()
 	local maxValue = self.maxValue
@@ -85,7 +93,7 @@ function PANEL:Paint(w, h)
 	end
 
 	draw.SimpleTextOutlined(
-		prefix .. value .. " / " .. maxValue,
+		self:GetText(),
 		"ixSmallFont",
 		4,
 		h * .5,
@@ -95,6 +103,13 @@ function PANEL:Paint(w, h)
 		1,
 		color_black
 	)
+end
+
+function PANEL:SizeToContents()
+	surface.SetFont("ixSmallFont")
+	local textWidth, textHeight = surface.GetTextSize(self:GetText())
+	self:SetWide(textWidth + 8)
+	self:SetTall(textHeight + 8)
 end
 
 vgui.Register("expProgressBar", PANEL, "EditablePanel")
