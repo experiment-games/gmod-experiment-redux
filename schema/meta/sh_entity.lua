@@ -3,7 +3,6 @@ local META = FindMetaTable("Entity")
 if (SERVER) then
 	util.AddNetworkString("expPlayerBodyGroupChanged")
 	util.AddNetworkString("expPlayerBodyGroupsChanged")
-	util.AddNetworkString("expLongRangeInteraction") -- TODO: Remove after resolving NebulousCloud/helix#483
 	util.AddNetworkString("expRemoveDecals")
 
 	META.expSetBodygroup = META.expSetBodygroup or META.SetBodygroup
@@ -146,47 +145,7 @@ if (SERVER) then
 			end
 		end)
 	end
-
-	--[[
-		Net Messages
-	--]]
-
-	-- TODO: Remove after resolving NebulousCloud/helix#483
-	net.Receive("expLongRangeInteraction", function(len, client)
-		local entity = net.ReadEntity()
-		local option = net.ReadString()
-		local data = net.ReadType()
-
-		if (not IsValid(entity) or not entity.OnOptionSelected) then
-			return
-		end
-
-		-- Ensure the entity is within range
-		local maxRange = 192 ^ 2
-
-		if (entity:GetPos():Distance(client:GetPos()) > maxRange) then
-			return
-		end
-
-		entity:OnOptionSelected(client, option, data)
-	end)
 else
-	--- TODO: Remove after resolving NebulousCloud/helix#483
-	--- Send long range interaction
-	--- @param option string
-	--- @param data any
-	function META:SendLongRangeInteraction(option, data)
-		if (not IsValid(self)) then
-			return
-		end
-
-		net.Start("expLongRangeInteraction")
-		net.WriteEntity(self)
-		net.WriteString(option)
-		net.WriteType(data)
-		net.SendToServer()
-	end
-
 	--[[
 		Net Messages
 	--]]

@@ -41,6 +41,10 @@ function ENT:SetupAnimatedProp()
 	self.animatedProp = ents.Create("prop_dynamic")
 	self:SetAnimatedProp(self.animatedProp)
 
+	self.animatedProp.OnOptionSelected = function(animatedProp, client, option, data)
+		return self:OnOptionSelected(client, option, data)
+	end
+
 	self.animatedProp:SetModel(self:GetModel())
 	self.animatedProp:SetPos(pos)
 	self.animatedProp:SetAngles(ang)

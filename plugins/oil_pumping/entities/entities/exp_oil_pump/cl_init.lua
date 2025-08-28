@@ -75,27 +75,15 @@ function ENT:GetEntityMenu()
 
 	-- If broken, allow repairs
 	if (self:GetIsBroken()) then
-		options[L("oilPumpRepair")] = function()
-			self:SendLongRangeInteraction(L("oilPumpRepair"))
-
-			return false
-		end
+		options[L("oilPumpRepair")] = function() end
 
 		return options
 	end
 
 	if (not self:GetIsDisabled()) then
-		options[L("oilPumpDisable")] = function()
-			self:SendLongRangeInteraction(L("oilPumpDisable"))
-
-			return false
-		end
+		options[L("oilPumpDisable")] = function() end
 	else
-		options[L("oilPumpEnable")] = function()
-			self:SendLongRangeInteraction(L("oilPumpEnable"))
-
-			return false
-		end
+		options[L("oilPumpEnable")] = function() end
 	end
 
 	-- Add scrap option
@@ -103,11 +91,7 @@ function ENT:GetEntityMenu()
 	local inventory = character:GetInventory()
 
 	if (inventory:HasItem("scrap")) then
-		options[L("oilPumpAddScrap")] = function()
-			self:SendLongRangeInteraction(L("oilPumpAddScrap"))
-
-			return false
-		end
+		options[L("oilPumpAddScrap")] = function() end
 	end
 
 	-- Oil extraction options
@@ -115,20 +99,12 @@ function ENT:GetEntityMenu()
 
 	-- Oil drum extraction (500L)
 	if (currentOil >= 500 and inventory:HasItem("oil_drum_empty")) then
-		options[L("oilPumpExtractOilDrum")] = function()
-			self:SendLongRangeInteraction(L("oilPumpExtractOilDrum"))
-
-			return false
-		end
+		options[L("oilPumpExtractOilDrum")] = function() end
 	end
 
 	-- Gas can extraction (50L)
 	if (currentOil >= 50 and inventory:HasItem("gas_can_empty")) then
-		options[L("oilPumpExtractGasCan")] = function()
-			self:SendLongRangeInteraction(L("oilPumpExtractGasCan"))
-
-			return false
-		end
+		options[L("oilPumpExtractGasCan")] = function() end
 	end
 
 	return options

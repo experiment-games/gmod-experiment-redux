@@ -17,6 +17,18 @@ function PLUGIN:SpawnOilPump(position, angles, ownerID)
 	return entity
 end
 
+function PLUGIN:CanPlayerInteractEntity(client, entity, option, data)
+	local parent = entity:GetParent()
+
+	if (not IsValid(parent)) then
+		return
+	end
+
+	if (parent.IsOilPump and entity:GetPos():DistToSqr(client:GetPos()) < 192 ^ 2) then
+		return true -- Force allow interacting if within larger than default range large entity
+	end
+end
+
 -- Clean up pump tracking when entities are removed
 function PLUGIN:EntityRemoved(entity)
 	if (entity:GetClass() == "exp_oil_pump") then
