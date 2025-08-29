@@ -67,7 +67,7 @@ Additionally you should consider this for a production server:
     /path/to/gmod/srcds -console -game garrysmod -tickrate 100 +maxplayers 64 +gamemode experiment-redux +map rp_c18_v2 +host_workshop_collection 3215035081
     ```
 
-    *Replace `3215035081` with the ID of the Workshop Collection you created. You can use `3215035081` for the default content and `exp_c18_v1_alpha033` map*
+    *Replace `3215035081` with the ID of the Workshop Collection you created. You can use `3215035081` for the default content and `exp_c18_v1_alpha034` map*
 
 8. Open Garry's Mod and connect to the server by typing `connect <server ip>:27015` in the console. Replace `<server-ip>` with the IP of the server:
 

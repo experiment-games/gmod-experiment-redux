@@ -25,7 +25,7 @@ cmd="/home/steam/server_1/srcds_run -console \
         -tickrate 100 \
         +maxplayers 64 \
         +gamemode experiment-redux \
-        +map exp_c18_v1_alpha033 \
+        +map exp_c18_v1_alpha034 \
         +host_workshop_collection 3215035081 \
         +sv_setsteamaccount REPLACE_WITH_STEAM_API_KEY"
 
