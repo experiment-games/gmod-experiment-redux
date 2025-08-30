@@ -9,6 +9,10 @@ function ENT:InitializeAnimation()
 	self.AnimationEndTime = 0
 	self.JumpDuration = 0.8
 
+	-- Fix for T-pose issue
+	self.PendingActivityAfterAnimation = nil
+	self.ForceActivityUpdate = false
+
 	self:SetPoseParameter("move_x", 0)
 	self:SetPoseParameter("move_y", 0)
 end
@@ -16,21 +20,51 @@ end
 function ENT:UpdateAnimation()
 	local currentTime = CurTime()
 
+	-- Process animation requests
 	if (self.AnimationRequestType ~= self.AnimationRequest.NONE and self.AnimationEndTime <= currentTime) then
 		self:ProcessAnimationRequest(currentTime)
 	end
 
+	-- Check if special animation just ended
+	if (self.AnimationRequestType == self.AnimationRequest.NONE and self.AnimationEndTime > 0 and currentTime >= self.AnimationEndTime) then
+		self:OnSpecialAnimationEnd()
+	end
+
 	self:UpdateAnimationState()
 
-	if (self.RequestedActivity ~= self.LastActivity) then
+	-- Force activity update if needed or if activity changed
+	if (self.ForceActivityUpdate or self.RequestedActivity ~= self.LastActivity) then
 		self:StartActivity(self.RequestedActivity)
 		self.LastActivity = self.RequestedActivity
+		self.ForceActivityUpdate = false
 	end
 
 	local activity = self:GetActivity()
-	if (activity == ACT_HL2MP_IDLE or activity == ACT_HL2MP_WALK or activity == ACT_HL2MP_RUN) then
+	if (activity == ACT_HL2MP_IDLE or activity == ACT_HL2MP_WALK or activity == ACT_HL2MP_RUN or
+			string.find(tostring(activity), "HL2MP_IDLE") or
+			string.find(tostring(activity), "HL2MP_WALK") or
+			string.find(tostring(activity), "HL2MP_RUN")) then
 		self:BodyMoveXY()
 	end
+end
+
+-- FIXED: Handle end of special animations properly
+function ENT:OnSpecialAnimationEnd()
+	-- Clear animation end time to prevent repeated calls
+	self.AnimationEndTime = 0
+
+	-- Restore appropriate activity based on current state
+	if (self.PendingActivityAfterAnimation) then
+		self.RequestedActivity = self.PendingActivityAfterAnimation
+		self.PendingActivityAfterAnimation = nil
+		self.ForceActivityUpdate = true
+	else
+		-- Default to idle with current holdtype
+		self.RequestedActivity = self:GetHoldTypeActivity(ACT_HL2MP_IDLE)
+		self.ForceActivityUpdate = true
+	end
+
+	print("Special animation ended, restoring activity:", self.RequestedActivity)
 end
 
 -- Get holdtype-specific activities

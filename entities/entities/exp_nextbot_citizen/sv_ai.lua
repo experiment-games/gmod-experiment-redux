@@ -81,4 +81,9 @@ end
 function ENT:SetSchedule(schedule)
 	-- TODO: Implement SetSchedule for NextBot
 	print("TODO: Implement SetSchedule for NextBot")
+
+	if (IsValid(self.CurrentWeapon) and (schedule == SCHED_RELOAD or schedule == SCHED_HIDE_AND_RELOAD)) then
+		-- TODO: Animate before actually setting the ammo
+		self.CurrentWeapon:SetClip1(self.CurrentWeapon:GetMaxClip1())
+	end
 end

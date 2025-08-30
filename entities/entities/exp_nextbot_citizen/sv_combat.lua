@@ -17,6 +17,18 @@ function ENT:InitializeCombat()
 	-- Combat pose parameters
 	self.AimYaw = 0
 	self.AimPitch = 0
+
+	-- Ranged combat parameters
+	self.OptimalRangedDistance = 400
+	self.MinRangedDistance = 200
+	self.MaxRangedDistance = 800
+
+	-- Fix for erratic movement
+	self.LastPositionUpdate = 0
+	self.PositionUpdateCooldown = 2.0 -- Only recalculate position every 2 seconds
+	self.InCombatPosition = false
+	self.LastAttackAttempt = 0
+	self.AttackCooldown = 1.5
 end
 
 function ENT:HandleDamage(damageInfo)
@@ -39,6 +51,10 @@ function ENT:EnterCombatMode()
 		local distance = self:GetRangeTo(self:GetEnemy():GetPos())
 		self:SelectBestWeaponForRange(distance)
 	end
+
+	-- Reset position tracking
+	self.InCombatPosition = false
+	self.LastPositionUpdate = 0
 end
 
 function ENT:SetAggressiveMode(player)
@@ -65,6 +81,9 @@ function ENT:SetEnemy(entity)
 		local distance = self:GetRangeTo(entity:GetPos())
 		self:SelectBestWeaponForRange(distance)
 	end
+
+	-- Reset position when enemy changes
+	self.InCombatPosition = false
 end
 
 function ENT:GetEnemy()
@@ -146,6 +165,118 @@ function ENT:ChaseEnemy(options)
 		return "lost_target"
 	end
 
+	local isRangedWeapon = self:IsUsingRangedWeapon()
+
+	-- Determine behavior based on weapon type
+	if (isRangedWeapon) then
+		return self:EngageWithRangedWeapon(path, options)
+	else
+		return self:EngageWithMeleeWeapon(path, options)
+	end
+end
+
+function ENT:EngageWithRangedWeapon(path, options)
+	if (not self:HaveEnemy()) then
+		return "lost_target"
+	end
+
+	local targetPos = self:GetEnemy():GetPos()
+	local currentDistance = self:GetRangeTo(targetPos)
+	local effectiveRange = self:GetEffectiveAttackRange()
+
+	while (self:HaveEnemy()) do
+		currentDistance = self:GetRangeTo(self:GetEnemy():GetPos())
+		targetPos = self:GetEnemy():GetPos()
+
+		-- Update aim direction for weapon aiming
+		self:UpdateAimDirection()
+		self:SnapToFaceEnemy()
+
+		-- Update weapon selection based on distance (less frequently)
+		if (CurTime() - self.LastCombatWeaponSwitch >= self.CombatWeaponSwitchCooldown) then
+			self:UpdateCombatWeaponSelection(currentDistance)
+		end
+
+		-- Check if we can attack from current position
+		if (currentDistance <= effectiveRange and currentDistance >= self.MinRangedDistance) then
+			-- We're in good range
+			self.InCombatPosition = true
+
+			-- Attack if cooldown is ready
+			if (CurTime() - self.LastAttackAttempt >= self.AttackCooldown) then
+				self:PerformAttack()
+				self.LastAttackAttempt = CurTime()
+			end
+
+			-- Stay in position and keep aiming
+			self:SnapToFaceEnemy()
+			coroutine.wait(0.2)
+			continue
+		end
+
+		-- Only recalculate position if we're not in a good position and enough time has passed
+		if (not self.InCombatPosition and CurTime() - self.LastPositionUpdate >= self.PositionUpdateCooldown) then
+			local needsMovement = false
+			local targetMovePos = nil
+
+			if (currentDistance < self.MinRangedDistance) then
+				-- Too close, back away
+				targetMovePos = self:CalculateBackoffPosition(targetPos, self.OptimalRangedDistance)
+				needsMovement = true
+			elseif (currentDistance > effectiveRange) then
+				-- Too far, move closer
+				targetMovePos = self:CalculateApproachPosition(targetPos, self.OptimalRangedDistance)
+				needsMovement = true
+			end
+
+			-- Execute movement if needed
+			if (needsMovement and targetMovePos) then
+				path:Compute(self, targetMovePos)
+				self.LastPositionUpdate = CurTime()
+				self.InCombatPosition = false
+
+				if (path:IsValid()) then
+					-- Move for a limited time, then reassess
+					local moveStartTime = CurTime()
+					local maxMoveTime = 3.0
+
+					while (CurTime() - moveStartTime < maxMoveTime and path:IsValid() and self:HaveEnemy()) do
+						path:Update(self)
+
+						if (options.draw) then
+							path:Draw()
+						end
+
+						-- Check if we've reached a good position
+						local newDistance = self:GetRangeTo(self:GetEnemy():GetPos())
+						if (newDistance <= effectiveRange and newDistance >= self.MinRangedDistance) then
+							self.InCombatPosition = true
+							break
+						end
+
+						coroutine.wait(0.1)
+					end
+				end
+			end
+		else
+			-- Just maintain current position and face enemy
+			self:SnapToFaceEnemy()
+			coroutine.wait(0.2)
+		end
+
+		if (self.loco:IsStuck()) then
+			self:HandleStuck()
+			self.InCombatPosition = false
+		end
+
+		coroutine.yield()
+	end
+
+	return "ok"
+end
+
+function ENT:EngageWithMeleeWeapon(path, options)
+	-- Original melee behavior - chase until in range
 	path:Compute(self, self:GetEnemy():GetPos())
 
 	if (not path:IsValid()) then
@@ -167,7 +298,11 @@ function ENT:ChaseEnemy(options)
 		end
 
 		local currentDistance = self:GetRangeTo(self:GetEnemy():GetPos())
-		self:UpdateCombatWeaponSelection(currentDistance)
+
+		-- Less frequent weapon switching
+		if (CurTime() - self.LastCombatWeaponSwitch >= self.CombatWeaponSwitchCooldown) then
+			self:UpdateCombatWeaponSelection(currentDistance)
+		end
 
 		if (currentDistance <= self:GetEffectiveAttackRange()) then
 			self:PerformAttack()
@@ -185,13 +320,68 @@ function ENT:ChaseEnemy(options)
 	return "ok"
 end
 
+function ENT:IsUsingRangedWeapon()
+	if (not self:IsArmed() or not IsValid(self.CurrentWeapon)) then
+		return false
+	end
+
+	local weaponClass = string.lower(self.CurrentWeapon:GetClass())
+
+	-- Check if it's a ranged weapon
+	local rangedWeapons = {
+		"pistol", "rifle", "smg", "shotgun", "crossbow", "ar2", "revolver", "sniper"
+	}
+
+	for _, weaponType in ipairs(rangedWeapons) do
+		if (string.find(weaponClass, weaponType)) then
+			return true
+		end
+	end
+
+	-- Check holdtype as fallback
+	local holdType = self:GetCurrentHoldType()
+	local rangedHoldTypes = {
+		"pistol", "smg", "ar2", "shotgun", "crossbow", "revolver"
+	}
+
+	return table.HasValue(rangedHoldTypes, holdType)
+end
+
+function ENT:CalculateBackoffPosition(enemyPos, desiredDistance)
+	local myPos = self:GetPos()
+	local direction = (myPos - enemyPos):GetNormalized()
+	local backoffPos = enemyPos + direction * desiredDistance
+
+	-- Make sure the position is navigable
+	local navArea = navmesh.GetNearestNavArea(backoffPos, false, 500, false, true)
+	if (navArea) then
+		return navArea:GetClosestPointOnArea(backoffPos)
+	end
+
+	return backoffPos
+end
+
+function ENT:CalculateApproachPosition(enemyPos, desiredDistance)
+	local myPos = self:GetPos()
+	local direction = (enemyPos - myPos):GetNormalized()
+	local approachPos = enemyPos - direction * desiredDistance
+
+	-- Make sure the position is navigable
+	local navArea = navmesh.GetNearestNavArea(approachPos, false, 500, false, true)
+	if (navArea) then
+		return navArea:GetClosestPointOnArea(approachPos)
+	end
+
+	return approachPos
+end
+
 function ENT:UpdateAimDirection()
 	if (not self:HaveEnemy()) then
 		return
 	end
 
-	local enemyPos = self:GetEnemy():GetPos() + Vector(0, 0, 32) -- Aim at chest level
-	local myPos = self:GetPos() + Vector(0, 0, 64)            -- From my eye level
+	local enemyPos = self:GetEnemy():GetPos() + Vector(0, 0, 32)
+	local myPos = self:GetPos() + Vector(0, 0, 64)
 	local aimVector = (enemyPos - myPos):GetNormalized()
 	local aimAngles = aimVector:Angle()
 
@@ -200,7 +390,7 @@ function ENT:UpdateAimDirection()
 	local deltaYaw = math.AngleDifference(aimAngles.y, myAngles.y)
 	local deltaPitch = aimAngles.p
 
-	-- Update pose parameters for aiming (these may vary depending on the model)
+	-- Update pose parameters for aiming
 	self:SetPoseParameter("aim_yaw", deltaYaw)
 	self:SetPoseParameter("aim_pitch", -deltaPitch)
 
@@ -231,8 +421,6 @@ function ENT:GetEffectiveAttackRange()
 end
 
 function ENT:GetWeaponAttackRange(weapon)
-	-- Override this method to define weapon-specific ranges
-	-- Default implementation
 	local weaponClass = weapon:GetClass()
 
 	if (string.find(string.lower(weaponClass), "knife") or
@@ -242,15 +430,19 @@ function ENT:GetWeaponAttackRange(weapon)
 	end
 
 	if (string.find(string.lower(weaponClass), "shotgun")) then
-		return 200
+		return 300
 	end
 
 	if (string.find(string.lower(weaponClass), "pistol")) then
-		return 500
+		return 600
 	end
 
 	if (string.find(string.lower(weaponClass), "rifle")) then
 		return 800
+	end
+
+	if (string.find(string.lower(weaponClass), "smg")) then
+		return 500
 	end
 
 	return self.AttackRange
@@ -268,6 +460,7 @@ function ENT:SnapToFaceEnemy()
 	self:SetAngles(angle)
 end
 
+-- FIXED: Simplified PerformAttack to avoid coroutine issues
 function ENT:PerformAttack()
 	if (not self:HaveEnemy()) then
 		return
@@ -282,27 +475,35 @@ function ENT:PerformAttack()
 	end
 end
 
+-- FIXED: Removed coroutine.wait from weapon attack
 function ENT:PerformWeaponAttack()
 	if (not IsValid(self.CurrentWeapon)) then
 		return
 	end
 
+	print("=== ATTEMPTING WEAPON ATTACK ===")
+	print("Current weapon:", self.CurrentWeapon:GetClass())
+	print("Enemy distance:", self:GetRangeTo(self:GetEnemy():GetPos()))
+	print("Effective range:", self:GetEffectiveAttackRange())
+
 	self:RequestAttackAnimation()
 
-	local attackDelay = self.AttackDuration * 0.3
-	coroutine.wait(attackDelay)
-
+	-- Fire immediately, don't wait for animation
 	if (self:HaveEnemy() and self:GetRangeTo(self:GetEnemy():GetPos()) <= self:GetEffectiveAttackRange()) then
-		-- Set weapon owner and position before firing
-		self.CurrentWeapon:SetOwner(self)
-
 		-- Position weapon at muzzle for accurate shooting
 		self:PositionWeaponForFiring()
 
-		-- Fire the weapon
+		print("=== FIRING WEAPON AT ENEMY ===", self:GetEnemy())
+
+		-- Try different firing methods
+		local fired = false
+
 		if (self.CurrentWeapon.PrimaryAttack) then
+			print("Using PrimaryAttack method")
 			self.CurrentWeapon:PrimaryAttack()
+			fired = true
 		elseif (self.CurrentWeapon.FireBullets) then
+			print("Using FireBullets method")
 			-- Fallback for weapons that use FireBullets directly
 			local bullet = {}
 			bullet.Num = 1
@@ -316,10 +517,17 @@ function ENT:PerformWeaponAttack()
 			bullet.Attacker = self
 
 			self.CurrentWeapon:FireBullets(bullet)
+			fired = true
+		else
+			print("No firing method found for weapon")
 		end
-	end
 
-	coroutine.wait(self.AttackDuration - attackDelay)
+		if fired then
+			print("=== WEAPON FIRED SUCCESSFULLY ===")
+		end
+	else
+		print("Target out of range or no enemy")
+	end
 end
 
 function ENT:PositionWeaponForFiring()
@@ -346,13 +554,16 @@ function ENT:PositionWeaponForFiring()
 	self.CurrentWeapon:SetAngles(muzzleAng)
 end
 
+-- FIXED: Simplified melee attack
 function ENT:PerformMeleeAttack()
+	print("=== PERFORMING MELEE ATTACK ===")
+
 	self:RequestAttackAnimation()
 
-	local damageDelay = self.AttackDuration * 0.5
-	coroutine.wait(damageDelay)
-
+	-- Deal damage immediately
 	if (self:HaveEnemy() and self:GetRangeTo(self:GetEnemy():GetPos()) <= self.AttackRange) then
+		print("=== DEALING MELEE DAMAGE ===")
+
 		local damageInfo = DamageInfo()
 		damageInfo:SetDamage(25)
 		damageInfo:SetAttacker(self)
@@ -364,8 +575,6 @@ function ENT:PerformMeleeAttack()
 		-- Create impact effect
 		self:CreateMeleeImpactEffect()
 	end
-
-	coroutine.wait(self.AttackDuration - damageDelay)
 end
 
 function ENT:CreateMeleeImpactEffect()
@@ -373,7 +582,7 @@ function ENT:CreateMeleeImpactEffect()
 		return
 	end
 
-	-- Create blood effect or spark effect depending on target
+	-- Create blood effect
 	local effectData = EffectData()
 	effectData:SetOrigin(self:GetEnemy():GetPos() + Vector(0, 0, 40))
 	effectData:SetNormal((self:GetEnemy():GetPos() - self:GetPos()):GetNormalized())
@@ -387,4 +596,32 @@ end
 
 function ENT:SetCombatWeaponSwitchCooldown(cooldown)
 	self.CombatWeaponSwitchCooldown = cooldown or 3.0
+end
+
+function ENT:GetAimVector()
+	if (not IsValid(self.CurrentWeapon)) then
+		return self:GetForward()
+	end
+
+	return self.CurrentWeapon:GetForward()
+end
+
+function ENT:GetShootPos()
+	if (not IsValid(self.CurrentWeapon)) then
+		return self:GetPos()
+	end
+
+	return self.CurrentWeapon:GetPos()
+end
+
+function ENT:SetOptimalRangedDistance(distance)
+	self.OptimalRangedDistance = distance or 400
+end
+
+function ENT:SetMinRangedDistance(distance)
+	self.MinRangedDistance = distance or 200
+end
+
+function ENT:SetMaxRangedDistance(distance)
+	self.MaxRangedDistance = distance or 800
 end

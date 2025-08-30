@@ -9,6 +9,12 @@ function ENT:InitializeMovement()
 
 	self.loco:SetAcceleration(400)
 	self.loco:SetDeceleration(400)
+
+	-- Fix for stuck handling
+	self.LastStuckCheck = 0
+	self.StuckCheckInterval = 1.0
+	self.LastPosition = Vector(0, 0, 0)
+	self.StuckThreshold = 10 -- If we haven't moved this distance in StuckCheckInterval, we're stuck
 end
 
 function ENT:UpdateMovementSpeeds()
@@ -75,12 +81,67 @@ function ENT:GoToTask()
 	return result
 end
 
+-- FIXED: Improved stuck handling
 function ENT:HandleStuck()
+	print("=== HANDLING STUCK SITUATION ===")
+
 	if (self.loco:IsStuck()) then
+		print("Bot is stuck, attempting to resolve...")
+
+		-- Try jumping first
 		self:RequestJumpAnimation()
 		self.loco:Jump()
-		coroutine.wait(0.5)
+
+		-- Wait a bit for the jump
+		local jumpWaitTime = 0
+		while jumpWaitTime < 0.8 do
+			coroutine.wait(0.1)
+			jumpWaitTime = jumpWaitTime + 0.1
+
+			-- If we're no longer stuck, break out early
+			if not self.loco:IsStuck() then
+				break
+			end
+		end
+
+		-- Clear the stuck state
 		self.loco:ClearStuck()
+
+		-- If still stuck after jump, try moving in a random direction
+		if self.loco:IsStuck() then
+			print("Still stuck after jump, trying random movement...")
+			local randomDir = Vector(math.Rand(-1, 1), math.Rand(-1, 1), 0):GetNormalized()
+			local newPos = self:GetPos() + randomDir * 100
+
+			self:RequestActivity(ACT_HL2MP_WALK)
+			self.loco:SetDesiredSpeed(200)
+			self:MoveToPos(newPos)
+
+			coroutine.wait(1.0)
+			self.loco:ClearStuck()
+		end
+	end
+end
+
+-- FIXED: Better stuck detection
+function ENT:CheckIfStuck()
+	local currentTime = CurTime()
+
+	if currentTime - self.LastStuckCheck >= self.StuckCheckInterval then
+		local currentPos = self:GetPos()
+		local distanceMoved = currentPos:Distance(self.LastPosition)
+
+		-- If we haven't moved much and we're supposed to be moving
+		if distanceMoved < self.StuckThreshold and self.loco:GetDesiredSpeed() > 0 then
+			-- Mark as stuck
+			if not self.loco:IsStuck() then
+				print("Detected stuck condition, distance moved:", distanceMoved)
+				self.loco:SetStuck()
+			end
+		end
+
+		self.LastPosition = currentPos
+		self.LastStuckCheck = currentTime
 	end
 end
 
@@ -93,4 +154,48 @@ function ENT:MoveAtSpeed(targetPos, speed, activity)
 	self:RequestActivity(ACT_HL2MP_IDLE)
 
 	return result
+end
+
+-- Override MoveToPos to include stuck checking
+function ENT:MoveToPos(pos)
+	local path = Path("Follow")
+	path:SetMinLookAheadDistance(300)
+	path:SetGoalTolerance(20)
+	path:Compute(self, pos)
+
+	if not path:IsValid() then
+		return "failed"
+	end
+
+	-- Reset stuck detection
+	self.LastPosition = self:GetPos()
+	self.LastStuckCheck = CurTime()
+
+	while path:IsValid() do
+		-- Check for stuck condition
+		self:CheckIfStuck()
+
+		if self.loco:IsStuck() then
+			self:HandleStuck()
+			-- Recompute path after getting unstuck
+			path:Compute(self, pos)
+			if not path:IsValid() then
+				return "stuck"
+			end
+		end
+
+		if path:GetAge() > 0.1 then
+			path:Compute(self, pos)
+		end
+
+		path:Update(self)
+
+		if self:GetRangeTo(pos) < 50 then
+			return "ok"
+		end
+
+		coroutine.yield()
+	end
+
+	return "failed"
 end
