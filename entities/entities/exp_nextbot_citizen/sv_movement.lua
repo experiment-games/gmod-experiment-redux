@@ -1,15 +1,51 @@
 function ENT:InitializeMovement()
-	self.MovementSpeeds = {
-		[self.TaskUrgency.LOW] = { speed = 150, animation = ACT_HL2MP_WALK },
-		[self.TaskUrgency.NORMAL] = { speed = 250, animation = ACT_HL2MP_WALK },
-		[self.TaskUrgency.HIGH] = { speed = 400, animation = ACT_HL2MP_RUN },
-		[self.TaskUrgency.URGENT] = { speed = 600, animation = ACT_HL2MP_RUN }
-	}
+	-- Default speeds (can be overridden)
+	self.WalkSpeed = 250
+	self.RunSpeed = 400
+
+	self:UpdateMovementSpeeds()
 
 	self.ReturnHomeSpeed = 350
 
 	self.loco:SetAcceleration(400)
 	self.loco:SetDeceleration(400)
+end
+
+function ENT:UpdateMovementSpeeds()
+	local walkThreshold = self.WalkSpeed
+	local runThreshold = self.RunSpeed
+
+	-- We might still be initializing
+	if (not walkThreshold or not runThreshold) then
+		return
+	end
+
+	self.MovementSpeeds = {
+		[self.TaskUrgency.LOW] = {
+			speed = math.min(walkThreshold * 0.6, 150),
+			animation = ACT_HL2MP_WALK
+		},
+		[self.TaskUrgency.NORMAL] = {
+			speed = walkThreshold,
+			animation = ACT_HL2MP_WALK
+		},
+		[self.TaskUrgency.HIGH] = {
+			speed = runThreshold,
+			animation = ACT_HL2MP_RUN
+		},
+		[self.TaskUrgency.URGENT] = {
+			speed = math.max(runThreshold * 1.5, 600),
+			animation = ACT_HL2MP_RUN
+		}
+	}
+end
+
+function ENT:GetWalkSpeed()
+	return self.WalkSpeed
+end
+
+function ENT:GetRunSpeed()
+	return self.RunSpeed
 end
 
 function ENT:GoHome()
@@ -46,4 +82,15 @@ function ENT:HandleStuck()
 		coroutine.wait(0.5)
 		self.loco:ClearStuck()
 	end
+end
+
+function ENT:MoveAtSpeed(targetPos, speed, activity)
+	activity = activity or (speed > self.WalkSpeed and ACT_HL2MP_RUN or ACT_HL2MP_WALK)
+
+	self:RequestActivity(activity)
+	self.loco:SetDesiredSpeed(speed)
+	local result = self:MoveToPos(targetPos)
+	self:RequestActivity(ACT_HL2MP_IDLE)
+
+	return result
 end

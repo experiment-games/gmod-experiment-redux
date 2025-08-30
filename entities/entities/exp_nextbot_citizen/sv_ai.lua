@@ -77,3 +77,8 @@ function ENT:IsAtTask()
 	end
 	return (self:GetRangeTo(self.TaskEntity:GetPos()) <= self.TaskRadius)
 end
+
+function ENT:SetSchedule(schedule)
+	-- TODO: Implement SetSchedule for NextBot
+	print("TODO: Implement SetSchedule for NextBot")
+end

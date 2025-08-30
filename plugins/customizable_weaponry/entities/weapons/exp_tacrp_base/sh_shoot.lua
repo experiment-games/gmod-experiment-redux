@@ -20,7 +20,7 @@ function SWEP:SprintLock(shoot)
 end
 
 function SWEP:PrimaryAttack()
-	if self:GetOwner():IsNPC() then
+	if self:GetOwner():IsNPC() or self:GetOwner():IsNextBot() then
 		self:NPC_PrimaryAttack()
 		return
 	end

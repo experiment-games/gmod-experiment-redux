@@ -19,9 +19,20 @@ do
 			return
 		end
 
+		local walkSpeed = ix.config.Get("walkSpeed")
+		local runSpeed = ix.config.Get("runSpeed")
 		local bot = ents.Create("exp_nextbot_citizen")
 		bot:SetPos(trace.HitPos)
+		bot:SetWalkSpeed(walkSpeed)
+		bot:SetRunSpeed(runSpeed)
 		bot:Spawn()
+
+		bot:SetWeaponList({
+			"exp_tacrp_ex_glock", -- Close range
+			"exp_tacrp_uzi", -- Medium range
+			"exp_tacrp_ak47", -- Long range
+			"exp_tacrp_m_crowbar.lua" -- Melee backup
+		})
 
 		PLUGIN:AddBotCitizen(bot)
 		client:Notify("NextBot spawned successfully.")

@@ -40,3 +40,9 @@ ENT.AnimationRequest = {
 	JUMP = "jump",
 	SEQUENCE = "sequence"
 }
+
+ENT.WeaponState = {
+	UNARMED = "unarmed",
+	ARMED = "armed",
+	SWITCHING = "switching"
+}
