@@ -2,7 +2,7 @@ local PLUGIN = PLUGIN
 local ITEM = ITEM
 
 ITEM.price = 100000
-ITEM.name = "Mongrel Dog Companion"
+ITEM.name = "Mongrel Companion"
 ITEM.model = "models/fallout/mongrel.mdl"
 ITEM.noBusiness = true
 ITEM.category = "Companion"

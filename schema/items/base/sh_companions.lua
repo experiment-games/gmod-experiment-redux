@@ -146,7 +146,7 @@ if (SERVER) then
 		client:Notify("You have renamed your companion to '" .. name .. "'.")
 
 		-- Update spawned companion name if exists
-		local companion = item:GetCompanionEntity(character)
+		local companion = item:GetCompanionEntity()
 		if (IsValid(companion)) then
 			companion:SetDisplayName(name)
 		end
@@ -172,17 +172,13 @@ function ITEM:GetCompanionHealth()
 	return health
 end
 
-function ITEM:GetCompanionEntity(character)
-	local client = character:GetPlayer()
-	if (not IsValid(client)) then
-		return
+function ITEM:GetCompanionEntity()
+	if (not self:GetData("spawned")) then
+		return nil, nil
 	end
 
-	if (client.expCompanion) then
-		return client.expCompanion.entity, client.expCompanion.item
-	end
-
-	return nil, nil
+	local entity = Entity(self:GetData("spawned"))
+	return entity, self
 end
 
 function ITEM:PopulateTooltip(tooltip)
@@ -196,7 +192,7 @@ end
 
 function ITEM:OnPlayerUnequipped(character)
 	local client = character:GetPlayer()
-	local companion = self:GetCompanionEntity(character)
+	local companion = self:GetCompanionEntity()
 
 	if (IsValid(companion)) then
 		-- This would call your companion system's remove function
@@ -209,8 +205,8 @@ function ITEM:OnPlayerUnequipped(character)
 end
 
 --- Called when a character uses the item.
-function ITEM:SpawnCompanion(client, character)
-	local companion = self:GetCompanionEntity(character)
+function ITEM:SpawnCompanion(client)
+	local companion = self:GetCompanionEntity()
 
 	if (IsValid(companion)) then
 		client:Notify("You already have a companion spawned!")
@@ -233,6 +229,10 @@ function ITEM:SpawnCompanion(client, character)
 	end
 
 	local companion = Schema.companion.Spawn(self.entityID, client, trace.HitPos, self)
+
+	if (self.OnSpawnedCompanion) then
+		self:OnSpawnedCompanion(client, companion)
+	end
 
 	client:Notify("You have spawned your companion.")
 
@@ -266,8 +266,7 @@ ITEM.functions.Toggle = {
 	OnRun = function(item)
 		local client = item.player
 		local character = client:GetCharacter()
-
-		local companion = item:GetCompanionEntity(character)
+		local companion = item:GetCompanionEntity()
 
 		if (IsValid(companion)) then
 			-- Despawn companion
@@ -275,7 +274,7 @@ ITEM.functions.Toggle = {
 			return false
 		else
 			-- Spawn companion
-			return item:SpawnCompanion(client, character)
+			return item:SpawnCompanion(client)
 		end
 	end
 }
@@ -289,7 +288,7 @@ ITEM.functions.Command = {
 		local character = client:GetCharacter()
 		if (not character) then return false end
 
-		local companion = item:GetCompanionEntity(character)
+		local companion = item:GetCompanionEntity()
 		if (not IsValid(companion)) then return false end
 
 		Schema.companion.PlayerTryCommand(client, companion, data.command, item)

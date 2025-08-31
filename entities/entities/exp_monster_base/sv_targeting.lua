@@ -16,6 +16,10 @@ function ENT:IsValidTarget(entity)
 		return false
 	end
 
+	if (entity.IsPassiveNPC) then
+		return false
+	end
+
 	-- Check if target is in ignore list
 	if (self:IsTargetIgnored(entity)) then
 		return false
