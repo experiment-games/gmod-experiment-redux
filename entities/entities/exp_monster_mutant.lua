@@ -555,7 +555,6 @@ function ENT:GetTargetPriority(entity)
 	return BaseClass.GetTargetPriority(self, entity)
 end
 
--- Example of overriding targeting behavior
 function ENT:IsValidTarget(entity)
 	-- Call base validation first
 	if not BaseClass.IsValidTarget(self, entity) then

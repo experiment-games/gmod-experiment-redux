@@ -11,7 +11,6 @@ function ENT:InitializeTargetingSystem()
 	}
 end
 
--- Main target validation
 function ENT:IsValidTarget(entity)
 	if (not IsValid(entity) or entity == self) then
 		return false
@@ -24,7 +23,13 @@ function ENT:IsValidTarget(entity)
 
 	-- Check basic target validity
 	if (entity:IsPlayer()) then
-		return entity:Alive() and entity:GetMoveType() ~= MOVETYPE_NOCLIP
+		local disposition = self:Disposition(entity)
+
+		if (disposition == D_HT or disposition == D_NU) then
+			return entity:Alive() and entity:GetMoveType() ~= MOVETYPE_NOCLIP
+		else
+			return false
+		end
 	elseif (entity:IsDoor()) then
 		return self:IsDoorObstacle(entity)
 	end
