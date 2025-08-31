@@ -25,11 +25,16 @@ function ENT:OnPopulateEntityInfo(tooltip)
 	name:SizeToContents()
 
 	-- Growth stage
-	local stage = self:GetCropStage()
 	local maxStages = seedItem:GetStages()
 
 	local stageBar = tooltip:Add("expProgressBar")
-	stageBar:SetValue(stage)
+	stageBar:SetValue(function()
+		if (not IsValid(self)) then
+			return 0
+		end
+
+		return self:GetCropStage()
+	end)
 	stageBar:SetMaxValue(maxStages)
 	stageBar:SetPrefix(L("cropStage"))
 	stageBar:Dock(BOTTOM)
@@ -39,7 +44,7 @@ function ENT:OnPopulateEntityInfo(tooltip)
 	if (self:GetIsRotten()) then
 		statusRow:SetText("Rotten!")
 		statusRow:SetTextColor(Color(150, 50, 50))
-	elseif (stage >= maxStages) then
+	elseif (self:GetCropStage() >= maxStages) then
 		statusRow:SetText("Ready to Harvest!")
 		statusRow:SetTextColor(Color(100, 255, 100))
 	else

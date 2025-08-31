@@ -268,6 +268,13 @@ function ENT:SetTargetEntity(target)
 	end
 end
 
+function ENT:ClearTargets()
+	self:SetTargetEntity(nil)
+	self.targetingSystem.primaryTarget = nil
+	self.targetingSystem.obstacleTarget = nil
+	self.targetingSystem.lostTargetCount = 0
+end
+
 function ENT:ShouldResumeChasePrimaryTarget()
 	-- Check if we should resume chasing our primary target
 	if (not IsValid(self.targetingSystem.primaryTarget)) then

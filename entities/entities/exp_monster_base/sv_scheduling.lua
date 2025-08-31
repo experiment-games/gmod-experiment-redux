@@ -49,14 +49,6 @@ function ENT:StartDefaultSchedule()
 	self:StartSchedule(self.expSchedules.Patrol)
 end
 
-function ENT:OnTaskComplete()
-	BaseClass.OnTaskComplete(self)
-
-	if (self.CurrentTask and self.expAttackSchedule) then
-		self:HandleAttackTaskComplete()
-	end
-end
-
 function ENT:HandleAttackTaskComplete()
 	self.expRouteBlockedCount = nil
 	self:EndAttackHandles()
@@ -65,7 +57,7 @@ end
 
 function ENT:ScheduleFinished()
 	if (self.CurrentSchedule == self.expAttackSchedule) then
-		self.expAttackSchedule = nil
+		self:HandleAttackTaskComplete()
 	end
 
 	BaseClass.ScheduleFinished(self)

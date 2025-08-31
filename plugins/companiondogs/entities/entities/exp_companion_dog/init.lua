@@ -5,83 +5,73 @@ AddCSLuaFile("shared.lua")
 
 DEFINE_BASECLASS("exp_companion_base")
 
--- Called when the entity initializes.
-function ENT:Initialize()
-	BaseClass.Initialize(self)
+function ENT:SetupAttackHandles()
+	self:ClearAttackHandles()
+
+	local headMuzzleBone = self:LookupBone("Bip01 Head Muzzle")
+
+	if (headMuzzleBone) then
+		self:CreateAttackHandle("head_muzzle", headMuzzleBone, Vector(0, 0, 0), 8)
+	end
 end
 
 function ENT:SetupVoiceSounds()
-	-- self:SetTypedVoiceSet("Idle", {
-	-- 	"forpnpcs/dog/npc_dog_growl_01.wav",
-	-- 	"forpnpcs/dog/npc_dog_growl_02.wav",
-	-- 	"forpnpcs/dog/npc_dog_growl_03.wav",
-	-- })
-
+	self:SetTypedVoiceSet("Idle", {
+		"npc/dog/dog_idle_pant01.mp3",
+		"npc/dog/dog_idle_pant02.mp3",
+		"npc/dog/dog_idle_pant03.mp3",
+		"npc/dog/dog_idle_pant04.mp3",
+	})
 	self:SetTypedVoiceSet("Pain", {
-		"forpnpcs/dog/npc_dog_injured_01.wav",
-		"forpnpcs/dog/npc_dog_injured_02.wav",
-		"forpnpcs/dog/npc_dog_injured_03.wav",
-		"forpnpcs/dog/npc_dog_injured_04.wav",
-
+		"npc/dog/dog_injured01.mp3",
+		"npc/dog/dog_injured02.mp3",
+		"npc/dog/dog_injured03.mp3",
+		"npc/dog/dog_injured04.mp3",
 	})
-
 	self:SetTypedVoiceSet("Die", {
-		"forpnpcs/dog/npc_dog_injured_05.wav",
-		"forpnpcs/dog/npc_dog_injured_06.wav",
+		"npc/dog/dog_death01.mp3",
+		"npc/dog/dog_death02.mp3",
+		"npc/dog/dog_death03.mp3",
+		"npc/dog/dog_death04.mp3",
 	})
-
 	self:SetTypedVoiceSet("Alert", {
-		"forpnpcs/dog/npc_dog_growl_01.wav",
-		"forpnpcs/dog/npc_dog_growl_02.wav",
-		"forpnpcs/dog/npc_dog_growl_03.wav",
-		"forpnpcs/dog/npc_dog_growl_04.wav",
-		"forpnpcs/dog/npc_dog_growl_05.wav",
-		"forpnpcs/dog/npc_dog_growl_06.wav",
-		"forpnpcs/dog/npc_dog_growl_07.wav",
+		"npc/dog/dog_growl01.mp3",
+		"npc/dog/dog_growl02.mp3",
+		"npc/dog/dog_growl03.mp3",
+		"npc/dog/dog_growl04.mp3",
 	})
-
 	self:SetTypedVoiceSet("Chase", {
-		"forpnpcs/dog/npc_dog_bark_04.wav",
-		"forpnpcs/dog/npc_dog_bark_05.wav",
-		"forpnpcs/dog/npc_dog_bark_06.wav",
-		"forpnpcs/dog/npc_dog_bark_07.wav",
+		"npc/dog/dog_barkrun01.mp3",
+		"npc/dog/dog_barkrun02.mp3",
+		"npc/dog/dog_barkrun03.mp3",
+		"npc/dog/dog_barkrun04.mp3",
 	})
-
 	self:SetTypedVoiceSet("Lost", {
-		"forpnpcs/dog/npc_dog_bark_08.wav",
-		"forpnpcs/dog/npc_dog_bark_09.wav",
+		"npc/dog/dog_bark01.mp3",
+		"npc/dog/dog_bark02.mp3",
+		"npc/dog/dog_bark03.mp3",
 	})
-
 	self:SetTypedVoiceSet("Attack", {
-		"forpnpcs/dog/npc_dog_attackforward_01.wav",
-		"forpnpcs/dog/npc_dog_attackforward_02.wav",
+		"npc/dog/dog_attackforward01.mp3",
+		"npc/dog/dog_attackforward02.mp3",
 	})
-
 	self:SetTypedVoiceSet("AttackMiss", {
-		"forpnpcs/dog/npc_dog_attackforward_05.wav",
-		"forpnpcs/dog/npc_dog_attackforward_06.wav",
+		"npc/dog/dog_attackforward05.mp3",
+		"npc/dog/dog_attackforward06.mp3",
 	})
-
 	self:SetTypedVoiceSet("AttackHit", {
-		"forpnpcs/dog/npc_dog_attackforward_03.wav",
-		"forpnpcs/dog/npc_dog_attackforward_04.wav",
+		"npc/dog/dog_attackforward03.mp3",
+		"npc/dog/dog_attackforward04.mp3",
 	})
-
-	-- self:SetTypedVoiceSet("AttackHitDoor", {
-	-- 	"NPC_BaseZombie.PoundDoor"
-	-- })
 
 	self:SetTypedVoiceSet("Victory", {
-		"forpnpcs/dog/npc_dog_bark_04.wav"
+		"npc/dog/dog_bark04.mp3"
 	})
-
 	self:SetTypedVoiceSet("Footstep", {
-		"forpnpcs/dog/npc_dog_foot_1.wav",
-		"forpnpcs/dog/npc_dog_foot_2.wav",
-		"forpnpcs/dog/npc_dog_foot_3.wav",
-		"forpnpcs/dog/npc_dog_foot_04.wav",
-		"forpnpcs/dog/npc_dog_foot_05.wav",
-		"forpnpcs/dog/npc_dog_foot_06.wav",
+		"npc/dog/foot/dog_foot01.mp3",
+		"npc/dog/foot/dog_foot02.mp3",
+		"npc/dog/foot/dog_foot03.mp3",
+		"npc/dog/foot/dog_foot04.mp3",
 	})
 end
 

@@ -26,7 +26,13 @@ function ENT:OnPopulateEntityInfo(tooltip)
 	modeRow:SizeToContents()
 
 	local healthBar = tooltip:Add("expProgressBar")
-	healthBar:SetValue(self:Health())
+	healthBar:SetValue(function()
+		if (not IsValid(self)) then
+			return 0
+		end
+
+		return self:Health()
+	end)
 	healthBar:SetMaxValue(self:GetMaxHealth())
 	healthBar:SetPrefix(L("turretHealth"))
 

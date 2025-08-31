@@ -101,7 +101,7 @@ if (CLIENT) then
 		Derma_StringRequest(
 			"Rename Companion",
 			"What would you like to rename your companion to?",
-			item.name,
+			item:GetData("name") or item.name,
 			function(name)
 				net.Start("ixCompanionRename")
 				net.WriteUInt(itemID, 32)
@@ -119,16 +119,8 @@ if (SERVER) then
 
 	-- Handle save data filtering
 	function ITEM:OnSave()
-		local data = {}
-
 		-- Copy all data except spawned state
-		for k, v in pairs(self.data or {}) do
-			if (k ~= "spawned") then
-				data[k] = v
-			end
-		end
-
-		return data
+		self:SetData("spawned", nil)
 	end
 
 	-- Handle rename from client
@@ -152,9 +144,6 @@ if (SERVER) then
 
 		item:SetData("name", name)
 		client:Notify("You have renamed your companion to '" .. name .. "'.")
-
-		-- Log the rename
-		ix.log.Add(client, "companionRename", name)
 
 		-- Update spawned companion name if exists
 		local companion = item:GetCompanionEntity(character)
@@ -181,17 +170,6 @@ function ITEM:GetCompanionHealth()
 	end
 
 	return health
-end
-
---- Helper to update the spawn state
-function ITEM:SetSpawnedState(character, entityIndex)
-	self:SetData("spawned", entityIndex)
-
-	-- Sync inventory changes
-	local client = character:GetPlayer()
-	if (IsValid(client)) then
-		client:GetCharacter():GetInventory():Sync(client, true)
-	end
 end
 
 function ITEM:GetCompanionEntity(character)
@@ -318,8 +296,12 @@ ITEM.functions.Command = {
 
 		return false -- Don't remove item
 	end,
-	OnCanRun = function(item)
-		-- Ensure it's in the world
-		return item:GetData("spawned") and IsValid(Entity(item:GetData("spawned")))
-	end
+	OnCanRun = function(item, data)
+		-- Ensure it's in the world and a command has been provided
+		if (data and data.command and item:GetData("spawned") and IsValid(Entity(item:GetData("spawned")))) then
+			return true
+		end
+
+		return false
+	end,
 }

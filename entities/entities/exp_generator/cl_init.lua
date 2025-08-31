@@ -22,7 +22,13 @@ function ENT:OnPopulateEntityInfo(tooltip)
 	end
 
 	local powerBar = tooltip:Add("expProgressBar")
-	powerBar:SetValue(self:GetPower())
+	powerBar:SetValue(function()
+		if (not IsValid(self)) then
+			return 0
+		end
+
+		return self:GetPower()
+	end)
 	powerBar:SetMaxValue(itemTable.generator.power)
 	powerBar:SetPrefix(L("generatorPower"))
 	powerBar:Dock(BOTTOM)

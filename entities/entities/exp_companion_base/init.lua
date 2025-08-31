@@ -92,6 +92,23 @@ function ENT:SetupSchedules()
 	self.expSchedules.WaitSitExit = ai_schedule.New("expWaitExit")
 	self.expSchedules.WaitSitExit:EngTask("TASK_PLAY_SEQUENCE", ACT_BUSY_SIT_GROUND_EXIT)
 	self.expSchedules.WaitSitExit:EngTask("TASK_WAIT_FOR_MOVEMENT", 0)
+
+	local attackMelee1 = ai_schedule.New("expAttackMelee1")
+	attackMelee1:EngTask("TASK_STOP_MOVING", 0)
+	attackMelee1:EngTask("TASK_FACE_ENEMY", 0)
+	attackMelee1:EngTask("TASK_MELEE_ATTACK1", 0)
+	attackMelee1:EngTask("TASK_WAIT_FOR_MOVEMENT", 0)
+	attackMelee1:EngTask("TASK_WAIT", 0.5)
+	attackMelee1.expAttackData = {
+		damageAfterTask = "TASK_MELEE_ATTACK1",
+		range = self:GetAttackMeleeRange(),
+		damage = 2,
+		damageType = DMG_SLASH,
+	}
+
+	-- Have the only attack be the melee biting attack which does only a bit of damage
+	self.expSchedules.Attacks = {}
+	self.expSchedules.Attacks[#self.expSchedules.Attacks + 1] = attackMelee1
 end
 
 function ENT:ShouldHibernate()

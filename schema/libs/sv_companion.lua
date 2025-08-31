@@ -81,6 +81,7 @@ function Schema.companion.PlayerTryCommand(player, companion, command, itemInsta
 		end
 
 		if (command == "attack") then
+			companion:ClearTargets()
 			companion:ClearSchedule()
 			companion:AddEntityRelationship(target, D_HT, 99)
 			companion:SetTargetEntity(target)
@@ -151,23 +152,24 @@ function Schema.companion.PlayerTryCommand(player, companion, command, itemInsta
 			command = nil
 		end
 	elseif (command == "patrol") then
+		companion:ClearTargets()
 		companion:ClearSchedule()
 		companion:SetCommand("patrol")
 		companion:SetFriendlyToFollow()
 	elseif (command == "stay") then
-		companion:SetTargetEntity(nil)
+		companion:ClearTargets()
 		companion:ClearSchedule()
 		companion:SetCommand("stay")
 		companion:SetFriendlyToFollow()
 	elseif (command == "follow") then
-		companion:SetTargetEntity(nil)
+		companion:ClearTargets()
 		companion:ClearSchedule()
 		companion:SetCommand("follow")
 		companion:SetFriendlyToFollow(player)
 	elseif (command == "stop") then
 		local currentTarget = companion.targetingSystem.currentTarget
 
-		companion:SetTargetEntity(nil)
+		companion:ClearTargets()
 		companion:ClearSchedule()
 		companion:SetCommand("stay")
 		companion:SetFriendlyToFollow()
@@ -214,6 +216,8 @@ function Schema.companion.Spawn(entityID, client, position, itemInstance)
 	companion:SetItem(itemInstance, client)
 	companion:SetDisplayName(itemInstance.name)
 	companion:Spawn()
+
+	itemInstance:SetData("spawned", companion:EntIndex())
 
 	Schema.companion.spawned[companion] = true
 

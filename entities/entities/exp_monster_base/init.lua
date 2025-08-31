@@ -96,7 +96,7 @@ function ENT:SetupSchedules()
 	attackMelee1.expAttackData = {
 		damageAfterTask = "TASK_MELEE_ATTACK1",
 		range = self:GetAttackMeleeRange(),
-		damage = 10,
+		damage = 5,
 		damageType = DMG_SLASH,
 	}
 
