@@ -44,7 +44,7 @@ if (CLIENT) then
 		panel:SizeToContents()
 	end
 
-	function ITEM:PaintOver(item, w, h)
+	function ITEM.PaintOver(icon, item, w, h)
 		if (item:GetData("placed")) then
 			surface.SetDrawColor(110, 255, 110, 100)
 			surface.DrawRect(w - 14, h - 14, 8, 8)

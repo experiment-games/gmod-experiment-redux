@@ -29,9 +29,8 @@ ix.chat.Register("monster", {
 	end,
 })
 
--- Override this to return the display name of the monster
-function ENT:GetDisplayName()
-	return Format("monster")
+function ENT:SetupDataTables()
+	self:NetworkVar("String", "DisplayName")
 end
 
 hook.Add("ShouldCollide", "expDontCollideMonsters", function(entity, otherEntity)

@@ -9,7 +9,7 @@ ITEM.category = "Stackable"
 ITEM.model = "models/props_c17/TrapPropeller_Lever.mdl"
 
 if (CLIENT) then
-	function ITEM:PaintOver(item, w, h)
+	function ITEM.PaintOver(icon, item, w, h)
 		local isMax = item:GetData("stacks", 1) == item:GetMaxStacks()
 
 		draw.SimpleTextOutlined(

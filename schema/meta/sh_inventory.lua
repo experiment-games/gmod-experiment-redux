@@ -214,3 +214,18 @@ function META:CanItemsFit(w, h, quantity, onlyMain)
 		return false, placed
 	end
 end
+
+if (CLIENT) then
+	--- Networks inventory actions to the server.
+	--- @param action string The action to perform (e.g., "transfer", "use", etc.).
+	--- @param itemID number The ID of the item to act upon.
+	--- @param data? table Additional data relevant to the action.
+	function META:NetworkAction(action, itemID, data)
+		net.Start("ixInventoryAction")
+		net.WriteString(action)
+		net.WriteUInt(itemID, 32)
+		net.WriteUInt(self:GetID(), 32)
+		net.WriteTable(data or {})
+		net.SendToServer()
+	end
+end
