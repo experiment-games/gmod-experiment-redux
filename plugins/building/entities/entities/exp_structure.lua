@@ -202,7 +202,7 @@ end
 function ENT:OnOptionSelected(client, option, data)
 	if (option == L("abortConstruction", client)) then
 		local structureMaterials = self:GetNetVar("structureMaterials", {})
-		-- Refund materials and return the blueprint (if they have space)
+		-- Refund materials (if they have space)
 		local inventory = client:GetCharacter():GetInventory()
 
 		for materialItem, amount in pairs(structureMaterials) do
@@ -212,13 +212,6 @@ function ENT:OnOptionSelected(client, option, data)
 				client:Notify(error)
 				return
 			end
-		end
-
-		local success, error = inventory:Add(self:GetItemID())
-
-		if (not success) then
-			client:Notify(error)
-			return
 		end
 
 		self:RemoveWithEffect()

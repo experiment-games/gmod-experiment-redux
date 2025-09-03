@@ -11,7 +11,7 @@ ITEM.height = 1
 -- TODO: Disabled because we can't interact with the structure somehow. Perhaps the USE trace doesn't hit?
 ITEM.noBusiness = true
 ITEM.requiresDefensivePerk = true
-ITEM.health = 2500
+ITEM.health = 15000
 ITEM.constructionMaterials = {
 	["material_plastic"] = 1,
 	["material_metal"] = 4,

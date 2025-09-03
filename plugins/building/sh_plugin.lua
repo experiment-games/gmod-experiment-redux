@@ -10,7 +10,36 @@ ix.config.Add("maxBuildGroundLevel", 2,
 	"The maximum distance from the ground players can build (in structures on top of structures).", nil, {
 		data = { min = 0, max = 100, decimals = 0 },
 		category = "Building"
-	})
+	}
+)
+
+ix.lang.AddTable("english", {
+	propHealth = "%d / %d",
+	propMaterialsRequired = "Materials Required",
+	propMaterial = "%s x%d",
+
+	abortConstruction = "Abort Construction",
+	fillMaterials = "Fill %s x%d",
+	fillAllMaterials = "Fill All Materials",
+	finishConstruction = "Finish Construction",
+	readyToFinishConstruction = "Ready to Finish",
+
+	structureSettings = "Structure Settings",
+
+	learnedBlueprint = "You have learned a new blueprint and can now build this structure!",
+	alreadyLearnedBlueprint = "You have already learned this blueprint!"
+})
+
+function PLUGIN:HasLearnedBlueprint(client, uniqueID)
+	local character = client:GetCharacter()
+
+	if (not character) then
+		return false
+	end
+
+	local blueprintsLearned = character:GetData("blueprintsLearned", {})
+	return blueprintsLearned[uniqueID] == true
+end
 
 function PLUGIN:EntityIsDoor(entity)
 	if (entity.IsStructureOrPart) then
@@ -28,7 +57,7 @@ if (CLIENT) then
 	end
 
 	function PLUGIN:RequestBuildStructure(position, angles)
-		net.Start("ixBuildingRequestBuildStructure")
+		net.Start("expBuildingRequestBuildStructure")
 		net.WriteVector(position)
 		net.WriteAngle(angles)
 		net.SendToServer()
@@ -156,7 +185,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		uniqueID = "blueprint_blue_barrel",
 		name = "Blue Barrel",
 		description = "A blue barrel.",
-		price = 100,
+		price = 800,
 		health = 100,
 		model = "models/props_borealis/bluebarrel001.mdl",
 		constructionMaterials = {
@@ -173,7 +202,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		uniqueID = "blueprint_storefront_bars",
 		name = "Storefront Bars",
 		description = "Strong bars to protect your storefront.",
-		price = 200,
+		price = 8000,
 		health = 4000,
 		model = "models/props_building_details/Storefront_Template001a_Bars.mdl",
 		constructionMaterials = {
@@ -186,7 +215,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		uniqueID = "blueprint_blast_door",
 		name = "Blast Door",
 		description = "A blast door to protect your base.",
-		price = 200,
+		price = 5000,
 		health = 5000,
 		model = "models/props_lab/blastdoor001b.mdl",
 		constructionMaterials = {
@@ -215,7 +244,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		uniqueID = "blueprint_furniture_shelf",
 		name = "Shelf",
 		description = "A shelf to store your items.",
-		price = 150,
+		price = 1500,
 		health = 400,
 		model = "models/props_c17/FurnitureShelf001a.mdl",
 		constructionMaterials = {
@@ -228,7 +257,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		uniqueID = "blueprint_furniture_table",
 		name = "Table",
 		description = "A table to place your items.",
-		price = 150,
+		price = 700,
 		health = 300,
 		model = "models/props_c17/FurnitureTable001a.mdl",
 		constructionMaterials = {
@@ -241,7 +270,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		uniqueID = "blueprint_oil_drum",
 		name = "Oil Drum",
 		description = "A barrel to store oil.",
-		price = 100,
+		price = 1000,
 		health = 100,
 		model = "models/props_c17/oildrum001.mdl",
 		constructionMaterials = {
@@ -249,4 +278,37 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		},
 		structureOffset = Vector(0, 0, 1),
 	})
+end
+
+--[[
+	Commands
+--]]
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Learn all blueprints."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, name)
+		local count = 0
+
+		for uniqueID, itemTable in pairs(ix.item.list) do
+			if (itemTable.base ~= "base_blueprints") then
+				continue
+			end
+
+			if (PLUGIN:HasLearnedBlueprint(client, uniqueID)) then
+				continue
+			end
+
+			PLUGIN:LearnBlueprint(client, uniqueID)
+
+			count = count + 1
+		end
+
+		client:Notify("Learned " .. count .. " new blueprints.")
+	end
+
+	ix.command.Add("BlueprintsLearnAll", COMMAND)
 end

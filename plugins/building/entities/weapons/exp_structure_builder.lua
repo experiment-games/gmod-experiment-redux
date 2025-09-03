@@ -8,7 +8,8 @@ DEFINE_BASECLASS("exp_base_holder")
 
 SWEP.Base = "exp_base_holder"
 SWEP.PrintName = "Blueprint Builder"
-SWEP.Instructions = "{+attack}: Build.\n{+attack2}: Rotate (Hold {+speed}-button to snap)."
+SWEP.Instructions =
+"{+reload}: Open Blueprint Menu.\n{+attack}: Build.\n{+attack2}: Rotate (Hold {+speed}-button to snap)."
 SWEP.Purpose = "Construct structures."
 
 SWEP.HoldingModel = "models/props_lab/clipboard.mdl"
@@ -268,6 +269,24 @@ function SWEP:PrimaryAttack()
 	end
 
 	PLUGIN:RequestBuildStructure(position, self.expLastStructureAngles)
+end
+
+function SWEP:Reload()
+	if (not CLIENT) then
+		return
+	end
+
+	-- Throttle to prevent spam
+	if (Schema.util.Throttle("BlueprintMenu", 1)) then
+		return
+	end
+
+	-- Create and show the blueprint selector menu
+	if (not IsValid(self.blueprintMenu)) then
+		self.blueprintMenu = vgui.Create("expBlueprintSelector")
+	end
+
+	self.blueprintMenu:SetWeapon(self)
 end
 
 function SWEP:SecondaryAttack()

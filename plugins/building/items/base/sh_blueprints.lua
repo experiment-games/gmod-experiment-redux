@@ -1,14 +1,12 @@
+local PLUGIN = PLUGIN
 local ITEM = ITEM
 
-ITEM.base = "base_weapons"
 ITEM.name = "Blueprint"
 ITEM.model = "models/props_lab/clipboard.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.description = "A blueprint that can be used to construct structures."
-ITEM.category = "Blueprints"
-ITEM.class = "exp_structure_builder"
-ITEM.weaponCategory = "construction"
+ITEM.category = "Learnable Blueprints"
 
 ITEM.structureModel = "models/props_c17/oildrum001.mdl"
 ITEM.constructionMaterials = {
@@ -57,7 +55,8 @@ function ITEM.PaintOver(icon, item, width, height)
 	surface.DrawTexturedRect(width - iconSize - iconMargin, height - iconSize - iconMargin, iconSize, iconSize)
 end
 
--- Override this function so it returns the structure and the way it's built at the position and angles
+--- Override this function so it returns the structure and the way it's built at the position and angles`
+--- This is used by the exp_structure_builder.
 function ITEM:GetStructure(client)
 	return {
 		{
@@ -68,7 +67,20 @@ function ITEM:GetStructure(client)
 	}
 end
 
-function ITEM:OnEquipWeapon(client, weapon)
-	-- Set the item information to the weapon
-	weapon:SetItemTable(self)
-end
+ITEM.functions.Learn = {
+	name = "Learn",
+	icon = "icon16/book_open.png",
+	OnRun = function(item)
+		local client = item.player
+
+		if (PLUGIN:HasLearnedBlueprint(client, item.uniqueID)) then
+			client:NotifyLocalized("alreadyLearnedBlueprint")
+			return false
+		end
+
+		PLUGIN:LearnBlueprint(client, item.uniqueID)
+		client:NotifyLocalized("learnedBlueprint")
+
+		return true
+	end,
+}
