@@ -11,9 +11,12 @@ function ENT:InitializeTargetingSystem()
 	}
 end
 
--- Main target validation
 function ENT:IsValidTarget(entity)
 	if (not IsValid(entity) or entity == self) then
+		return false
+	end
+
+	if (entity.IsPassiveNPC) then
 		return false
 	end
 
@@ -24,7 +27,13 @@ function ENT:IsValidTarget(entity)
 
 	-- Check basic target validity
 	if (entity:IsPlayer()) then
-		return entity:Alive() and entity:GetMoveType() ~= MOVETYPE_NOCLIP
+		local disposition = self:Disposition(entity)
+
+		if (disposition == D_HT or disposition == D_NU) then
+			return entity:Alive() and entity:GetMoveType() ~= MOVETYPE_NOCLIP
+		else
+			return false
+		end
 	elseif (entity:IsDoor()) then
 		return self:IsDoorObstacle(entity)
 	end
@@ -266,6 +275,13 @@ function ENT:SetTargetEntity(target)
 			self:OnTargetLost(oldTarget)
 		end
 	end
+end
+
+function ENT:ClearTargets()
+	self:SetTargetEntity(nil)
+	self.targetingSystem.primaryTarget = nil
+	self.targetingSystem.obstacleTarget = nil
+	self.targetingSystem.lostTargetCount = 0
 end
 
 function ENT:ShouldResumeChasePrimaryTarget()

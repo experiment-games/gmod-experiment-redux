@@ -80,11 +80,20 @@ function ENT:OnPopulateEntityInfo(container)
 	name:SetText(self:GetDisplayName())
 	name:SizeToContents()
 
-	local healthBar = container:Add("expMonsterHealth")
-	healthBar:SetHealth(self:Health())
-	healthBar:SetMaxHealth(self:GetMaxHealth())
+	local healthBar = container:Add("expProgressBar")
+	healthBar:SetValue(function()
+		if (not IsValid(self)) then
+			return 0
+		end
+
+		return self:Health()
+	end)
+	healthBar:SetMaxValue(self:GetMaxHealth())
+	healthBar:SetPrefix("Health: ")
+	healthBar:SetProgressColors({
+		{ threshold = 0, color = derma.GetColor("Error", healthBar) },
+	})
 	healthBar:Dock(BOTTOM)
-	healthBar:SetWide(math.max(container:GetWide(), 200))
 end
 
 -- Override this to dress up the monster

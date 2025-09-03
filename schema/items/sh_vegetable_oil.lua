@@ -15,6 +15,10 @@ ITEM.functions.Drink = {
 
 		client:Notify("You drink the vegetable oil.")
 
+		if (item.useSound) then
+			client:EmitSound(item.useSound)
+		end
+
 		timer.Simple(1, function()
 			if (IsValid(client) and client:Alive()) then
 				client:TakeDamage(15, client, game.GetWorld())

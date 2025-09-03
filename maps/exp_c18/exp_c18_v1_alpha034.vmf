@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8870"
-	"mapversion" "2505"
+	"mapversion" "2506"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -101,7 +101,7 @@ bgimages_plus
 world
 {
 	"id" "1"
-	"mapversion" "2505"
+	"mapversion" "2506"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -953225,13 +953225,285 @@ entity
 		"logicalpos" "[0 0]"
 	}
 }
+entity
+{
+	"id" "2963841"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "887"
+	"origin" "30 -253.833 853.597"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963843"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "888"
+	"origin" "646 -611.854 922.425"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963845"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "889"
+	"origin" "50 -703.423 910.06"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963847"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "890"
+	"origin" "302.533 -870 907.653"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963849"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "891"
+	"origin" "-542 -736.594 904.311"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963851"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "892"
+	"origin" "-256.126 -1142 911.389"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963853"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "893"
+	"origin" "-542 -260.098 912.826"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963855"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "894"
+	"origin" "-959.291 70 873.967"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963857"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "895"
+	"origin" "-928 -712 926.151"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963860"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "896"
+	"origin" "-1032 661.68 904"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963863"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "897"
+	"origin" "-1045.04 1393.17 1079.24"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963865"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "898"
+	"origin" "-1071.91 2013.05 1123.23"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963867"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "899"
+	"origin" "-1197.23 2292.33 1143.05"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963869"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "900"
+	"origin" "-1724.19 2345.59 1162"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963871"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "901"
+	"origin" "-768 2480.58 904"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963874"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "902"
+	"origin" "-328 2487.32 912"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "2963877"
+	"classname" "info_node_air"
+	"angles" "0 0 0"
+	"nodeheight" "0"
+	"nodeid" "903"
+	"origin" "-312 2926 912"
+	editor
+	{
+		"color" "232 171 8"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
 cameras
 {
 	"activecamera" "0"
 	camera
 	{
-		"position" "[-1683.95 3695.58 994.698]"
-		"look" "[-20851 17216.4 1322.23]"
+		"position" "[-307.082 2850.37 950.885]"
+		"look" "[-2030.11 25241.2 -5829.24]"
 	}
 	camera
 	{

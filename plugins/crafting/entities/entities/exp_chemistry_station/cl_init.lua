@@ -36,7 +36,9 @@ function ENT:OnPopulateEntityInfo(tooltip)
 		statusRow:SizeToContents()
 
 		local progressBar = tooltip:Add("expProgressBar")
-		progressBar:SetValue(function() return CurTime() - startTime end)
+		progressBar:SetValue(function()
+			return CurTime() - startTime
+		end)
 		progressBar:SetMaxValue(duration)
 		progressBar:SetDrawValueText(false)
 		progressBar:Dock(BOTTOM)
