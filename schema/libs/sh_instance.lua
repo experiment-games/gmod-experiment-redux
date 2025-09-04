@@ -845,11 +845,13 @@ else
 
 				if (shouldHide and not isCurrentlyHidden) then
 					-- Need to hide this entity
+					entity.expOldNoDraw = entity:GetNoDraw()
 					entity:SetNoDraw(true)
 					hiddenEntities[entity] = true
 				elseif (not shouldHide and isCurrentlyHidden) then
 					-- Need to show this entity
-					entity:SetNoDraw(false)
+					entity:SetNoDraw(entity.expOldNoDraw or false)
+					entity.expOldNoDraw = nil
 					hiddenEntities[entity] = nil
 				end
 			end
@@ -930,16 +932,17 @@ end
 
 -- Micro-optimize lookup (ShouldCollide hook is called very often)
 local getEntityInstance = Schema.instance.GetEntityInstance
+local getPlayerInstance = Schema.instance.GetPlayerInstance
 
 -- Collision prevention across instances
 hook.Add("ShouldCollide", "expInstanceShouldCollide", function(ent1, ent2)
-	local inst1 = getEntityInstance(ent1)
-	local inst2 = getEntityInstance(ent2)
-
 	-- If one is the world, return to have default behaviour
 	if (not IsValid(ent1) or not IsValid(ent2)) then
 		return
 	end
+
+	local inst1 = ent1:IsPlayer() and getPlayerInstance(ent1) or getEntityInstance(ent1)
+	local inst2 = ent2:IsPlayer() and getPlayerInstance(ent2) or getEntityInstance(ent2)
 
 	-- If one is instanced and the other isn't, or they're in different instances
 	if ((inst1 and not inst2) or (not inst1 and inst2) or (inst1 ~= inst2)) then

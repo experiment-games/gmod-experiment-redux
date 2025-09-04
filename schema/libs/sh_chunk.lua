@@ -253,6 +253,9 @@ else
 		Client Functions
 	--]]
 
+	-- Table to store entities that need custom rendering with their render positions
+	Schema.chunk.customRenderEntities = Schema.chunk.customRenderEntities or {}
+
 	--- Gets a player's chunk from networked data
 	--- @param client Player
 	--- @return table { x = number, y = number }
@@ -307,12 +310,33 @@ else
 	-- Handle rendering players from neighboring chunks
 	hook.Add("ShouldHideEntityDueToInstance", "ChunkSystemNeighborRendering", function(localPlayer, entity, shouldHide)
 		if (not IsValid(localPlayer) or not IsValid(entity)) then
-			return nil
+			return
+		end
+
+		local function restore()
+			-- Restore original render mode and color if modified
+			if (entity.expOldRenderMode) then
+				entity:SetRenderMode(entity.expOldRenderMode)
+				entity.expOldRenderMode = nil
+			end
+
+			if (entity.expOldColor) then
+				entity:SetColor(entity.expOldColor)
+				entity.expOldColor = nil
+			end
+
+			-- Remove from custom render table if it was there
+			Schema.chunk.customRenderEntities[entity] = nil
 		end
 
 		-- Only handle players in different instances
 		if (not entity:IsPlayer() or not shouldHide) then
-			return nil
+			-- Remove from custom render table if it was there
+			if (Schema.chunk.customRenderEntities[entity]) then
+				restore()
+			end
+
+			return
 		end
 
 		local localChunk = Schema.chunk.GetPlayerChunkNetworked(localPlayer)
@@ -320,21 +344,85 @@ else
 
 		-- Check if the target player is in a neighboring chunk
 		if (Schema.chunk.IsNeighboringChunk(localChunk, targetChunk)) then
-			-- Don't hide players in neighboring chunks.
-			-- Instead, we'll render them with a position offset.
+			-- Calculate the render position
 			local renderPos = Schema.chunk.GetNeighborRenderPosition(localChunk, targetChunk, entity)
 
 			if (renderPos) then
-				entity:SetRenderOrigin(renderPos)
-				return false -- Don't hide the entity
+				-- Add to custom render table instead of trying to use SetRenderOrigin
+				Schema.chunk.customRenderEntities[entity] = renderPos
+
+				-- In order to preserve animations that are active, we cannot use SetNoDraw here since it would hang on the last known animation.
+				entity.expOldRenderMode = entity.expOldRenderMode or entity:GetRenderMode()
+				entity.expOldColor = entity.expOldColor or entity:GetColor()
+				entity:SetRenderMode(RENDERMODE_TRANSALPHA)
+				entity:SetColor(Color(255, 255, 255, 0))
+				return false
 			end
+		else
+			restore()
 		end
 	end)
 
-	-- Clean up render origins when entities are removed or chunks change
-	hook.Add("EntityRemoved", "ChunkSystemRenderCleanup", function(entity)
-		if (IsValid(entity) and entity:IsPlayer()) then
-			entity:SetRenderOrigin(nil)
+	-- Custom rendering hook for entities with custom positions
+	hook.Add("PostDrawOpaqueRenderables", "ChunkSystemCustomRender", function()
+		for entity, renderPos in pairs(Schema.chunk.customRenderEntities) do
+			if (not IsValid(entity)) then
+				Schema.chunk.customRenderEntities[entity] = nil
+				continue
+			end
+
+			-- Store original position
+			local originalPos = entity:GetPos()
+			local originalAngles = entity:GetAngles()
+
+			-- Set render position
+			entity:SetPos(renderPos)
+
+			-- Draw the entity manually
+			entity:DrawModel()
+
+			-- Restore original position
+			entity:SetPos(originalPos)
+		end
+	end)
+
+	-- Also handle transparent renderables (for any transparent parts of player models)
+	hook.Add("PostDrawTranslucentRenderables", "ChunkSystemCustomRenderTranslucent", function()
+		for entity, renderPos in pairs(Schema.chunk.customRenderEntities) do
+			if (not IsValid(entity)) then
+				Schema.chunk.customRenderEntities[entity] = nil
+				continue
+			end
+
+			-- Store original position
+			local originalPos = entity:GetPos()
+			local originalAngles = entity:GetAngles()
+
+			-- Set render position
+			entity:SetPos(renderPos)
+
+			-- Draw translucent parts
+			entity:DrawModel()
+
+			-- Restore original position
+			entity:SetPos(originalPos)
+		end
+	end)
+
+	-- Clean up custom render table when entities are removed or chunks change
+	hook.Add("EntityRemoved", "ChunkSystemCustomRenderCleanup", function(entity)
+		if (Schema.chunk.customRenderEntities[entity]) then
+			Schema.chunk.customRenderEntities[entity] = nil
+		end
+	end)
+
+	-- Clean up when local player's chunk changes
+	hook.Add("PlayerChangedChunk", "ChunkSystemCustomRenderChunkChange", function(client)
+		local localPlayer = LocalPlayer()
+		if (client == localPlayer) then
+			-- Clear all custom render entities when our chunk changes
+			-- They'll be re-evaluated in the next ShouldHideEntityDueToInstance call
+			table.Empty(Schema.chunk.customRenderEntities)
 		end
 	end)
 end
