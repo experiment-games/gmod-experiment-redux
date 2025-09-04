@@ -148,14 +148,6 @@
     resourceTypeID(string) : "Resource Type ID" : "" : "The type of resource that can be placed here"
 ]
 
-// Trigger to define the edge of a chunk for the chunk system
-@SolidClass base(Trigger, Targetname) = exp_chunk_edge :
-    "Trigger that defines the edge of a chunk for the chunk system"
-[
-    chunkX(integer) : "Chunk X" : 0 : "X coordinate of the chunk"
-    chunkY(integer) : "Chunk Y" : 0 : "Y coordinate of the chunk"
-]
-
 //
 // Extend doors to get ownable properties
 //

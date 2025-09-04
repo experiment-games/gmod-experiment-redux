@@ -6,10 +6,12 @@
 
 local CHUNK_SIZE_X = 2048
 local CHUNK_SIZE_Y = 2048
+local BOUNDARY_MARGIN = 0.001 -- Small margin to prevent infinite loops
 
 -- Utility library for chunk management
 Schema.chunk = ix.util.GetOrCreateLibrary("chunk", {
 	chunkSize = { x = CHUNK_SIZE_X, y = CHUNK_SIZE_Y },
+	boundaryMargin = BOUNDARY_MARGIN,
 })
 
 --[[
@@ -73,6 +75,41 @@ function Schema.chunk.GetChunkWorldOffset(chunkX, chunkY)
 	return Vector(chunkX * CHUNK_SIZE_X, chunkY * CHUNK_SIZE_Y, 0)
 end
 
+--- Checks if a position is near a chunk boundary
+--- @param pos Vector
+--- @param margin number Optional margin (defaults to BOUNDARY_MARGIN)
+--- @return boolean, number, number Returns whether near boundary and which boundaries (offsetX, offsetY)
+function Schema.chunk.IsNearChunkBoundary(pos, margin)
+	margin = margin or BOUNDARY_MARGIN
+
+	local halfSizeX = CHUNK_SIZE_X / 2
+	local halfSizeY = CHUNK_SIZE_Y / 2
+
+	local offsetX = 0
+	local offsetY = 0
+	local nearBoundary = false
+
+	-- Check X boundaries
+	if pos.x >= halfSizeX - margin then
+		offsetX = 1
+		nearBoundary = true
+	elseif pos.x <= -halfSizeX + margin then
+		offsetX = -1
+		nearBoundary = true
+	end
+
+	-- Check Y boundaries
+	if pos.y >= halfSizeY - margin then
+		offsetY = 1
+		nearBoundary = true
+	elseif pos.y <= -halfSizeY + margin then
+		offsetY = -1
+		nearBoundary = true
+	end
+
+	return nearBoundary, offsetX, offsetY
+end
+
 if SERVER then
 	--[[
 		Server Functions
@@ -82,8 +119,9 @@ if SERVER then
 	--- @param client Player
 	--- @param chunkX number
 	--- @param chunkY number
-	--- @param teleportPos Vector|nil Optional position to teleport to
-	function Schema.chunk.MovePlayerToChunk(client, chunkX, chunkY, teleportPos)
+	--- @param teleportPos? Vector Optional position to teleport to
+	--- @param moveData? CMoveData Optional movement data to position the player
+	function Schema.chunk.MovePlayerToChunk(client, chunkX, chunkY, teleportPos, moveData)
 		if (not IsValid(client)) then
 			return
 		end
@@ -101,8 +139,12 @@ if SERVER then
 		Schema.instance.AddPlayer(client, newInstanceID)
 
 		-- Teleport player if position is provided
-		if teleportPos then
-			client:SetPos(teleportPos)
+		if (teleportPos) then
+			if (moveData) then
+				moveData:SetOrigin(teleportPos)
+			else
+				client:SetPos(teleportPos)
+			end
 		end
 
 		-- Network the chunk change
@@ -141,24 +183,50 @@ if SERVER then
 		local halfSizeX = CHUNK_SIZE_X / 2
 		local halfSizeY = CHUNK_SIZE_Y / 2
 
-		-- Calculate teleport position (opposite side of the map)
+		-- Calculate teleport position (opposite side of the map with margin)
 		if (offsetX > 0) then
-			-- Moving to +X chunk, teleport to -X side
-			newPos.x = -halfSizeX
+			-- Moving to +X chunk, teleport to -X side with margin
+			newPos.x = -halfSizeX + BOUNDARY_MARGIN
 		elseif (offsetX < 0) then
-			-- Moving to -X chunk, teleport to +X side
-			newPos.x = halfSizeX
+			-- Moving to -X chunk, teleport to +X side with margin
+			newPos.x = halfSizeX - BOUNDARY_MARGIN
 		end
 
 		if (offsetY > 0) then
-			-- Moving to +Y chunk, teleport to -Y side
-			newPos.y = -halfSizeY
+			-- Moving to +Y chunk, teleport to -Y side with margin
+			newPos.y = -halfSizeY + BOUNDARY_MARGIN
 		elseif (offsetY < 0) then
-			-- Moving to -Y chunk, teleport to +Y side
-			newPos.y = halfSizeY
+			-- Moving to -Y chunk, teleport to +Y side with margin
+			newPos.y = halfSizeY - BOUNDARY_MARGIN
 		end
 
 		return newPos
+	end
+
+	--- Checks if a player should be moved to a different chunk and handles the transition
+	--- @param client Player
+	--- @param moveData? CMoveData Optional movement data to position the player
+	function Schema.chunk.CheckPlayerChunkTransition(client, moveData)
+		if (not IsValid(client) or not client.chunk) then
+			return
+		end
+
+		local pos = client:GetPos()
+		local nearBoundary, offsetX, offsetY = Schema.chunk.IsNearChunkBoundary(pos)
+
+		if (nearBoundary) then
+			local currentChunk = Schema.chunk.GetPlayerChunk(client)
+
+			-- Calculate new chunk coordinates
+			local newChunkX = currentChunk.x + offsetX
+			local newChunkY = currentChunk.y + offsetY
+
+			-- Calculate teleport position
+			local teleportPos = Schema.chunk.GetTeleportPosition(pos, offsetX, offsetY)
+
+			-- Move player to new chunk
+			Schema.chunk.MovePlayerToChunk(client, newChunkX, newChunkY, teleportPos, moveData)
+		end
 	end
 
 	--[[
@@ -170,6 +238,15 @@ if SERVER then
 		if (not client.chunk) then
 			Schema.chunk.InitializePlayer(client)
 		end
+	end)
+
+	-- Monitor player positions for chunk transitions
+	hook.Add("PlayerTick", "ChunkSystemPlayerTick", function(client, moveData)
+		if (not IsValid(client) or not client:Alive()) then
+			return
+		end
+
+		Schema.chunk.CheckPlayerChunkTransition(client, moveData)
 	end)
 else
 	--[[
@@ -215,12 +292,12 @@ else
 		local dx = targetPlayerChunk.x - localPlayerChunk.x
 		local dy = targetPlayerChunk.y - localPlayerChunk.y
 
-		-- Calculate the offset based on chunk difference
 		local offset = Vector(dx * CHUNK_SIZE_X, dy * CHUNK_SIZE_Y, 0)
 
-		-- Get the target player's current position and add the offset
 		local targetPos = targetPlayer:GetPos()
-		return targetPos + offset
+		local renderPos = targetPos + offset
+
+		return renderPos
 	end
 
 	--[[
@@ -242,54 +319,22 @@ else
 		local targetChunk = Schema.chunk.GetPlayerChunkNetworked(entity)
 
 		-- Check if the target player is in a neighboring chunk
-		if Schema.chunk.IsNeighboringChunk(localChunk, targetChunk) then
-			-- Don't hide players in neighboring chunks
-			-- Instead, we'll render them with a position offset
+		if (Schema.chunk.IsNeighboringChunk(localChunk, targetChunk)) then
+			-- Don't hide players in neighboring chunks.
+			-- Instead, we'll render them with a position offset.
 			local renderPos = Schema.chunk.GetNeighborRenderPosition(localChunk, targetChunk, entity)
 
-			if renderPos then
-				-- Set the render origin to simulate the player being in the infinite world
+			if (renderPos) then
 				entity:SetRenderOrigin(renderPos)
 				return false -- Don't hide the entity
 			end
 		end
-
-		-- For all other cases, use the default behavior
-		return nil
 	end)
 
 	-- Clean up render origins when entities are removed or chunks change
 	hook.Add("EntityRemoved", "ChunkSystemRenderCleanup", function(entity)
 		if (IsValid(entity) and entity:IsPlayer()) then
 			entity:SetRenderOrigin(nil)
-		end
-	end)
-
-	-- Update render origins when players change chunks
-	hook.Add("Think", "ChunkSystemUpdateRenderOrigins", function()
-		local localPlayer = LocalPlayer()
-		if (not IsValid(localPlayer)) then
-			return
-		end
-
-		local localChunk = Schema.chunk.GetPlayerChunkNetworked(localPlayer)
-
-		-- Update render origins for all players
-		for _, player in ipairs(player.GetAll()) do
-			if (IsValid(player) and player ~= localPlayer) then
-				local targetChunk = Schema.chunk.GetPlayerChunkNetworked(player)
-
-				if (Schema.chunk.IsNeighboringChunk(localChunk, targetChunk)) then
-					-- Player is in neighboring chunk, update render origin
-					local renderPos = Schema.chunk.GetNeighborRenderPosition(localChunk, targetChunk, player)
-					if (renderPos) then
-						player:SetRenderOrigin(renderPos)
-					end
-				else
-					-- Player is not in neighboring chunk, clear render origin
-					player:SetRenderOrigin(nil)
-				end
-			end
 		end
 	end)
 end

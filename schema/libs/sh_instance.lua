@@ -22,7 +22,7 @@ Schema.instance = ix.util.GetOrCreateLibrary("instance", {
 	instances = {},    -- instanceID -> InstanceData
 	playerInstances = {}, -- Player -> instanceID
 	entityInstances = {}, -- Entity -> instanceID
-	instanceOwners = {} -- instanceID -> Player (for quick lookup)
+	instanceOwners = {}, -- instanceID -> Player (for quick lookup)
 })
 
 if (SERVER) then
@@ -787,10 +787,12 @@ else
 	--]]
 
 	-- Store entities that should be hidden due to instance mismatch
-	local hiddenEntities = {}
+	Schema.instance.hiddenEntities = Schema.instance.hiddenEntities or {}
+	local hiddenEntities = Schema.instance.hiddenEntities
 
 	-- Store entities in PVS so not all entities have to be looped in PreRender
-	local entitiesInPVS = {}
+	Schema.instance.entitiesInPVS = Schema.instance.entitiesInPVS or {}
+	local entitiesInPVS = Schema.instance.entitiesInPVS
 
 	-- Track entities entering PVS
 	hook.Add("NotifyShouldTransmit", "expInstancePVSTracking", function(entity, shouldTransmit)
