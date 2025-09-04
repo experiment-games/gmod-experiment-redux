@@ -542,17 +542,28 @@ if (SERVER) then
 		local attacker = dmgInfo:GetAttacker()
 
 		if (IsValid(attacker) and attacker:IsPlayer()) then
-			-- Prevent player damage across instances
+			-- Get instances
+			local attackerInstance = Schema.instance.GetPlayerInstance(attacker)
+			local targetInstance
+
 			if (target:IsPlayer()) then
-				if (not Schema.instance.CanPlayerSeePlayer(attacker, target)) then
-					return true -- Block damage
-				end
+				targetInstance = Schema.instance.GetPlayerInstance(target)
 			else
-				-- Prevent entity damage across instances
-				if (not Schema.instance.CanPlayerSeeEntity(attacker, target)) then
-					return true -- Block damage
-				end
+				targetInstance = Schema.instance.GetEntityInstance(target)
 			end
+
+			-- Allow damage if in same instance or no instances
+			if (attackerInstance == targetInstance) then
+				return
+			end
+
+			-- Allow damage between neighboring chunks
+			if (hook.Run("ShouldInstanceBlockEntityDamage", attacker, target, attackerInstance, targetInstance) == false) then
+				return
+			end
+
+			-- Block damage for all other cases
+			return true
 		end
 	end)
 
@@ -835,7 +846,7 @@ else
 
 				-- Allow overriding if the player can be seen. This could for example be used when using instances
 				-- for chunks and you want to draw players in the bordering chunk with SetRenderOrigin.
-				local shouldHideOverride = hook.Run("ShouldHideEntityDueToInstance", localPlayer, entity, shouldHide)
+				local shouldHideOverride = hook.Run("ShouldInstanceHideEntity", localPlayer, entity, shouldHide)
 
 				if (shouldHideOverride ~= nil) then
 					shouldHide = shouldHideOverride

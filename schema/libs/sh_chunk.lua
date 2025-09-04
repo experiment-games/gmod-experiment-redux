@@ -337,6 +337,105 @@ if SERVER then
 		return pvsOrigins
 	end
 
+	-- Store original positions for cross-chunk combat calculations
+	Schema.chunk.playerOriginalPositions = Schema.chunk.playerOriginalPositions or {}
+
+	--- Gets the effective position of a player for combat calculations
+	--- This considers their position from the perspective of another player's chunk
+	--- @param targetPlayer Player The player whose position we want
+	--- @param viewerPlayer Player The player viewing/attacking
+	--- @return Vector The effective position for combat
+	function Schema.chunk.GetPlayerEffectivePosition(targetPlayer, viewerPlayer)
+		if (not IsValid(targetPlayer) or not IsValid(viewerPlayer)) then
+			return targetPlayer:GetPos()
+		end
+
+		local viewerChunk = Schema.chunk.GetPlayerChunk(viewerPlayer)
+		local targetChunk = Schema.chunk.GetPlayerChunk(targetPlayer)
+
+		-- If in same chunk, return normal position
+		if (viewerChunk.x == targetChunk.x and viewerChunk.y == targetChunk.y) then
+			return targetPlayer:GetPos()
+		end
+
+		-- If not neighboring chunks, return normal position (shouldn't hit anyway due to instance system)
+		if (not Schema.chunk.IsNeighboringChunk(viewerChunk, targetChunk)) then
+			return targetPlayer:GetPos()
+		end
+
+		-- Calculate the offset position as seen from viewer's chunk
+		local dx = targetChunk.x - viewerChunk.x
+		local dy = targetChunk.y - viewerChunk.y
+		local offset = Vector(dx * CHUNK_SIZE_X, dy * CHUNK_SIZE_Y, 0)
+
+		return targetPlayer:GetPos() + offset
+	end
+
+	--- Custom trace function for cross-chunk combat
+	--- @param start Vector
+	--- @param endPos Vector
+	--- @param filter table|function
+	--- @param mask number
+	--- @param attacker Player
+	--- @return table Trace result
+	function Schema.chunk.TraceCrossChunk(start, endPos, filter, mask, attacker)
+		-- First do a normal trace
+		local tr = util.TraceLine({
+			start = start,
+			endpos = endPos,
+			filter = filter,
+			mask = mask
+		})
+
+		if (not IsValid(attacker) or not attacker:IsPlayer()) then
+			return tr
+		end
+
+		-- If we hit something or don't have a valid attacker, return the trace
+		if (tr.Hit and IsValid(tr.Entity)) then
+			return tr
+		end
+
+		-- Check for cross-chunk hits on players
+		local attackerChunk = Schema.chunk.GetPlayerChunk(attacker)
+		local nearbyPlayers = {}
+
+		-- Get players in neighboring chunks
+		for _, client in ipairs(player.GetAll()) do
+			if (client == attacker) then continue end
+
+			local clientChunk = Schema.chunk.GetPlayerChunk(client)
+			if (Schema.chunk.IsNeighboringChunk(attackerChunk, clientChunk)) then
+				table.insert(nearbyPlayers, client)
+			end
+		end
+
+		-- Check intersection with effective positions of cross-chunk players
+		for _, targetPlayer in ipairs(nearbyPlayers) do
+			local effectivePos = Schema.chunk.GetPlayerEffectivePosition(targetPlayer, attacker)
+			local mins, maxs = targetPlayer:GetCollisionBounds()
+
+			-- Simple box intersection check
+			local hitPos = util.IntersectRayWithOBB(start, endPos - start, effectivePos, targetPlayer:GetAngles(), mins,
+				maxs)
+			if (hitPos) then
+				-- Create a custom trace result
+				local customTr = {
+					Hit = true,
+					Entity = targetPlayer,
+					HitPos = hitPos,
+					Normal = (start - hitPos):GetNormalized(),
+					Fraction = start:Distance(hitPos) / start:Distance(endPos),
+					StartPos = start,
+					EndPos = endPos
+				}
+				return customTr
+			end
+		end
+
+		return tr
+	end
+
 	--[[
 		Server Hooks
 	--]]
@@ -368,6 +467,80 @@ if SERVER then
 		for _, origin in ipairs(pvsOrigins) do
 			AddOriginToPVS(origin)
 		end
+	end)
+
+	-- Allow damage in between neighboring chunks
+	hook.Add("ShouldInstanceBlockEntityDamage", "ChunkSystemAllowCrossChunkDamage",
+		function(attacker, target, attackerInstance, targetInstance)
+			if (not IsValid(attacker) or not IsValid(target)) then
+				return
+			end
+
+			if (not attacker:IsPlayer() or not target:IsPlayer()) then
+				return
+			end
+
+			local attackerChunk = Schema.chunk.GetPlayerChunk(attacker)
+			local targetChunk = Schema.chunk.GetPlayerChunk(target)
+
+			-- Allow damage if in neighboring chunks
+			if (Schema.chunk.IsNeighboringChunk(attackerChunk, targetChunk)) then
+				return false
+			end
+		end)
+
+	-- Hook into weapon firing to use custom trace
+	hook.Add("EntityFireBullets", "ChunkSystemCrossBorder", function(entity, data)
+		if (not IsValid(entity) or not entity:IsPlayer()) then
+			return
+		end
+
+		-- Store original callback
+		local originalCallback = data.Callback
+
+		-- Create new callback that handles cross-chunk hits
+		-- TODO: This idea fails, because this is only called if we hit something (not the skybox or water)
+		data.Callback = function(attacker, tr, dmgInfo)
+			-- If we have an original callback, call it first
+			if (originalCallback) then
+				local result = originalCallback(attacker, tr, dmgInfo)
+				if (result) then return result end
+			end
+
+			-- If the trace didn't hit anything, try cross-chunk trace
+			if (not tr.Hit or not IsValid(tr.Entity)) then
+				local customTr = Schema.chunk.TraceCrossChunk(
+					tr.StartPos,
+					tr.StartPos + data.Dir * (data.Distance or 8192),
+					data.Filter,
+					data.Mask or MASK_SHOT,
+					attacker
+				)
+
+				if (customTr.Hit and IsValid(customTr.Entity) and customTr.Entity:IsPlayer()) then
+					-- Apply damage manually since the trace system won't handle this
+					local damage = DamageInfo()
+					damage:SetDamage(dmgInfo:GetDamage())
+					damage:SetAttacker(attacker)
+					damage:SetInflictor(dmgInfo:GetInflictor())
+					damage:SetDamageType(dmgInfo:GetDamageType())
+					damage:SetDamagePosition(customTr.HitPos)
+					damage:SetDamageForce(data.Dir * dmgInfo:GetDamage() * 100)
+
+					customTr.Entity:TakeDamageInfo(damage)
+
+					-- Create blood effect at hit position
+					local effectData = EffectData()
+					effectData:SetOrigin(customTr.HitPos)
+					effectData:SetNormal(customTr.Normal)
+					util.Effect("BloodImpact", effectData)
+
+					return { damage = true, effects = true }
+				end
+			end
+		end
+
+		return data
 	end)
 else
 	-- Table to store entities that need custom rendering with their render positions
@@ -425,7 +598,7 @@ else
 	--]]
 
 	-- Handle rendering players from neighboring chunks
-	hook.Add("ShouldHideEntityDueToInstance", "ChunkSystemNeighborRendering", function(localPlayer, entity, shouldHide)
+	hook.Add("ShouldInstanceHideEntity", "ChunkSystemNeighborRendering", function(localPlayer, entity, shouldHide)
 		if (not IsValid(localPlayer) or not IsValid(entity)) then
 			return
 		end
@@ -538,7 +711,7 @@ else
 		local localPlayer = LocalPlayer()
 		if (client == localPlayer) then
 			-- Clear all custom render entities when our chunk changes
-			-- They'll be re-evaluated in the next ShouldHideEntityDueToInstance call
+			-- They'll be re-evaluated in the next ShouldInstanceHideEntity call
 			table.Empty(Schema.chunk.customRenderEntities)
 		end
 	end)
