@@ -6,12 +6,14 @@
 
 local CHUNK_SIZE_X = 2048
 local CHUNK_SIZE_Y = 2048
-local BOUNDARY_MARGIN = 0.001 -- Small margin to prevent infinite loops
+local BOUNDARY_MARGIN = 0.001     -- Small margin to prevent infinite loops
+local PVS_BOUNDARY_DISTANCE = 512 -- Distance from boundary to start adding PVS origins
 
 -- Utility library for chunk management
 Schema.chunk = ix.util.GetOrCreateLibrary("chunk", {
 	chunkSize = { x = CHUNK_SIZE_X, y = CHUNK_SIZE_Y },
 	boundaryMargin = BOUNDARY_MARGIN,
+	pvsBoundaryDistance = PVS_BOUNDARY_DISTANCE,
 })
 
 --[[
@@ -111,9 +113,59 @@ function Schema.chunk.IsNearChunkBoundary(pos, margin)
 end
 
 if SERVER then
-	--[[
-		Server Functions
-	--]]
+	--- Checks if a position is near a chunk boundary for PVS purposes
+	--- @param pos Vector
+	--- @param distance number Distance from boundary to check
+	--- @return boolean, table Returns whether near boundary and which boundaries { x = number, y = number }
+	function Schema.chunk.IsNearChunkBoundaryForPVS(pos, distance)
+		distance = distance or PVS_BOUNDARY_DISTANCE
+
+		local halfSizeX = CHUNK_SIZE_X / 2
+		local halfSizeY = CHUNK_SIZE_Y / 2
+
+		local boundaries = {}
+		local nearBoundary = false
+
+		-- Check X boundaries
+		if pos.x >= halfSizeX - distance then
+			table.insert(boundaries, { x = 1, y = 0 })
+			nearBoundary = true
+		end
+		if pos.x <= -halfSizeX + distance then
+			table.insert(boundaries, { x = -1, y = 0 })
+			nearBoundary = true
+		end
+
+		-- Check Y boundaries
+		if pos.y >= halfSizeY - distance then
+			table.insert(boundaries, { x = 0, y = 1 })
+			nearBoundary = true
+		end
+		if pos.y <= -halfSizeY + distance then
+			table.insert(boundaries, { x = 0, y = -1 })
+			nearBoundary = true
+		end
+
+		-- Check diagonal boundaries (corners)
+		if pos.x >= halfSizeX - distance and pos.y >= halfSizeY - distance then
+			table.insert(boundaries, { x = 1, y = 1 })
+			nearBoundary = true
+		end
+		if pos.x <= -halfSizeX + distance and pos.y >= halfSizeY - distance then
+			table.insert(boundaries, { x = -1, y = 1 })
+			nearBoundary = true
+		end
+		if pos.x >= halfSizeX - distance and pos.y <= -halfSizeY + distance then
+			table.insert(boundaries, { x = 1, y = -1 })
+			nearBoundary = true
+		end
+		if pos.x <= -halfSizeX + distance and pos.y <= -halfSizeY + distance then
+			table.insert(boundaries, { x = -1, y = -1 })
+			nearBoundary = true
+		end
+
+		return nearBoundary, boundaries
+	end
 
 	--- Moves a player to a specific chunk
 	--- @param client Player
@@ -229,6 +281,62 @@ if SERVER then
 		end
 	end
 
+	--- Calculates PVS origins for neighboring chunks that the player is near
+	--- @param client Player
+	--- @return table Array of Vector positions to add to PVS
+	function Schema.chunk.GetPVSOriginsForPlayer(client)
+		if (not IsValid(client) or not client.chunk) then
+			return {}
+		end
+
+		local pos = client:GetPos()
+		local currentChunk = Schema.chunk.GetPlayerChunk(client)
+		local nearBoundary, boundaries = Schema.chunk.IsNearChunkBoundaryForPVS(pos, PVS_BOUNDARY_DISTANCE)
+
+		local pvsOrigins = {}
+
+		if (nearBoundary) then
+			for _, boundary in ipairs(boundaries) do
+				-- Calculate the neighboring chunk coordinates
+				local neighborChunkX = currentChunk.x + boundary.x
+				local neighborChunkY = currentChunk.y + boundary.y
+
+				-- Calculate the world offset for this neighboring chunk
+				local chunkOffset = Schema.chunk.GetChunkWorldOffset(neighborChunkX, neighborChunkY)
+
+				-- Calculate a position in the neighboring chunk that would be good for PVS
+				-- We want a position that's on the boundary but in the neighboring chunk
+				local pvsPos = Vector(pos.x, pos.y, pos.z)
+
+				-- Adjust position to be in the neighboring chunk
+				if (boundary.x ~= 0) then
+					local halfSizeX = CHUNK_SIZE_X / 2
+					if (boundary.x > 0) then
+						pvsPos.x = -halfSizeX + PVS_BOUNDARY_DISTANCE
+					else
+						pvsPos.x = halfSizeX - PVS_BOUNDARY_DISTANCE
+					end
+				end
+
+				if (boundary.y ~= 0) then
+					local halfSizeY = CHUNK_SIZE_Y / 2
+					if (boundary.y > 0) then
+						pvsPos.y = -halfSizeY + PVS_BOUNDARY_DISTANCE
+					else
+						pvsPos.y = halfSizeY - PVS_BOUNDARY_DISTANCE
+					end
+				end
+
+				-- Add the chunk offset to get the actual world position
+				pvsPos = pvsPos + chunkOffset
+
+				table.insert(pvsOrigins, pvsPos)
+			end
+		end
+
+		return pvsOrigins
+	end
+
 	--[[
 		Server Hooks
 	--]]
@@ -248,11 +356,20 @@ if SERVER then
 
 		Schema.chunk.CheckPlayerChunkTransition(client, moveData)
 	end)
-else
-	--[[
-		Client Functions
-	--]]
 
+	-- Add PVS origins for neighboring chunks when player is near boundaries
+	hook.Add("SetupPlayerVisibility", "ChunkSystemPVS", function(client, viewEntity)
+		if (not IsValid(client)) then
+			return
+		end
+
+		local pvsOrigins = Schema.chunk.GetPVSOriginsForPlayer(client)
+
+		for _, origin in ipairs(pvsOrigins) do
+			AddOriginToPVS(origin)
+		end
+	end)
+else
 	-- Table to store entities that need custom rendering with their render positions
 	Schema.chunk.customRenderEntities = Schema.chunk.customRenderEntities or {}
 
@@ -468,5 +585,29 @@ if SERVER then
 		end
 
 		ix.command.Add("ChunkMoveTo", COMMAND)
+	end
+
+	do
+		local COMMAND = {}
+
+		COMMAND.description = "Debug PVS origins for the current player."
+		COMMAND.arguments = {}
+		COMMAND.superAdminOnly = true
+
+		function COMMAND:OnRun(client)
+			local pvsOrigins = Schema.chunk.GetPVSOriginsForPlayer(client)
+			local pos = client:GetPos()
+			local chunk = Schema.chunk.GetPlayerChunk(client)
+
+			client:Notify(string.format("Player position: %.1f, %.1f, %.1f", pos.x, pos.y, pos.z))
+			client:Notify(string.format("Current chunk: (%d, %d)", chunk.x, chunk.y))
+			client:Notify(string.format("PVS origins count: %d", #pvsOrigins))
+
+			for i, origin in ipairs(pvsOrigins) do
+				client:Notify(string.format("PVS Origin %d: %.1f, %.1f, %.1f", i, origin.x, origin.y, origin.z))
+			end
+		end
+
+		ix.command.Add("ChunkDebugPVS", COMMAND)
 	end
 end
