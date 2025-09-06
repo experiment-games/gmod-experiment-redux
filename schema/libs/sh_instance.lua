@@ -689,6 +689,17 @@ if (SERVER) then
 		end
 	end)
 
+	-- Ensure player/entity ragdolls are in the same instance as the player/entity that spawned them
+	hook.Add("EntityRagdollCreated", "expInstanceEntityRagdoll", function(entity, ragdoll)
+		local ownerInstance = entity:IsPlayer()
+			and Schema.instance.GetPlayerInstance(entity)
+			or Schema.instance.GetEntityInstance(entity)
+
+		if (ownerInstance) then
+			Schema.instance.AddEntity(ragdoll, ownerInstance)
+		end
+	end)
+
 	-- Prevent in-character chat from working across instances
 	hook.Add("PlayerMessageSend", "expInstanceChatFilter",
 		function(speaker, chatType, text, anonymous, receivers, rawText)
