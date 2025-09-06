@@ -22,7 +22,7 @@ Schema.instance = ix.util.GetOrCreateLibrary("instance", {
 	instances = {},    -- instanceID -> InstanceData
 	playerInstances = {}, -- Player -> instanceID
 	entityInstances = {}, -- Entity -> instanceID
-	instanceOwners = {} -- instanceID -> Player (for quick lookup)
+	instanceOwners = {}, -- instanceID -> Player (for quick lookup)
 })
 
 if (SERVER) then
@@ -53,7 +53,7 @@ if (SERVER) then
 		return children
 	end
 
-	--- Common logic for adding entities to instances with networking and transmission updates
+	--- Common logic for adding entities to instances with networking
 	--- @param entity Entity
 	--- @param instanceID string
 	--- @param isPlayer boolean
@@ -91,13 +91,6 @@ if (SERVER) then
 		-- Needed for ShouldCollide to work
 		entity.expInstanceOldCustomCollisionCheck = entity:GetCustomCollisionCheck()
 		entity:SetCustomCollisionCheck(true)
-
-		-- Update transmission
-		if (isPlayer) then
-			Schema.instance.UpdatePlayerTransmission(entity)
-		else
-			Schema.instance.UpdateEntityTransmission(entity)
-		end
 
 		return true
 	end
@@ -137,13 +130,6 @@ if (SERVER) then
 
 		-- Restore collision check
 		entity:SetCustomCollisionCheck(entity.expInstanceOldCustomCollisionCheck or false)
-
-		-- Update transmission
-		if (isPlayer) then
-			Schema.instance.UpdatePlayerTransmission(entity)
-		else
-			Schema.instance.UpdateEntityTransmission(entity)
-		end
 
 		return instanceID
 	end
@@ -348,41 +334,6 @@ if (SERVER) then
 		return viewerInstance == targetInstance
 	end
 
-	--- Updates transmission for a specific entity to all players
-	--- @param entity Entity
-	function Schema.instance.UpdateEntityTransmission(entity)
-		if (not IsValid(entity)) then
-			return
-		end
-
-		for _, client in ipairs(player.GetAll()) do
-			if (Schema.instance.CanPlayerSeeEntity(client, entity)) then
-				entity:SetPreventTransmit(client, false)
-			else
-				entity:SetPreventTransmit(client, true)
-			end
-		end
-	end
-
-	--- Updates transmission for a specific player to all entities
-	--- @param client Player
-	function Schema.instance.UpdatePlayerTransmission(client)
-		if (not IsValid(client)) then
-			return
-		end
-
-		-- Update transmission for all instanced entities
-		for entity, _ in pairs(Schema.instance.entityInstances) do
-			if (IsValid(entity)) then
-				if (Schema.instance.CanPlayerSeeEntity(client, entity)) then
-					entity:SetPreventTransmit(client, false)
-				else
-					entity:SetPreventTransmit(client, true)
-				end
-			end
-		end
-	end
-
 	--- Destroys an instance and removes all its entities and players
 	--- @param instanceID string
 	--- @param reason string|nil Optional reason for destruction
@@ -560,19 +511,6 @@ if (SERVER) then
 		end
 	end)
 
-	-- Handle new players connecting
-	hook.Add("PlayerSpawn", "expInstanceTransmission", function(client)
-		Schema.instance.UpdatePlayerTransmission(client)
-	end)
-
-	-- Handle entity spawning - ensure proper transmission
-	hook.Add("OnEntityCreated", "expInstanceTransmission", function(entity)
-		if (hook.Run("ShouldEntityBeInstanced", entity) == false) then
-			return
-		end
-
-		Schema.instance.UpdateEntityTransmission(entity)
-	end)
 
 	-- Prevent players from hearing voice chat across instances
 	hook.Add("PlayerCanHearPlayersVoice", "expPreventHearingOtherInstancePlayers", function(listener, speaker)
@@ -604,17 +542,28 @@ if (SERVER) then
 		local attacker = dmgInfo:GetAttacker()
 
 		if (IsValid(attacker) and attacker:IsPlayer()) then
-			-- Prevent player damage across instances
+			-- Get instances
+			local attackerInstance = Schema.instance.GetPlayerInstance(attacker)
+			local targetInstance
+
 			if (target:IsPlayer()) then
-				if (not Schema.instance.CanPlayerSeePlayer(attacker, target)) then
-					return true -- Block damage
-				end
+				targetInstance = Schema.instance.GetPlayerInstance(target)
 			else
-				-- Prevent entity damage across instances
-				if (not Schema.instance.CanPlayerSeeEntity(attacker, target)) then
-					return true -- Block damage
-				end
+				targetInstance = Schema.instance.GetEntityInstance(target)
 			end
+
+			-- Allow damage if in same instance or no instances
+			if (attackerInstance == targetInstance) then
+				return
+			end
+
+			-- Allow damage between neighboring chunks
+			if (hook.Run("ShouldInstanceBlockEntityDamage", attacker, target, attackerInstance, targetInstance) == false) then
+				return
+			end
+
+			-- Block damage for all other cases
+			return true
 		end
 	end)
 
@@ -848,20 +797,94 @@ else
 		Client hooks
 	--]]
 
-	-- Hide players that are in different instances
-	hook.Add("PrePlayerDraw", "expInstancePlayerVisibility", function(client)
-		if (not Schema.instance.CanSeePlayer(client)) then
-			return true -- Prevent drawing
+	-- Store entities that should be hidden due to instance mismatch
+	Schema.instance.hiddenEntities = Schema.instance.hiddenEntities or {}
+	local hiddenEntities = Schema.instance.hiddenEntities
+
+	-- Store entities in PVS so not all entities have to be looped in PreRender
+	Schema.instance.entitiesInPVS = Schema.instance.entitiesInPVS or {}
+	local entitiesInPVS = Schema.instance.entitiesInPVS
+
+	-- Track entities entering PVS
+	hook.Add("NotifyShouldTransmit", "expInstancePVSTracking", function(entity, shouldTransmit)
+		if (shouldTransmit) then
+			entitiesInPVS[entity] = true
+		else
+			entitiesInPVS[entity] = nil
+			-- Clean up hidden entities when they leave PVS
+			if (hiddenEntities[entity]) then
+				hiddenEntities[entity] = nil
+			end
+		end
+	end)
+
+	-- Lookups since thse are used in hooks that are called often and this micro optimization helps
+	local isValid = IsValid
+	local localPlayerFunction = LocalPlayer
+	local canSeeEntity = Schema.instance.CanSeeEntity
+	local canSeePlayer = Schema.instance.CanSeePlayer
+
+	-- Pre-render hook to hide entities from other instances
+	hook.Add("PreRender", "expInstanceVisibilityControl", function()
+		local localPlayer = localPlayerFunction()
+
+		if (not isValid(localPlayer)) then
+			return
+		end
+
+		-- Process only entities in PVS
+		for entity, _ in pairs(entitiesInPVS) do
+			if (isValid(entity) and entity ~= localPlayer) then
+				local shouldHide = false
+
+				-- Check if entity should be visible to local player
+				if (entity:IsPlayer()) then
+					shouldHide = not canSeePlayer(entity)
+				else
+					shouldHide = not canSeeEntity(entity)
+				end
+
+				-- Allow overriding if the player can be seen. This could for example be used when using instances
+				-- for chunks and you want to draw players in the bordering chunk with SetRenderOrigin.
+				local shouldHideOverride = hook.Run("ShouldInstanceHideEntity", localPlayer, entity, shouldHide)
+
+				if (shouldHideOverride ~= nil) then
+					shouldHide = shouldHideOverride
+				end
+
+				local isCurrentlyHidden = hiddenEntities[entity]
+
+				if (shouldHide and not isCurrentlyHidden) then
+					-- Need to hide this entity
+					entity.expOldNoDraw = entity:GetNoDraw()
+					entity:SetNoDraw(true)
+					hiddenEntities[entity] = true
+				elseif (not shouldHide and isCurrentlyHidden) then
+					-- Need to show this entity
+					entity:SetNoDraw(entity.expOldNoDraw or false)
+					entity.expOldNoDraw = nil
+					hiddenEntities[entity] = nil
+				end
+			end
+		end
+	end)
+
+	-- Clean up when entities are removed
+	hook.Add("EntityRemoved", "expInstanceVisibilityCleanup", function(entity)
+		entitiesInPVS[entity] = nil
+
+		if (hiddenEntities[entity]) then
+			hiddenEntities[entity] = nil
 		end
 	end)
 
 	-- Hide player names/overlays for players in different instances
 	hook.Add("HUDDrawTargetID", "expInstanceTargetID", function()
-		local trace = LocalPlayer():GetEyeTrace()
+		local trace = localPlayerFunction():GetEyeTrace()
 		local target = trace.Entity
 
-		if (IsValid(target) and target:IsPlayer()) then
-			if (not Schema.instance.CanSeePlayer(target)) then
+		if (isValid(target) and target:IsPlayer()) then
+			if (not canSeePlayer(target)) then
 				return true -- Prevent drawing target ID
 			end
 		end
@@ -871,18 +894,18 @@ else
 	hook.Add("EntityEmitSound", "expInstanceEntitySound", function(data)
 		local entity = data.Entity
 
-		if (IsValid(entity)) then
-			local localPlayer = LocalPlayer()
+		if (isValid(entity)) then
+			local localPlayer = localPlayerFunction()
 
-			if (IsValid(localPlayer)) then
+			if (isValid(localPlayer)) then
 				-- If it's a player sound
 				if (entity:IsPlayer()) then
-					if (not Schema.instance.CanSeePlayer(entity)) then
+					if (not canSeePlayer(entity)) then
 						return false
 					end
 				else
 					-- For entity sounds, check if we can see the entity
-					if (not Schema.instance.CanSeeEntity(entity)) then
+					if (not canSeeEntity(entity)) then
 						return false
 					end
 				end
@@ -892,11 +915,12 @@ else
 
 	-- Prevent client-side prediction errors for interactions
 	hook.Add("CreateMove", "expInstanceCreateMove", function(cmd)
+		local localPlayer = localPlayerFunction()
 		if (cmd:KeyDown(IN_USE)) then
-			local trace = LocalPlayer():GetEyeTrace()
+			local trace = localPlayer:GetEyeTrace()
 			local entity = trace.Entity
 
-			if (IsValid(entity) and not Schema.instance.CanSeeEntity(entity)) then
+			if (isValid(entity) and not canSeeEntity(entity)) then
 				cmd:RemoveKey(IN_USE)
 			end
 		end
@@ -904,9 +928,9 @@ else
 
 	-- Prevent tooltip info for entities in other instances
 	hook.Add("ShouldPopulateEntityInfo", "expInstanceEntityInfo", function(entity)
-		local localPlayer = LocalPlayer()
-		if (IsValid(localPlayer)) then
-			if (not Schema.instance.CanSeeEntity(entity)) then
+		local localPlayer = localPlayerFunction()
+		if (isValid(localPlayer)) then
+			if (not canSeeEntity(entity)) then
 				return false
 			end
 		end
@@ -919,16 +943,17 @@ end
 
 -- Micro-optimize lookup (ShouldCollide hook is called very often)
 local getEntityInstance = Schema.instance.GetEntityInstance
+local getPlayerInstance = Schema.instance.GetPlayerInstance
 
 -- Collision prevention across instances
 hook.Add("ShouldCollide", "expInstanceShouldCollide", function(ent1, ent2)
-	local inst1 = getEntityInstance(ent1)
-	local inst2 = getEntityInstance(ent2)
-
 	-- If one is the world, return to have default behaviour
 	if (not IsValid(ent1) or not IsValid(ent2)) then
 		return
 	end
+
+	local inst1 = ent1:IsPlayer() and getPlayerInstance(ent1) or getEntityInstance(ent1)
+	local inst2 = ent2:IsPlayer() and getPlayerInstance(ent2) or getEntityInstance(ent2)
 
 	-- If one is instanced and the other isn't, or they're in different instances
 	if ((inst1 and not inst2) or (not inst1 and inst2) or (inst1 ~= inst2)) then
