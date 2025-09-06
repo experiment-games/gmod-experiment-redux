@@ -672,44 +672,16 @@ if (SERVER) then
 		end
 	end)
 
-	-- Ensure dropped items from a player get moved to the same instance.
-	hook.Add("OnItemSpawned", "expInstanceItemSpawned", function(item)
-		if (not item.ixSteamID) then
-			return
-		end
+	-- Ensure player/entity ragdolls are in the same instance as the player/entity that spawned them
+	hook.Add("EntityRagdollCreated", "expInstanceEntityRagdoll", function(entity, ragdoll)
+		local ownerInstance = entity:IsPlayer()
+			and Schema.instance.GetPlayerInstance(entity)
+			or Schema.instance.GetEntityInstance(entity)
 
-		local client = player.GetBySteamID(item.ixSteamID)
-
-		if (client) then
-			local playerInstance = Schema.instance.GetPlayerInstance(client)
-
-			if (playerInstance) then
-				Schema.instance.AddEntity(item, playerInstance)
-			end
+		if (ownerInstance) then
+			Schema.instance.AddEntity(ragdoll, ownerInstance)
 		end
 	end)
-
-	-- Prevent in-character chat from working across instances
-	hook.Add("PlayerMessageSend", "expInstanceChatFilter",
-		function(speaker, chatType, text, anonymous, receivers, rawText)
-			if (chatType == "ic") then
-				local playerInstance = Schema.instance.GetPlayerInstance(speaker)
-
-				-- If the player is in an instance, remove receivers not in the same instance
-				if (playerInstance) then
-					for i = #receivers, 1, -1 do
-						local receiver = receivers[i]
-
-						if (not Schema.instance.CanPlayerSeePlayer(speaker, receiver)) then
-							table.remove(receivers, i)
-						end
-					end
-				end
-			end
-
-			return text -- Allow the message to be sent normally
-		end
-	)
 else
 	--- Client-side function to get a player's instance using networked data
 	--- @param client Player

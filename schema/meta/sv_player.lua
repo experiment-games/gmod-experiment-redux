@@ -355,6 +355,8 @@ function META:CreateServerRagdoll(bDontSetPlayer)
 		end
 	end
 
+	hook.Run("EntityRagdollCreated", self, entity)
+
 	return entity
 end
 
