@@ -16,7 +16,7 @@
 --- @class InstanceData
 --- @field entities table<Entity, boolean> Entities belonging to this instance
 --- @field players table<Player, boolean> Players in this instance
---- @field owner Player|nil The client that owns this instance
+--- @field owner Player? The client that owns this instance
 
 Schema.instance = ix.util.GetOrCreateLibrary("instance", {
 	instances = {},    -- instanceID -> InstanceData
@@ -136,7 +136,7 @@ if (SERVER) then
 
 	--- Creates a new instance or returns existing one
 	--- @param instanceID string
-	--- @param owner Player|nil Optional owner of the instance
+	--- @param owner? Player Optional owner of the instance
 	--- @return InstanceData
 	function Schema.instance.CreateInstance(instanceID, owner)
 		if (not Schema.instance.instances[instanceID]) then
@@ -180,7 +180,7 @@ if (SERVER) then
 
 	--- Gets the owner of an instance
 	--- @param instanceID string
-	--- @return Player|nil
+	--- @return Player?
 	function Schema.instance.GetInstanceOwner(instanceID)
 		local instance = Schema.instance.instances[instanceID]
 		return instance and instance.owner or nil
@@ -288,14 +288,14 @@ if (SERVER) then
 
 	--- Gets the instance ID a player is in
 	--- @param client Player
-	--- @return string|nil
+	--- @return string?
 	function Schema.instance.GetPlayerInstance(client)
 		return Schema.instance.playerInstances[client]
 	end
 
 	--- Gets the instance ID an entity belongs to
 	--- @param entity Entity
-	--- @return string|nil
+	--- @return string?
 	function Schema.instance.GetEntityInstance(entity)
 		return Schema.instance.entityInstances[entity]
 	end
@@ -336,7 +336,7 @@ if (SERVER) then
 
 	--- Destroys an instance and removes all its entities and players
 	--- @param instanceID string
-	--- @param reason string|nil Optional reason for destruction
+	--- @param reason? string Optional reason for destruction
 	function Schema.instance.DestroyInstance(instanceID, reason)
 		local instance = Schema.instance.instances[instanceID]
 		if (not instance) then
@@ -394,7 +394,7 @@ if (SERVER) then
 	--- Transfers ownership of an instance to another player
 	--- @param instanceID string
 	--- @param newOwner Player
-	--- @param oldOwner Player|nil Optional verification of current owner
+	--- @param oldOwner? Player Optional verification of current owner
 	function Schema.instance.TransferInstanceOwnership(instanceID, newOwner, oldOwner)
 		if (not IsValid(newOwner)) then
 			ix.util.SchemaErrorNoHalt("Attempted to transfer instance ownership to invalid player\n")
@@ -713,7 +713,7 @@ if (SERVER) then
 else
 	--- Client-side function to get a player's instance using networked data
 	--- @param client Player
-	--- @return string|nil
+	--- @return string?
 	function Schema.instance.GetPlayerInstance(client)
 		if (not IsValid(client)) then
 			return nil
@@ -725,7 +725,7 @@ else
 
 	--- Client-side function to get an entity's instance using networked data
 	--- @param entity Entity
-	--- @return string|nil
+	--- @return string?
 	function Schema.instance.GetEntityInstance(entity)
 		if (not IsValid(entity)) then
 			return nil

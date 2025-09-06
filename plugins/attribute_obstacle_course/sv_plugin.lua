@@ -124,7 +124,7 @@ end
 --- checks its door target to find the door entity.
 --- Returns the door entity if found, or nil if not.
 --- @param courseID string The ID of the obstacle course.
---- @return Entity|nil The door entity or nil if not found.
+--- @return Entity? # The door entity or nil if not found.
 function PLUGIN:FindDoorForCourse(courseID)
 	local startEntity = ents.FindByClass("exp_obstacle_course_start")
 

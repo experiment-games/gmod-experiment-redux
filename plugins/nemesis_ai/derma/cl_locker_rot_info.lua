@@ -19,8 +19,8 @@ local TEST_DATA = {
 }
 
 --- Returns the current phase and the stage data.
---- @return table|nil phase
---- @return table|nil stageData
+--- @return table? # phase
+--- @return table? # stageData
 local function getCurrentPhase()
 	if (TEST_LOCKER_ROT_PANEL) then
 		-- For testing purposes, we use the TEST_DATA

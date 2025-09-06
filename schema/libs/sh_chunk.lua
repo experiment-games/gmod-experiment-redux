@@ -6,8 +6,8 @@
 
 local CHUNK_SIZE_X = 2048
 local CHUNK_SIZE_Y = 2048
-local BOUNDARY_MARGIN = 0.001     -- Small margin to prevent infinite loops
-local PVS_BOUNDARY_DISTANCE = 512 -- Distance from boundary to start adding PVS origins
+local BOUNDARY_MARGIN = 0.001      -- Small margin to prevent infinite loops
+local PVS_BOUNDARY_DISTANCE = 2048 -- Distance from boundary to start adding PVS origins
 
 -- Utility library for chunk management
 Schema.chunk = ix.util.GetOrCreateLibrary("chunk", {
@@ -30,7 +30,7 @@ end
 
 --- Gets the chunk coordinates for a player
 --- @param client Player
---- @return table|nil { x = number, y = number }
+--- @return table? # { x = number, y = number }
 function Schema.chunk.GetPlayerChunk(client)
 	if (not IsValid(client)) then
 		return nil
@@ -77,6 +77,18 @@ function Schema.chunk.GetChunkWorldOffset(chunkX, chunkY)
 	return Vector(chunkX * CHUNK_SIZE_X, chunkY * CHUNK_SIZE_Y, 0)
 end
 
+--- Checks if a player is in a neighboring chunk
+--- @param viewerChunk table { x = number, y = number }
+--- @param targetChunk table { x = number, y = number }
+--- @return boolean
+function Schema.chunk.IsNeighboringChunk(viewerChunk, targetChunk)
+	local dx = math.abs(viewerChunk.x - targetChunk.x)
+	local dy = math.abs(viewerChunk.y - targetChunk.y)
+
+	-- Check if it's a direct neighbor (including diagonals)
+	return dx <= 1 and dy <= 1 and not (dx == 0 and dy == 0)
+end
+
 --- Checks if a position is near a chunk boundary
 --- @param pos Vector
 --- @param margin number Optional margin (defaults to BOUNDARY_MARGIN)
@@ -112,7 +124,7 @@ function Schema.chunk.IsNearChunkBoundary(pos, margin)
 	return nearBoundary, offsetX, offsetY
 end
 
-if SERVER then
+if (SERVER) then
 	--- Checks if a position is near a chunk boundary for PVS purposes
 	--- @param pos Vector
 	--- @param distance number Distance from boundary to check
@@ -488,60 +500,6 @@ if SERVER then
 				return false
 			end
 		end)
-
-	-- Hook into weapon firing to use custom trace
-	hook.Add("EntityFireBullets", "ChunkSystemCrossBorder", function(entity, data)
-		if (not IsValid(entity) or not entity:IsPlayer()) then
-			return
-		end
-
-		-- Store original callback
-		local originalCallback = data.Callback
-
-		-- Create new callback that handles cross-chunk hits
-		-- TODO: This idea fails, because this is only called if we hit something (not the skybox or water)
-		data.Callback = function(attacker, tr, dmgInfo)
-			-- If we have an original callback, call it first
-			if (originalCallback) then
-				local result = originalCallback(attacker, tr, dmgInfo)
-				if (result) then return result end
-			end
-
-			-- If the trace didn't hit anything, try cross-chunk trace
-			if (not tr.Hit or not IsValid(tr.Entity)) then
-				local customTr = Schema.chunk.TraceCrossChunk(
-					tr.StartPos,
-					tr.StartPos + data.Dir * (data.Distance or 8192),
-					data.Filter,
-					data.Mask or MASK_SHOT,
-					attacker
-				)
-
-				if (customTr.Hit and IsValid(customTr.Entity) and customTr.Entity:IsPlayer()) then
-					-- Apply damage manually since the trace system won't handle this
-					local damage = DamageInfo()
-					damage:SetDamage(dmgInfo:GetDamage())
-					damage:SetAttacker(attacker)
-					damage:SetInflictor(dmgInfo:GetInflictor())
-					damage:SetDamageType(dmgInfo:GetDamageType())
-					damage:SetDamagePosition(customTr.HitPos)
-					damage:SetDamageForce(data.Dir * dmgInfo:GetDamage() * 100)
-
-					customTr.Entity:TakeDamageInfo(damage)
-
-					-- Create blood effect at hit position
-					local effectData = EffectData()
-					effectData:SetOrigin(customTr.HitPos)
-					effectData:SetNormal(customTr.Normal)
-					util.Effect("BloodImpact", effectData)
-
-					return { damage = true, effects = true }
-				end
-			end
-		end
-
-		return data
-	end)
 else
 	-- Table to store entities that need custom rendering with their render positions
 	Schema.chunk.customRenderEntities = Schema.chunk.customRenderEntities or {}
@@ -560,23 +518,11 @@ else
 		}
 	end
 
-	--- Checks if a player is in a neighboring chunk
-	--- @param viewerChunk table { x = number, y = number }
-	--- @param targetChunk table { x = number, y = number }
-	--- @return boolean
-	function Schema.chunk.IsNeighboringChunk(viewerChunk, targetChunk)
-		local dx = math.abs(viewerChunk.x - targetChunk.x)
-		local dy = math.abs(viewerChunk.y - targetChunk.y)
-
-		-- Check if it's a direct neighbor (including diagonals)
-		return dx <= 1 and dy <= 1 and not (dx == 0 and dy == 0)
-	end
-
 	--- Calculates the render position for a player in a neighboring chunk
 	--- @param localPlayerChunk table { x = number, y = number }
 	--- @param targetPlayerChunk table { x = number, y = number }
 	--- @param targetPlayer Player
-	--- @return Vector|nil
+	--- @return Vector?
 	function Schema.chunk.GetNeighborRenderPosition(localPlayerChunk, targetPlayerChunk, targetPlayer)
 		if (not IsValid(targetPlayer)) then
 			return nil
@@ -661,6 +607,10 @@ else
 				continue
 			end
 
+			if (not entity:Alive()) then
+				continue
+			end
+
 			-- Store original position
 			local originalPos = entity:GetPos()
 			local originalAngles = entity:GetAngles()
@@ -681,6 +631,10 @@ else
 		for entity, renderPos in pairs(Schema.chunk.customRenderEntities) do
 			if (not IsValid(entity)) then
 				Schema.chunk.customRenderEntities[entity] = nil
+				continue
+			end
+
+			if (not entity:Alive()) then
 				continue
 			end
 
@@ -782,5 +736,368 @@ if SERVER then
 		end
 
 		ix.command.Add("ChunkDebugPVS", COMMAND)
+	end
+end
+
+--[[
+	Chunk Proxy Management System
+
+	This code should be added to the SERVER section of sh_chunk.lua
+	It manages the creation and destruction of player proxy entities for cross-chunk combat.
+]]
+
+if SERVER then
+	-- Storage for proxy entities
+	Schema.chunk.playerProxies = Schema.chunk.playerProxies or {}
+	-- Format: { [client] = { [chunkKey] = proxyEntity } }
+
+	--- Creates a unique key for a chunk coordinate pair
+	--- @param chunkX number
+	--- @param chunkY number
+	--- @return string
+	local function GetChunkKey(chunkX, chunkY)
+		return string.format("%d_%d", chunkX, chunkY)
+	end
+
+	--- Gets neighboring chunks where a player should have proxies
+	--- @param client Player
+	--- @return table Array of { chunkX = number, chunkY = number, offset = Vector }
+	function Schema.chunk.GetProxyNeighborChunks(client)
+		if (not IsValid(client) or not client.chunk) then
+			return {}
+		end
+
+		local pos = client:GetPos()
+		local currentChunk = Schema.chunk.GetPlayerChunk(client)
+		local nearBoundary, boundaries = Schema.chunk.IsNearChunkBoundaryForPVS(pos, PVS_BOUNDARY_DISTANCE)
+
+		local proxyChunks = {}
+
+		if (nearBoundary) then
+			for _, boundary in ipairs(boundaries) do
+				local neighborChunkX = currentChunk.x + boundary.x
+				local neighborChunkY = currentChunk.y + boundary.y
+
+				-- Calculate the offset for this neighboring chunk
+				-- This should be the offset from the player's current position to where
+				-- the proxy should be positioned in the neighboring chunk
+				-- We need to negate the offset because we want the proxy to appear
+				-- on the opposite side of the boundary from where the player actually is
+				local chunkOffset = Vector(-boundary.x * CHUNK_SIZE_X, -boundary.y * CHUNK_SIZE_Y, 0)
+
+				table.insert(proxyChunks, {
+					chunkX = neighborChunkX,
+					chunkY = neighborChunkY,
+					offset = chunkOffset
+				})
+			end
+		end
+
+		return proxyChunks
+	end
+
+	--- Creates a proxy entity for a player in a specific chunk
+	--- @param client Player
+	--- @param chunkX number
+	--- @param chunkY number
+	--- @param chunkOffset Vector
+	--- @return Entity? The created proxy entity
+	function Schema.chunk.CreatePlayerProxy(client, chunkX, chunkY, chunkOffset)
+		if (not IsValid(client)) then
+			return nil
+		end
+
+		-- Create the proxy entity
+		local proxy = ents.Create("exp_player_proxy")
+
+		-- Position the proxy in the target chunk's coordinate space
+		local playerPos = client:GetPos()
+		local proxyPos = playerPos + chunkOffset
+
+		proxy:SetPos(proxyPos)
+		proxy:SetAngles(client:GetAngles())
+		proxy:Spawn()
+
+		-- Set up the proxy relationship
+		proxy:SetProxiedPlayer(client, chunkOffset)
+		proxy:SetChunkCoordinates(chunkX, chunkY)
+
+		-- Add proxy to the target chunk's instance
+		local chunkInstanceID = Schema.chunk.GetChunkInstanceID(chunkX, chunkY)
+		Schema.instance.AddEntity(proxy, chunkInstanceID)
+
+		-- Store proxy reference
+		local chunkKey = GetChunkKey(chunkX, chunkY)
+		if (not Schema.chunk.playerProxies[client]) then
+			Schema.chunk.playerProxies[client] = {}
+		end
+		Schema.chunk.playerProxies[client][chunkKey] = proxy
+
+		print(string.format("Created proxy for %s in chunk (%d, %d)", client:Name(), chunkX, chunkY))
+		hook.Run("ChunkPlayerProxyCreated", client, proxy, chunkX, chunkY)
+
+		return proxy
+	end
+
+	--- Removes a specific proxy for a player in a chunk
+	--- @param client Player
+	--- @param chunkX number
+	--- @param chunkY number
+	function Schema.chunk.RemovePlayerProxy(client, chunkX, chunkY)
+		if (not Schema.chunk.playerProxies[client]) then
+			return
+		end
+
+		local chunkKey = GetChunkKey(chunkX, chunkY)
+		local proxy = Schema.chunk.playerProxies[client][chunkKey]
+
+		if (IsValid(proxy)) then
+			proxy:Remove()
+		end
+
+		print(string.format("Removing proxy for %s in chunk %s (no longer needed)", client:Name(), chunkKey))
+
+		Schema.chunk.playerProxies[client][chunkKey] = nil
+
+		-- Clean up empty player table
+		if (table.IsEmpty(Schema.chunk.playerProxies[client])) then
+			Schema.chunk.playerProxies[client] = nil
+		end
+	end
+
+	--- Removes all proxies for a player
+	--- @param client Player
+	function Schema.chunk.RemoveAllPlayerProxies(client)
+		if (not Schema.chunk.playerProxies[client]) then
+			return
+		end
+
+		for chunkKey, proxy in pairs(Schema.chunk.playerProxies[client]) do
+			if (IsValid(proxy)) then
+				proxy:Remove()
+			end
+		end
+
+		Schema.chunk.playerProxies[client] = nil
+	end
+
+	--- Gets all proxies for a player
+	--- @param client Player
+	--- @return table<string, Entity> Map of chunkKey to proxy entity
+	function Schema.chunk.GetPlayerProxies(client)
+		return Schema.chunk.playerProxies[client] or {}
+	end
+
+	--- Updates proxy entities for a player based on their current position
+	--- @param client Player
+	function Schema.chunk.UpdatePlayerProxies(client)
+		if (not IsValid(client) or not client:Alive()) then
+			-- Remove all proxies if player is invalid or dead
+			Schema.chunk.RemoveAllPlayerProxies(client)
+			return
+		end
+
+		-- Get current proxy chunks needed
+		local neededProxyChunks = Schema.chunk.GetProxyNeighborChunks(client)
+		local currentProxies = Schema.chunk.GetPlayerProxies(client)
+
+		-- Create a set of needed chunk keys for easy lookup
+		local neededChunkKeys = {}
+		for _, chunkData in ipairs(neededProxyChunks) do
+			local chunkKey = GetChunkKey(chunkData.chunkX, chunkData.chunkY)
+			neededChunkKeys[chunkKey] = chunkData
+		end
+
+		-- Create a copy of current proxies to avoid modifying while iterating
+		local currentProxiesCopy = {}
+		for chunkKey, proxy in pairs(currentProxies) do
+			currentProxiesCopy[chunkKey] = proxy
+		end
+
+		-- Remove proxies that are no longer needed
+		for chunkKey, proxy in pairs(currentProxiesCopy) do
+			if (not neededChunkKeys[chunkKey]) then
+				if (IsValid(proxy)) then
+					proxy:Remove()
+				end
+
+				print(string.format("Removing proxy for %s in chunk %s (no longer needed)", client:Name(), chunkKey))
+
+				-- Remove from the actual storage
+				if (Schema.chunk.playerProxies[client]) then
+					Schema.chunk.playerProxies[client][chunkKey] = nil
+				end
+			end
+		end
+
+		-- Create new proxies that are needed
+		for chunkKey, chunkData in pairs(neededChunkKeys) do
+			local existingProxy = Schema.chunk.playerProxies[client] and Schema.chunk.playerProxies[client][chunkKey]
+			if (not existingProxy or not IsValid(existingProxy)) then
+				Schema.chunk.CreatePlayerProxy(client, chunkData.chunkX, chunkData.chunkY, chunkData.offset)
+			end
+		end
+
+		-- Clean up empty player table
+		if (Schema.chunk.playerProxies[client] and table.IsEmpty(Schema.chunk.playerProxies[client])) then
+			Schema.chunk.playerProxies[client] = nil
+		end
+	end
+
+	--- Checks if an entity is a chunk player proxy
+	--- @param entity Entity
+	--- @return boolean
+	function Schema.chunk.IsPlayerProxy(entity)
+		return IsValid(entity) and entity.IsChunkPlayerProxy == true
+	end
+
+	--- Gets the real player that a proxy represents
+	--- @param proxy Entity
+	--- @return Player? The real player
+	function Schema.chunk.GetProxyPlayer(proxy)
+		if (not Schema.chunk.IsPlayerProxy(proxy)) then
+			return nil
+		end
+
+		return proxy:GetProxiedPlayer()
+	end
+
+	--[[
+		Server Hooks for Proxy Management
+	--]]
+
+	-- Update proxies when players move
+	hook.Add("PlayerTick", "ChunkSystemProxyUpdate", function(client, moveData)
+		if (not IsValid(client) or not client:Alive()) then
+			return
+		end
+
+		-- Update proxies along with chunk transitions
+		Schema.chunk.UpdatePlayerProxies(client)
+	end)
+
+	-- Clean up proxies when players disconnect
+	hook.Add("PlayerDisconnected", "ChunkSystemProxyCleanup", function(client)
+		Schema.chunk.RemoveAllPlayerProxies(client)
+	end)
+
+	-- Clean up proxies when players die
+	hook.Add("PlayerDeath", "ChunkSystemProxyCleanup", function(client)
+		Schema.chunk.RemoveAllPlayerProxies(client)
+	end)
+
+	-- Clean up proxies when players respawn (they'll be recreated as needed)
+	hook.Add("PlayerSpawn", "ChunkSystemProxyRespawn", function(client)
+		-- Small delay to ensure player is fully spawned
+		timer.Simple(0.1, function()
+			if (IsValid(client)) then
+				Schema.chunk.RemoveAllPlayerProxies(client)
+			end
+		end)
+	end)
+
+	-- Update proxies when players change chunks
+	hook.Add("PlayerChangedChunk", "ChunkSystemProxyChunkChange",
+		function(client, newChunkX, newChunkY, oldChunkX, oldChunkY)
+			-- Remove old proxies and create new ones
+			Schema.chunk.RemoveAllPlayerProxies(client)
+
+			-- Small delay to ensure chunk transition is complete
+			timer.Simple(0.05, function()
+				if (IsValid(client) and client:Alive()) then
+					Schema.chunk.UpdatePlayerProxies(client)
+				end
+			end)
+		end)
+
+	-- Handle damage from proxies in the instance damage hook
+	local oldInstanceDamageHook = hook.GetTable()["EntityTakeDamage"]["expInstanceDamage"]
+
+	hook.Add("EntityTakeDamage", "expInstanceDamage", function(target, dmgInfo)
+		local attacker = dmgInfo:GetAttacker()
+
+		-- Handle proxy damage first
+		if (Schema.chunk.IsPlayerProxy(target)) then
+			-- Let the proxy handle its own damage forwarding
+			return
+		end
+
+		-- Call original instance damage logic for non-proxy entities
+		if (oldInstanceDamageHook) then
+			return oldInstanceDamageHook(target, dmgInfo)
+		end
+	end)
+
+	-- Prevent physgun/gravgun interactions with proxies
+	hook.Add("PhysgunPickup", "ChunkSystemProxyPhysgun", function(client, entity)
+		if (Schema.chunk.IsPlayerProxy(entity)) then
+			return false
+		end
+	end)
+
+	hook.Add("GravGunOnPickedUp", "ChunkSystemProxyGravgun", function(client, entity)
+		if (Schema.chunk.IsPlayerProxy(entity)) then
+			return false
+		end
+	end)
+
+	hook.Add("GravGunPunt", "ChunkSystemProxyGravgunPunt", function(client, entity)
+		if (Schema.chunk.IsPlayerProxy(entity)) then
+			return false
+		end
+	end)
+
+	-- Prevent use interactions with proxies
+	hook.Add("PlayerUse", "ChunkSystemProxyUse", function(client, entity)
+		if (Schema.chunk.IsPlayerProxy(entity)) then
+			return false
+		end
+	end)
+
+	-- Prevent tool interactions with proxies
+	hook.Add("CanTool", "ChunkSystemProxyTool", function(client, trace, tool)
+		local entity = trace.Entity
+		if (Schema.chunk.IsPlayerProxy(entity)) then
+			return false
+		end
+	end)
+
+	-- Add debug command for proxy management
+	do
+		local COMMAND = {}
+
+		COMMAND.description = "Debug player proxy entities."
+		COMMAND.arguments = {
+			ix.type.player
+		}
+		COMMAND.superAdminOnly = true
+
+		function COMMAND:OnRun(client, target)
+			target = target or client
+
+			if (not IsValid(target)) then
+				client:Notify("Invalid player.")
+				return
+			end
+
+			local proxies = Schema.chunk.GetPlayerProxies(target)
+			local proxyCount = table.Count(proxies)
+
+			client:Notify(string.format("Player %s has %d proxy entities:", target:Name(), proxyCount))
+
+			for chunkKey, proxy in pairs(proxies) do
+				if (IsValid(proxy)) then
+					local pos = proxy:GetPos()
+					client:Notify(string.format("  Chunk %s: Proxy at (%.1f, %.1f, %.1f)", chunkKey, pos.x, pos.y, pos.z))
+				else
+					client:Notify(string.format("  Chunk %s: Invalid proxy", chunkKey))
+				end
+			end
+
+			local neededChunks = Schema.chunk.GetProxyNeighborChunks(target)
+			client:Notify(string.format("Should have %d proxies based on position", #neededChunks))
+		end
+
+		ix.command.Add("ChunkDebugProxies", COMMAND)
 	end
 end

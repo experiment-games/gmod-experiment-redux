@@ -3,11 +3,11 @@ local PLUGIN = PLUGIN
 function PLUGIN:LoadBelongings()
 	local belongings = self:GetData()
 
-    for _, belongingsData in pairs(belongings) do
-        if (not belongingsData.ownerID) then
+	for _, belongingsData in pairs(belongings) do
+		if (not belongingsData.ownerID) then
 			-- Legacy check that we can remove after 1 map change
-            continue
-        end
+			continue
+		end
 
 		local entity = ents.Create("exp_belongings")
 		local inventoryID = tonumber(belongingsData.inventoryID)
@@ -62,13 +62,13 @@ function PLUGIN:SaveBelongings()
 			moveable = physicsObject:IsMoveable()
 		end
 
-        if (not inventory.GetSize) then
-            ix.util.SchemaErrorNoHaltWithStack(
-            "TODO: Im doing something wrong, find out why inventories are not complete\n")
-            continue
-        end
+		if (not inventory.GetSize) then
+			ix.util.SchemaErrorNoHaltWithStack(
+				"TODO: Im doing something wrong, find out why inventories are not complete\n")
+			continue
+		end
 
-        -- Do not store monster inventories (for sake of code simplicity)
+		-- Do not store monster inventories (for sake of code simplicity)
 		if (entity:GetOwnerID() == 0) then
 			continue
 		end
@@ -93,11 +93,11 @@ function PLUGIN:SaveBelongings()
 end
 
 --- If there's no money or items left in the belongings, remove it.
---- @param inventory table|nil
+--- @param inventory? table
 function PLUGIN:RemoveIfEmpty(inventory)
-    if (not inventory) then
-        return true
-    end
+	if (not inventory) then
+		return true
+	end
 
 	if (not inventory.vars or not IsValid(inventory.vars.belongingsEntity)) then
 		return false
@@ -111,7 +111,7 @@ function PLUGIN:RemoveIfEmpty(inventory)
 
 	entity:RemoveWithEffect()
 
-    if (inventory.storageInfo) then
+	if (inventory.storageInfo) then
 		--[[
 			TODO: Figure out why this happens. For now it'll just prevent this error:
 
@@ -146,13 +146,13 @@ function PLUGIN:RemoveIfEmpty(inventory)
 end
 
 function PLUGIN:CreateBelongings(corpse)
-    local inventory = corpse.ixInventory
+	local inventory = corpse.ixInventory
 
-    if (not inventory) then
-        ix.util.SchemaErrorNoHaltWithStack(
-            "Attempted to create belongings for monster without existing corpse inventory\n")
-        return -- This shouldn't happen, but lets log it just in case
-    end
+	if (not inventory) then
+		ix.util.SchemaErrorNoHaltWithStack(
+			"Attempted to create belongings for monster without existing corpse inventory\n")
+		return -- This shouldn't happen, but lets log it just in case
+	end
 
 	local belongings = ents.Create("exp_belongings")
 
@@ -164,7 +164,7 @@ function PLUGIN:CreateBelongings(corpse)
 	belongings:SetInventory(inventory)
 	belongings:SetAngles(corpse:GetAngles())
 	belongings:SetPos(corpse:GetPos() + Vector(0, 0, 48))
-    belongings:Spawn()
+	belongings:Spawn()
 
 	return belongings
 end

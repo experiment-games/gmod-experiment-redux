@@ -176,7 +176,7 @@ end
 --- This does not implement the penalty itself, it only shows a warning to the player.
 ---
 --- Note only players with a character loaded will receive the penalty warning.
---- @param playerOrPlayers Player|table|nil If nil, sets it for all players. Otherwise the player or players to set the penalty for.
+--- @param playerOrPlayers? Player|table If nil, sets it for all players. Otherwise the player or players to set the penalty for.
 --- @param isActive boolean If true, sets the penalty active, otherwise deactivates it.
 --- @param reason string The reason for the disconnect penalty, shown to the player.
 --- @param isCertain? boolean (Only when isActive is true) If true, the penalty will mention all items will be lost, otherwise it will mention 'possibly some items'.
