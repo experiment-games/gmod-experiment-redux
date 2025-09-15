@@ -582,7 +582,7 @@ else
 
 	function ENT:GetOrCreateCameraMaterial(renderTarget)
 		local matName = "exp_obstacle_course_camera_" .. renderTarget:GetName()
-		local material = Material(matName)
+		local material = Material("!" .. matName)
 
 		if (not material:IsError()) then
 			return material
