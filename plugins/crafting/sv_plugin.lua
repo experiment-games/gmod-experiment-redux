@@ -5,8 +5,8 @@ util.AddNetworkString("expOpenCombinationSelector")
 util.AddNetworkString("expChemistryDistill")
 util.AddNetworkString("expCraftingCombine")
 
--- Fallout: New Vegas - Crafting Station Props (steamcommunity.com/sharedfiles/filedetails/?id=1906251322)
-resource.AddWorkshop("1906251322")
+-- Fallout: New Vegas – Crafting Station Props (REUPLOAD) (https://steamcommunity.com/sharedfiles/filedetails/?id=3616195119)
+resource.AddWorkshop("3616195119")
 
 ix.util.AddResourceFile("materials/experiment-redux/icons/chemistry.png")
 ix.util.AddResourceFile("materials/experiment-redux/icons/workbench.png")
